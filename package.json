@@ -1,0 +1,31 @@
+{
+  "name": "wotnlclans",
+  "version": "1.0.0",
+  "description": "the new wot nl/be clans shite",
+  "main": "index.js",
+  "scripts": {
+    "start": "node serv.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mjarkk/wotnlclans.git"
+  },
+  "author": "mjarkk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mjarkk/wotnlclans/issues"
+  },
+  "homepage": "https://github.com/mjarkk/wotnlclans#readme",
+  "dependencies": {
+    "base64-js": "^1.2.1",
+    "body-parser": "^1.17.2",
+    "colors": "^1.1.2",
+    "ejs": "^2.5.6",
+    "express": "^4.15.3",
+    "express-fileupload": "^0.1.4",
+    "fs-extra": "^3.0.1",
+    "pics": "^1.0.3",
+    "promptly": "^2.2.0",
+    "request": "^2.81.0"
+  }
+}
