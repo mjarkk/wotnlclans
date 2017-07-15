@@ -5,33 +5,36 @@
     <title>Wot NL/BE clans</title>
     <link rel="stylesheet" href="css/home.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   </head>
   <body>
-    <div class="titlebar">
+    <div class="titlebar" v-cloak>
       {{ sitetitle }}
     </div>
     <div class="header">
     </div>
     <div class="maincontent">
-      <div class="clanslist">
+      <div class="clanslist" v-cloak>
         <h1>Clans</h1>
         <div class="listheader">
           <div class="icon"></div>
-          <div class="name">#</div>
+          <div class="cound">#</div>
+          <div class="name">Tag</div>
           <div class="clanrating">Rating</div>
           <div class="winrate">Win</div>
           <div class="leden">Leden</div>
           <div class="s">Strongholds</div>
           <div class="gm">Global map</div>
         </div>
-        <div class="i" v-for="(item, index) in items">
+        <div class="items" v-for="(item, id) in items" v-bind:id="'list-' + id">
           <div class="icon"></div>
-          <div class="name"></div>
-          <div class="clanrating"></div>
-          <div class="winrate"></div>
-          <div class="leden"></div>
-          <div class="s"></div>
-          <div class="gm"></div>
+          <div class="cound">{{ id }}</div>
+          <div class="name">{{ item.tag }}<div v-if='!item.tag' class='line'></div></div>
+          <div class="clanrating">{{ item.rate }}<div v-if='!item.rate' class='line'></div></div>
+          <div class="winrate">{{ item.win }}<div v-if='!item.win' class='line'></div></div>
+          <div class="leden">{{ item.leden }}<div v-if='!item.leden' class='line'></div></div>
+          <div class="s">{{ item.s }}<div v-if='!item.s' class='line'></div></div>
+          <div class="gm">{{ item.gm }}<div v-if='!item.gm' class='line'></div></div>
         </div>
       </div>
     </div>
@@ -40,3 +43,5 @@
     <script src='js/script.js'></script>
   </body>
 </html>
+
+<!-- https://material.io/color/#!/?view.left=0&view.right=0&primary.color=212121 -->
