@@ -8,12 +8,12 @@ On this site you can view the all the NL/BE clans
 - The curent site is slow on a normal mobiel connection it takes 25s  
 - The curent site looks bad on mobiel  
 
-## Site Goal
+## Site Goal  
 - In 5s have a site where the top 50+ clans are visable on a "normal" 3G connection  
 - Use dynamic url's for better sharing instaid of 1 page where the url doen't change on what you look at  
 - Not use jquery  
-- More material because it's a little bit uncluttered  
-- minimal 90% score in [Lighthouse](https://developers.google.com/web/tools/lighthouse/)
+- More material because the old site did look a little bit uncluttered  
+- minimal 90% score in [Lighthouse](https://developers.google.com/web/tools/lighthouse/)  
 
 ## How to install:  
 - Clone the project  
