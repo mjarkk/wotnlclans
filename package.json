@@ -27,6 +27,7 @@
     "node-fetch": "^1.7.1",
     "pics": "^1.0.3",
     "promptly": "^2.2.0",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "underscore": "^1.8.3"
   }
 }
