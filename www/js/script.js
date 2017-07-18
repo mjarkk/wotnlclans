@@ -1,9 +1,8 @@
-spf.init();
-
 var clandata = [];
 var HomeArr = [];
 
-var sitetitle = 'WOT NL/BE Clans'
+var sitetitle = 'WOT NL/BE Clans';
+
 var sitetitle = new Vue({
   el: '.titlebar',
   data: {
@@ -11,14 +10,12 @@ var sitetitle = new Vue({
   }
 })
 
-for (var i = 0; i < 20; i++) {
-  clandata.push({
-    id: 1,
-    tag: '[' + 'idsfs' + ']',
-    win: '49.44%',
-    rate: 8350
-  })
-}
+var clanslist = new Vue({
+  el: '.clanslist',
+  data: {
+    items: HomeArr
+  }
+})
 
 function MkArrHome() {
   HomeArr = [];
@@ -30,14 +27,25 @@ function MkArrHome() {
       rate: clandata[i].rate
     })
   }
+  clanslist.items = HomeArr;
 }
 
-// make home array
-MkArrHome()
-
-var clanslist = new Vue({
-  el: '.clanslist',
-  data: {
-    items: HomeArr
+fetch('/clandata-firstload/', {mode: 'cors'}).then(function(response) {
+  return response.text();
+}).then(function(firstload) {
+  firstload = JSON.parse(firstload)
+  for (var i = 0; i < firstload.length; i++) {
+    var j = firstload[i];
+    clandata.push({
+      id: j.i,
+      tag: '[' + j.t + ']',
+      win: j.w + '%',
+      rate: j.e
+    })
   }
-})
+  MkArrHome()
+}).catch(function(error) {
+  console.log('Request failed' + error)
+});
+
+spf.init();

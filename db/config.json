@@ -4,5 +4,20 @@
   "extraclans": "./db/extra.txt",
   "blockedclans": "./db/blockedclans.json",
   "madeby": "516673968",
+  "clandata": {
+    "all": "./db/clandata-all.json",
+    "allI": "./db/clandata-all-index.json",
+    "firstload": "./db/clandata-firstload.json"
+  },
+  "js": {
+    "vue.js": {
+      "dev": "./www/js/vue.js",
+      "normal": "./www/js/vue.min.js"
+    },
+    "script.js": {
+      "dev": "./www/js/script.js",
+      "normal": "./www/js/script.js"
+    }
+  },
   "dev": true
 }

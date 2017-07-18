@@ -4,6 +4,7 @@
 
 const path = require('path');
 const express = require('express');
+const compression = require('compression')
 const request = require("request");
 const fs = require('fs-extra');
 const bodyParser = require('body-parser');
@@ -16,6 +17,7 @@ const promptly = require('promptly');
 const fetch = require('node-fetch');
 const readline = require('readline');
 const _ = require('underscore');
+const sortOn = require('sort-on');
 const config = fs.readJsonSync('./db/config.json');
 
 // startup
@@ -68,6 +70,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 var staticPath = path.join(__dirname, '/www');
 app.use(express.static(staticPath));
 app.use(fileUpload());
+app.use(compression());
 
 var port = 2020;
 app.listen(port, function() {
@@ -79,6 +82,27 @@ app.get('/', function(req, res) {
     madeby: madeby.name + ' [' + madeby.clan + ']',
     madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby
   });
+})
+
+app.get('/clandata-firstload/', function(req, res) {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.set('Content-Type', 'text/plain');
+  res.sendFile(path.resolve(config.clandata.firstload));
+})
+
+app.get('/dyjs/:js', function (req, res) {
+  var script = req.params.js;
+  res.setHeader('Cache-Control', 'no-cache');
+  if (config.dev && config.js[script]) {
+    res.set('Content-Type', 'application/javascript');
+    res.sendFile(path.resolve(config.js[script].dev));
+  } else if (config.js[script]) {
+    res.set('Content-Type', 'application/javascript');
+    res.sendFile(path.resolve(config.js[script].normal));
+  } else {
+    res.set('Content-Type', 'text/html');
+    res.status(404).sendFile(__dirname + '/www/404.html');
+  }
 })
 
 app.get('*', function(req, res){
@@ -207,39 +231,76 @@ function updateclandata() {
       } else {
         begin = i * 100;
       }
-      if (((i + 1) * 100) - 1 > clans.length) {
+      if ((i + 1) * 100 > clans.length) {
         end = clans.length;
         status = false;
       } else {
-        end = ((i + 1) * 100) - 1;
+        end = (i + 1) * 100;
       }
       var url = listtorurl(clans, begin, end);
       fetch('https://api.worldoftanks.eu/wgn/clans/info/?application_id=' + config.wgkey + '&clan_id=' + url + '&game=wot')
         .then(function(res) {
           return res.json();
         }).then(function(body) {
-          console.log(body);
-          if (body.status == 'ok') {
-            for (var key in body.data) {
-              var c = body.data[key];
-              toclanfile.push(c);
-              console.log('--> ' + c.tag);
-            }
-            if (status) {
-              getclandata(i + 1);
-            } else {
-              console.log("dune getting all clan data");
-            }
-          } else {
-            if (status) {
-              getclandata(i + 1);
-            } else {
-              console.log("dune getting all clan data");
-            }
-          }
+          fetch('https://api.worldoftanks.eu/wot/clanratings/clans/?application_id=' + config.wgkey + '&clan_id=' + url)
+            .then(function(ress) {
+              return ress.json();
+            }).then(function(body2) {
+              if (body.status == 'ok' && body2.status == 'ok') {
+                for (var key in body.data) {
+                  var c = body.data[key];
+                  var d = body2.data[key];
+                  toclanfile.push(Object.assign({}, c, d));
+                  console.log('--> ' + c.tag);
+                }
+                if (status) {
+                  getclandata(i + 1);
+                } else {
+                  makeclandata()
+                }
+              } else {
+                if (status) {
+                  getclandata(i + 1);
+                } else {
+                  makeclandata()
+                }
+              }
+            });
         });
     }
     getclandata(0)
+    function makeclandata() {
+      toclanfile = sortOn(toclanfile, '-efficiency.value');
+      RemoveFromToclans = [];
+      for (var i = 0; i < toclanfile.length; i++) {
+        if (toclanfile[i].wins_ratio_avg.value == 0 || toclanfile[i].efficiency.value == 0 || toclanfile[i].exclude_reasons.efficiency == "newbies_measure" || toclanfile[i].exclude_reasons.battles_count_avg == "newbies_measure") {
+          RemoveFromToclans.push(toclanfile[i])
+        }
+      }
+      toclanfile = _.difference(toclanfile, RemoveFromToclans);
+      console.log("creating files");
+      var t = 3;
+      var once = [];
+      fs.outputJson(config.clandata.all, toclanfile, err => {
+        console.log("1/"+t);
+        fs.outputJson(config.clandata.allI, _.indexBy(toclanfile, 'clan_id'), err => {
+          console.log("2/"+t);
+          once = [];
+          for (var i = 0; i < toclanfile.length; i++) {
+            c = toclanfile[i];
+            once.push({
+              i: c.clan_id,
+              t: c.tag,
+              w: c.wins_ratio_avg.value,
+              e: c.efficiency.value
+            })
+          }
+          fs.outputJson(config.clandata.firstload, once, err => {
+            console.log("3/"+t);
+          });
+        });
+      });
+    }
   })
 }
 
