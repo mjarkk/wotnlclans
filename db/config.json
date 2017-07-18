@@ -1,0 +1,8 @@
+{
+  "wgkey": "f53bdb585a307dbb8e5c1fdcbf213384",
+  "clansfile": "./db/clans.json",
+  "extraclans": "./db/extra.txt",
+  "blockedclans": "./db/blockedclans.json",
+  "madeby": "516673968",
+  "dev": true
+}

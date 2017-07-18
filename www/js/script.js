@@ -1,3 +1,5 @@
+spf.init();
+
 var clandata = [];
 var HomeArr = [];
 

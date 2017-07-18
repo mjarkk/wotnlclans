@@ -1,11 +1,5 @@
 // config
-var config = {
-  wgkey: 'f53bdb585a307dbb8e5c1fdcbf213384',
-  clansfile: './db/clans.json',
-  extraclans: './db/extra.txt',
-  blockedclans: './db/blockedclans.json',
-  madeby: '516673968'
-}
+var config = readJsonSync('./db/config.json');
 
 const path = require('path');
 const express = require('express');
@@ -79,7 +73,10 @@ app.listen(port, function() {
 });
 
 app.get('/', function(req, res) {
-  res.render('index');
+  res.render('index', {
+    madeby: madeby.name + ' [' + madeby.clan + ']',
+    madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby
+  });
 })
 
 app.get('*', function(req, res){
@@ -113,12 +110,12 @@ function clanstolist() {
                   console.log('--> ' + key);
                 }
               }
-              if (convert.length > 95) {
-                console.log('list' + nr);
-                clans(nr + 1);
-              } else {
+              if (convert.length < 96 || (config.dev == true && nr == 100)) {
                 console.log('finallize');
                 finallize();
+              } else {
+                console.log('list' + nr);
+                clans(nr + 1);
               }
             });
         } else {
@@ -132,30 +129,59 @@ function clanstolist() {
         // and remove clans that have dutch words or are not relevant to this list
         try {
           fs.readFile(config.extraclans, function(errrr, linesdata) {
-            // TODO: add function for checking if the clan still exsist
             var lines = linesdata.toString().split("\n");
             for (var i = 0; i < lines.length; i++) {
               lines[i] = lines[i].replace(/\r/g, "")
             }
-            fs.readFile(config.blockedclans, function(errrrr, blockedclans) {
-              blockedclans = JSON.parse(blockedclans.toString());
-              for (var i = 0; i < lines.length; i++) {
-                var status = true;
-                for (var j = 0; j < list.length; j++) {
-                  if (list[j] == lines[i]) {
-                    status = false;
+            var removefromlines = [];
+            // checkif will check if the clan exsist and if not remove it from the list
+            function checkif(c) {
+              fetch('https://api.worldoftanks.eu/wgn/clans/info/?application_id=' + config.wgkey + '&clan_id=' + lines[c] + '&fields=tag')
+                .then(function(res) {
+                  return res.text();
+                }).then(function(body) {
+                  body = JSON.parse(body);
+                  try {
+                    if (body.status != 'ok' || body.data[lines[c]] == null) {
+                      console.log('bad clan: ' + lines[c]);
+                      removefromlines.push(lines[c])
+                    } else if (body.data[lines[c]].tag == undefined || body.data[lines[c]].tag == "") {
+                      console.log('bad clan: ' + lines[c]);
+                      removefromlines.push(lines[c])
+                    }
+                  } catch (e) {
+
+                  }
+                  var cc = c + 1;
+                  if (lines[cc]) {
+                    checkif(cc)
+                  } else {
+                    lines = _.difference(lines, removefromlines);
+                    removeblocked();
+                  }
+                });
+            }
+            function removeblocked() {
+              fs.readFile(config.blockedclans, function(errrrr, blockedclans) {
+                blockedclans = JSON.parse(blockedclans.toString());
+                for (var i = 0; i < lines.length; i++) {
+                  var status = true;
+                  for (var j = 0; j < list.length; j++) {
+                    if (list[j] == lines[i]) {
+                      status = false;
+                    }
+                  }
+                  if (status) {
+                    list.push(lines[i]);
                   }
                 }
-                if (status) {
-                  list.push(lines[i]);
-                }
-              }
-              list = _.difference(list, blockedclans);
-              // output the list to a file to use it later
-              fs.outputJson(config.clansfile, list, err => {
-
-              });
-            })
+                list = _.difference(list, blockedclans);
+                // output the list to a file to use it later
+                fs.outputJson(config.clansfile, list, err => {});
+                console.log('dune');
+              })
+            }
+            checkif(0);
           });
         } catch (e) {
           console.error(e);
