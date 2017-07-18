@@ -10,9 +10,6 @@ body
   overflow-y: scroll
   background-color: #E1E2E1
 
-[v-cloak]
-  display: none
-
 .madeby
   display: flex
   justify-content: center
@@ -43,7 +40,9 @@ body
   color: white
   box-sizing: border-box
   padding: 20px
-  font-size: 30px
+  h1
+    font-weight: 400
+    font-size: 30px
 
 .header
   padding: 80px 10px 10px 10px
@@ -86,9 +85,9 @@ body
     .winrate
       width: 80px
     .leden
-      width: 100px
+      width: 60px
     .s
-      width: 150px
+      width: 100px
     .gm
       width: 150px
     .line
@@ -108,7 +107,7 @@ body
       user-select: none
   .items
     background-color: white
-    transition: background-color 0.3s
+    transition: background-color 0.2s
     cursor: pointer
     -webkit-touch-callout: none
     -webkit-user-select: none
@@ -116,5 +115,6 @@ body
     -moz-user-select: none
     -ms-user-select: none
     user-select: none
+    will-change: background-color
     &:hover
       background-color: rgb(240, 240, 240)

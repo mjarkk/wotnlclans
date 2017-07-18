@@ -110,6 +110,12 @@ app.get('/clandata-firstload/', function(req, res) {
   res.sendFile(path.resolve(config.clandata.firstload));
 })
 
+app.get('/clandata-load2/', function(req, res) {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.set('Content-Type', 'text/plain');
+  res.sendFile(path.resolve(config.clandata.load2));
+})
+
 app.get('/dyjs/:js', function (req, res) {
   var script = req.params.js;
   res.setHeader('Cache-Control', 'no-cache');
@@ -223,7 +229,9 @@ function clanstolist() {
                 }
                 list = _.difference(list, blockedclans);
                 // output the list to a file to use it later
-                fs.outputJson(config.clansfile, list, err => {});
+                fs.outputJson(config.clansfile, list, err => {
+                  updateclandata();
+                });
                 console.log('dune');
               })
             }
@@ -299,7 +307,7 @@ function updateclandata() {
       }
       toclanfile = _.difference(toclanfile, RemoveFromToclans);
       console.log("creating files");
-      var t = 3;
+      var t = 4;
       var once = [];
       fs.outputJson(config.clandata.all, toclanfile, err => {
         console.log("1/"+t);
@@ -317,6 +325,30 @@ function updateclandata() {
           }
           fs.outputJson(config.clandata.firstload, once, err => {
             console.log("3/"+t);
+            once = [];
+            for (var i = 0; i < toclanfile.length; i++) {
+              c = toclanfile[i];
+              var json = {
+                leden: c.members_count,
+                color: c.color,
+                gm: {
+                  "6": c.gm_elo_rating_6.value,
+                  "8": c.gm_elo_rating_8.value,
+                  "10": c.gm_elo_rating_10.value,
+                  "normal": c.gm_elo_rating.value
+                },
+                s: {
+                  "6": c.fb_elo_rating_6.value,
+                  "8": c.fb_elo_rating_8.value,
+                  "10": c.fb_elo_rating_10.value,
+                  "normal": c.fb_elo_rating.value
+                }
+              }
+              once.push(json);
+            }
+            fs.outputJson(config.clandata.load2, once, err => {
+              console.log("4/"+t);
+            });
           });
         });
       });
