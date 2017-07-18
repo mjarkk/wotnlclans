@@ -1,5 +1,6 @@
-// config
-var config = readJsonSync('./db/config.json');
+#!/usr/bin/env node
+
+// https://material.io/color/#!/?view.left=0&view.right=0&primary.color=212121
 
 const path = require('path');
 const express = require('express');
@@ -15,6 +16,7 @@ const promptly = require('promptly');
 const fetch = require('node-fetch');
 const readline = require('readline');
 const _ = require('underscore');
+const config = fs.readJsonSync('./db/config.json');
 
 // startup
 console.log('');
@@ -54,7 +56,7 @@ function aboutme() {
 aboutme()
 
 function listtorurl(arrr,begin,end) {
-  return (JSON.stringify(arrr.slice(begin, end)).replace('[', '').replace(']', '').replace(/,/g, '%2C'))
+  return (JSON.stringify(arrr.slice(begin, end)).replace('[', '').replace(']', '').replace(/,/g, '%2C').replace(/\"/g, ''))
 }
 
 var app = express();
@@ -191,4 +193,55 @@ function clanstolist() {
   }
   clans(1)
 }
+
+function updateclandata() {
+  fs.readFile(config.clansfile, function(er, clans) {
+    clans = JSON.parse(clans.toString());
+    var toclanfile = [];
+    function getclandata(i) {
+      var begin = 0;
+      var end = 0;
+      var status = true;
+      if (i == 0) {
+        begin = 0;
+      } else {
+        begin = i * 100;
+      }
+      if (((i + 1) * 100) - 1 > clans.length) {
+        end = clans.length;
+        status = false;
+      } else {
+        end = ((i + 1) * 100) - 1;
+      }
+      var url = listtorurl(clans, begin, end);
+      fetch('https://api.worldoftanks.eu/wgn/clans/info/?application_id=' + config.wgkey + '&clan_id=' + url + '&game=wot')
+        .then(function(res) {
+          return res.json();
+        }).then(function(body) {
+          console.log(body);
+          if (body.status == 'ok') {
+            for (var key in body.data) {
+              var c = body.data[key];
+              toclanfile.push(c);
+              console.log('--> ' + c.tag);
+            }
+            if (status) {
+              getclandata(i + 1);
+            } else {
+              console.log("dune getting all clan data");
+            }
+          } else {
+            if (status) {
+              getclandata(i + 1);
+            } else {
+              console.log("dune getting all clan data");
+            }
+          }
+        });
+    }
+    getclandata(0)
+  })
+}
+
 // clanstolist();
+// updateclandata();
