@@ -16,7 +16,7 @@
     },
     "script.js": {
       "dev": "./www/js/script.js",
-      "normal": "./www/js/script.js"
+      "normal": "./www/js/script.min.js"
     }
   },
   "dev": true

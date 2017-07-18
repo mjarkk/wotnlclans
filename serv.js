@@ -18,12 +18,32 @@ const fetch = require('node-fetch');
 const readline = require('readline');
 const _ = require('underscore');
 const sortOn = require('sort-on');
+const watch = require('node-watch');
+const UglifyJS = require("uglify-js");
 const config = fs.readJsonSync('./db/config.json');
 
 // startup
 console.log('');
 console.log('clans counted: ' + colors.green(fs.readJsonSync(config.clansfile).length));
 console.log('');
+
+// uglify the main script.js
+watch(config.js['script.js'].dev, { recursive: true }, function(evt, name) {
+  uglyfiscript();
+});
+function uglyfiscript() {
+  fs.readFile(config.js['script.js'].dev, 'utf8', (errr, data) => {
+    var uglyjs = UglifyJS.minify(data);
+    if (!uglyjs.error) {
+      fs.outputFile(config.js['script.js'].normal, uglyjs.code, err => {
+
+      })
+    } else {
+      console.log(colors.red('error uglifying js file: '));
+      console.log(colors.red(uglyjs.error));
+    }
+  })
+}
 
 var madeby = {
   name: '',
@@ -306,3 +326,4 @@ function updateclandata() {
 
 // clanstolist();
 // updateclandata();
+uglyfiscript()

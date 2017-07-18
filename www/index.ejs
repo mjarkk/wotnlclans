@@ -28,7 +28,7 @@
         </div>
         <div class="items" v-for="(item, id) in items" v-bind:id="'list-' + id">
           <div class="icon"></div>
-          <div class="cound">{{ id }}</div>
+          <div class="cound">{{ id + 1 }}</div>
           <div class="name">{{ item.tag }}<div v-if='!item.tag' class='line'></div></div>
           <div class="clanrating">{{ item.rate }}<div v-if='!item.rate' class='line'></div></div>
           <div class="winrate">{{ item.win }}<div v-if='!item.win' class='line'></div></div>
