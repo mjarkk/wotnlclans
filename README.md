@@ -4,7 +4,7 @@ On this site you can view the all the NL/BE clans
 
 ## Why?  
 - Because I want to learn Vue.js and Spf.js.  
-- Because the old site uses 3 npm scripts (that can break) and 2 domains and 1 domain for making the website.  
+- Because the old site uses 3 npm scripts (that can break), 2 domains, 1 domain for making the website and a view other scripts for copying and some other things.  
 - The curent site is slow on a normal mobiel connection it takes 25s  
 - The curent site looks bad on mobiel  
 
