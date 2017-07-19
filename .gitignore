@@ -57,5 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
+# added
 old/
 test/
+package-lock.json
