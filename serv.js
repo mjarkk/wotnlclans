@@ -20,22 +20,32 @@ const _ = require('underscore');
 const sortOn = require('sort-on');
 const watch = require('node-watch');
 const UglifyJS = require("uglify-js");
-const config = fs.readJsonSync('./db/config.json');
+const mergeImg = require("merge-img");
+const shell = require('shelljs');
+var config = fs.readJsonSync('./db/config.json');
 
 // startup
+config['ffmpeg'] = true;
 console.log('');
 console.log('clans counted: ' + colors.green(fs.readJsonSync(config.clansfile).length));
+if (!shell.which('ffmpeg')) {
+  console.log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
+  config.ffmpeg = false
+};
 console.log('');
 
 // uglify the main script.js
 watch(config.js['script.js'].dev, { recursive: true }, function(evt, name) {
-  uglyfiscript();
+  uglyfiscript('script.js');
 });
-function uglyfiscript() {
-  fs.readFile(config.js['script.js'].dev, 'utf8', (errr, data) => {
+watch(config.js['worker.js'].dev, { recursive: true }, function(evt, name) {
+  uglyfiscript('worker.js');
+});
+function uglyfiscript(name) {
+  fs.readFile(config.js[name].dev, 'utf8', (errr, data) => {
     var uglyjs = UglifyJS.minify(data);
     if (!uglyjs.error) {
-      fs.outputFile(config.js['script.js'].normal, uglyjs.code, err => {
+      fs.outputFile(config.js[name].normal, uglyjs.code, err => {
 
       })
     } else {
@@ -90,12 +100,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 var staticPath = path.join(__dirname, '/www');
 app.use(express.static(staticPath));
 app.use(fileUpload());
-app.use(compression());
+app.use(compression({ threshold: 0 }));
 
-var port = 2020;
-app.listen(port, function() {
-  console.log('listening on port: '.green + colors.green(port));
-});
+try {
+  var port = config.port;
+  app.listen(port, function() {
+    console.log('listening on port: '.green + colors.green(port));
+  });
+} catch (e) {
+  console.log(colors.red('server can\'t start most likly because of another program that uses the same port'));
+}
 
 app.get('/', function(req, res) {
   res.render('index', {
@@ -104,10 +118,26 @@ app.get('/', function(req, res) {
   });
 })
 
+app.get('/clanicons.png', function (req, res) {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.set('Content-Type', 'image/png');
+  if (config.ffmpeg) {
+    res.sendFile(path.resolve('./www/img/clanicons.min.png'));
+  } else {
+    res.sendFile(path.resolve('./www/img/clanicons.png'));
+  }
+})
+
 app.get('/clandata-firstload/', function(req, res) {
   res.setHeader('Cache-Control', 'no-cache');
   res.set('Content-Type', 'text/plain');
   res.sendFile(path.resolve(config.clandata.firstload));
+})
+
+app.get('/clandata-load2/', function(req, res) {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.set('Content-Type', 'text/plain');
+  res.sendFile(path.resolve(config.clandata.load2));
 })
 
 app.get('/dyjs/:js', function (req, res) {
@@ -223,7 +253,9 @@ function clanstolist() {
                 }
                 list = _.difference(list, blockedclans);
                 // output the list to a file to use it later
-                fs.outputJson(config.clansfile, list, err => {});
+                fs.outputJson(config.clansfile, list, err => {
+                  updateclandata();
+                });
                 console.log('dune');
               })
             }
@@ -299,7 +331,7 @@ function updateclandata() {
       }
       toclanfile = _.difference(toclanfile, RemoveFromToclans);
       console.log("creating files");
-      var t = 3;
+      var t = 4;
       var once = [];
       fs.outputJson(config.clandata.all, toclanfile, err => {
         console.log("1/"+t);
@@ -317,6 +349,34 @@ function updateclandata() {
           }
           fs.outputJson(config.clandata.firstload, once, err => {
             console.log("3/"+t);
+            once = [];
+            for (var i = 0; i < toclanfile.length; i++) {
+              c = toclanfile[i];
+              var json = {
+                leden: c.members_count,
+                color: c.color,
+                gm: {
+                  "6": c.gm_elo_rating_6.value,
+                  "8": c.gm_elo_rating_8.value,
+                  "10": c.gm_elo_rating_10.value,
+                  "normal": c.gm_elo_rating.value
+                },
+                s: {
+                  "6": c.fb_elo_rating_6.value,
+                  "8": c.fb_elo_rating_8.value,
+                  "10": c.fb_elo_rating_10.value,
+                  "normal": c.fb_elo_rating.value
+                }
+              }
+              once.push(json);
+            }
+            fs.outputJson(config.clandata.load2, once, err => {
+              console.log("4/"+t);
+
+              // when dune make a image with all clan icons
+              mkimg();
+
+            });
           });
         });
       });
@@ -324,6 +384,45 @@ function updateclandata() {
   })
 }
 
+function mkimg() {
+  fs.readJson(config.clandata.all, (err, data) => {
+    var imgs = [];
+    function reqimg(i) {
+      fetch(data[i].emblems.x64.wot)
+        .then(function(res) {
+          return res.buffer();
+        }).then(function(body) {
+          imgs.push(body);
+          console.log("img: " + i);
+          if (data[i+1]) {
+            reqimg(i+1)
+          } else {
+            createimg()
+          }
+        });
+    }
+    function createimg() {
+      mergeImg(imgs)
+        .then((img) => {
+          img.write('./www/img/clanicons.png', () => {
+            console.log('done converting all clan icon into one file');
+            if (config.ffmpeg) {
+
+            }
+          });
+          // img.getBuffer(img.getMIME(), (inputBuffer) => {
+          //
+          // });
+
+        });
+    }
+    reqimg(0)
+  })
+}
+
 // clanstolist();
 // updateclandata();
-uglyfiscript()
+uglyfiscript('script.js');
+uglyfiscript('worker.js');
+
+shell.exec('ffmpeg -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*419 + ' ./www/img/clanicons.min.png', {silent:true}).code

@@ -25,11 +25,13 @@
     "express": "^4.15.3",
     "express-fileupload": "^0.1.4",
     "fs-extra": "^3.0.1",
+    "merge-img": "^1.0.2",
     "node-fetch": "^1.7.1",
     "node-watch": "^0.5.5",
     "pics": "^1.0.3",
     "promptly": "^2.2.0",
     "request": "^2.81.0",
+    "shelljs": "^0.7.8",
     "sort-on": "^2.0.0",
     "uglify-js": "^3.0.25",
     "underscore": "^1.8.3"

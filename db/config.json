@@ -1,5 +1,6 @@
 {
   "wgkey": "f53bdb585a307dbb8e5c1fdcbf213384",
+  "port": 2020,
   "clansfile": "./db/clans.json",
   "extraclans": "./db/extra.txt",
   "blockedclans": "./db/blockedclans.json",
@@ -7,7 +8,8 @@
   "clandata": {
     "all": "./db/clandata-all.json",
     "allI": "./db/clandata-all-index.json",
-    "firstload": "./db/clandata-firstload.json"
+    "firstload": "./db/clandata-firstload.json",
+    "load2": "./db/clandata-load2.json"
   },
   "js": {
     "vue.js": {
@@ -17,6 +19,10 @@
     "script.js": {
       "dev": "./www/js/script.js",
       "normal": "./www/js/script.min.js"
+    },
+    "worker.js": {
+      "dev": "./www/js/worker.js",
+      "normal": "./www/js/worker.min.js"
     }
   },
   "dev": true
