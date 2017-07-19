@@ -20,23 +20,32 @@ const _ = require('underscore');
 const sortOn = require('sort-on');
 const watch = require('node-watch');
 const UglifyJS = require("uglify-js");
-const mergeImg = require("merge-img")
-const config = fs.readJsonSync('./db/config.json');
+const mergeImg = require("merge-img");
+const shell = require('shelljs');
+var config = fs.readJsonSync('./db/config.json');
 
 // startup
+config['ffmpeg'] = true;
 console.log('');
 console.log('clans counted: ' + colors.green(fs.readJsonSync(config.clansfile).length));
+if (!shell.which('ffmpeg')) {
+  console.log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
+  config.ffmpeg = false
+};
 console.log('');
 
 // uglify the main script.js
 watch(config.js['script.js'].dev, { recursive: true }, function(evt, name) {
-  uglyfiscript();
+  uglyfiscript('script.js');
 });
-function uglyfiscript() {
-  fs.readFile(config.js['script.js'].dev, 'utf8', (errr, data) => {
+watch(config.js['worker.js'].dev, { recursive: true }, function(evt, name) {
+  uglyfiscript('worker.js');
+});
+function uglyfiscript(name) {
+  fs.readFile(config.js[name].dev, 'utf8', (errr, data) => {
     var uglyjs = UglifyJS.minify(data);
     if (!uglyjs.error) {
-      fs.outputFile(config.js['script.js'].normal, uglyjs.code, err => {
+      fs.outputFile(config.js[name].normal, uglyjs.code, err => {
 
       })
     } else {
@@ -91,18 +100,32 @@ app.use(bodyParser.urlencoded({ extended: true }));
 var staticPath = path.join(__dirname, '/www');
 app.use(express.static(staticPath));
 app.use(fileUpload());
-app.use(compression());
+app.use(compression({ threshold: 0 }));
 
-var port = 2020;
-app.listen(port, function() {
-  console.log('listening on port: '.green + colors.green(port));
-});
+try {
+  var port = config.port;
+  app.listen(port, function() {
+    console.log('listening on port: '.green + colors.green(port));
+  });
+} catch (e) {
+  console.log(colors.red('server can\'t start most likly because of another program that uses the same port'));
+}
 
 app.get('/', function(req, res) {
   res.render('index', {
     madeby: madeby.name + ' [' + madeby.clan + ']',
     madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby
   });
+})
+
+app.get('/clanicons.png', function (req, res) {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.set('Content-Type', 'image/png');
+  if (config.ffmpeg) {
+    res.sendFile(path.resolve('./www/img/clanicons.min.png'));
+  } else {
+    res.sendFile(path.resolve('./www/img/clanicons.png'));
+  }
 })
 
 app.get('/clandata-firstload/', function(req, res) {
@@ -382,8 +405,15 @@ function mkimg() {
       mergeImg(imgs)
         .then((img) => {
           img.write('./www/img/clanicons.png', () => {
-            console.log('done converting all clan icon into one file')
+            console.log('done converting all clan icon into one file');
+            if (config.ffmpeg) {
+
+            }
           });
+          // img.getBuffer(img.getMIME(), (inputBuffer) => {
+          //
+          // });
+
         });
     }
     reqimg(0)
@@ -392,4 +422,7 @@ function mkimg() {
 
 // clanstolist();
 // updateclandata();
-uglyfiscript()
+uglyfiscript('script.js');
+uglyfiscript('worker.js');
+
+shell.exec('ffmpeg -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*419 + ' ./www/img/clanicons.min.png', {silent:true}).code
