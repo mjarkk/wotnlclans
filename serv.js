@@ -20,6 +20,7 @@ const _ = require('underscore');
 const sortOn = require('sort-on');
 const watch = require('node-watch');
 const UglifyJS = require("uglify-js");
+const mergeImg = require("merge-img")
 const config = fs.readJsonSync('./db/config.json');
 
 // startup
@@ -348,11 +349,44 @@ function updateclandata() {
             }
             fs.outputJson(config.clandata.load2, once, err => {
               console.log("4/"+t);
+
+              // when dune make a image with all clan icons
+              mkimg();
+
             });
           });
         });
       });
     }
+  })
+}
+
+function mkimg() {
+  fs.readJson(config.clandata.all, (err, data) => {
+    var imgs = [];
+    function reqimg(i) {
+      fetch(data[i].emblems.x64.wot)
+        .then(function(res) {
+          return res.buffer();
+        }).then(function(body) {
+          imgs.push(body);
+          console.log("img: " + i);
+          if (data[i+1]) {
+            reqimg(i+1)
+          } else {
+            createimg()
+          }
+        });
+    }
+    function createimg() {
+      mergeImg(imgs)
+        .then((img) => {
+          img.write('./www/img/clanicons.png', () => {
+            console.log('done converting all clan icon into one file')
+          });
+        });
+    }
+    reqimg(0)
   })
 }
 
