@@ -18,5 +18,10 @@ On this site you can view the all the NL/BE clans
 ## How to install:  
 - Clone the project  
 - Install nodejs  
-- Inside the cloned folder open a terminal and type: npm i   
+- Inside the cloned folder open a terminal and type: npm i  
 - After that's dune type: npm start  
+
+## Bugs  
+- On Windows you can't get clan data  
+- On Windows FFMPEG will not work with resolt the icons on the website don't look sharp and take longer to load  
+- On Windows 
