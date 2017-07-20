@@ -5,6 +5,48 @@ var config = {
   s: '8'
 }
 
+var procanjoin = true;
+var prolenght = 0;
+var proneedl = 0;
+function progressbar(g) {
+  var bar = document.getElementsByClassName("progress")[0];
+  function animatebar(le) {
+    procanjoin = false;
+    requestAnimationFrame(function() {
+      var now = prolenght + (le * (proneedl - prolenght));
+      bar.style.width = now + '%';
+      if (le < 0.9) {
+        animatebar(le + 0.1)
+      } else {
+        prolenght = Number(bar.style.width.replace('%',''));
+        procanjoin = true;
+        if (prolenght > 98) {
+          removeprogressbar(0)
+        }
+      }
+    })
+  }
+  proneedl = g;
+  if (procanjoin) {
+    animatebar(0)
+  }
+}
+function removeprogressbar(i) {
+  setTimeout(function () {
+    var bar = document.getElementsByClassName("loadingbar")[0];
+    requestAnimationFrame(function() {
+      bar.style.top = '-' + (i / 1) + 'px'
+      if (i < 4) {
+        removeprogressbar(i + 1)
+      }
+    })
+  }, 100);
+}
+function progressbarreset() {
+  prolenght = 0;
+}
+progressbar(10)
+
 var sitetitle = 'WOT NL/BE Clans';
 
 var sitetitle = new Vue({
@@ -19,6 +61,12 @@ var clanslist = new Vue({
   data: {
     'resize': document.body.clientWidth,
     'items': clandata
+  },
+  methods: {
+    open: function(url) {
+      spf.navigate('/clan/' + url);
+      openclan(url)
+    }
   }
 })
 
@@ -36,6 +84,7 @@ window.addEventListener("resize", function(event) {
 fetch('/clandata-firstload/', {mode: 'cors'}).then(function(response) {
   return response.text();
 }).then(function(firstload) {
+  progressbar(30)
   firstload = JSON.parse(firstload)
   var pos = 0;
   for (var i = 0; i < firstload.length; i++) {
@@ -65,17 +114,18 @@ fetch('/clandata-firstload/', {mode: 'cors'}).then(function(response) {
   fetch('/clandata-load2/', {mode: 'cors'}).then(function(response2) {
     return response2.text();
   }).then(function(firstload2) {
+    progressbar(50)
     firstload2 = JSON.parse(firstload2)
     for (var i = 0; i < firstload2.length; i++) {
       var j = firstload2[i];
       clandata[i] = Object.assign(clandata[i], firstload2[i]);
     }
     clanslist.items = clandata;
-
     var listicons = document.getElementsByClassName("listicons")
     var objImage = new Image();
     objImage.src ='/clanicons.png';
     objImage.onload = function(e){
+      progressbar(100)
       setTimeout(function () {
         // console.log(listicons);
         function nexticon(i) {
@@ -125,3 +175,23 @@ function createworker() {
 }
 
 spf.init();
+
+function openclan(clanid) {
+  fetch('/claninfo/now/' + clanid)
+  .then(function(response) {
+    return response.text()
+  }).then(function(body) {
+    body = JSON.parse(body);
+    console.log(body);
+  })
+}
+
+Vue.component('clanstatspage', {
+  template: '<h1>test</h1>'
+})
+
+var clanstatspage = new Vue({
+  el: '.clanstatspage',
+  data: {},
+  methods: {}
+})

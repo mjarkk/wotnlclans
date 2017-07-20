@@ -140,6 +140,25 @@ app.get('/clandata-load2/', function(req, res) {
   res.sendFile(path.resolve(config.clandata.load2));
 })
 
+app.get('/claninfo/:time/:clanid', function (req, res) {
+  fs.readFile(config.clandata.allI, 'utf8', (err, data) => {
+    data = JSON.parse(data);
+    res.json(data[req.params.clanid]);
+  })
+})
+
+app.get('/clan/:clanid', function (req, res) {
+  var clanid = req.params.clanid;
+  if (req.url.slice(-13) == '?spf=navigate') {
+    // TODO: replace clanid by clan tag :D
+    res.json({
+      "title": "NL/Be clan: " + clanid
+    })
+  } else {
+    res.send('/_\\');
+  }
+})
+
 app.get('/dyjs/:js', function (req, res) {
   var script = req.params.js;
   res.setHeader('Cache-Control', 'no-cache');
@@ -407,7 +426,7 @@ function mkimg() {
           img.write('./www/img/clanicons.png', () => {
             console.log('done converting all clan icon into one file');
             if (config.ffmpeg) {
-
+              shell.exec('ffmpeg -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*419 + ' ./www/img/clanicons.min.png', {silent:true}).code
             }
           });
           // img.getBuffer(img.getMIME(), (inputBuffer) => {
@@ -424,5 +443,3 @@ function mkimg() {
 // updateclandata();
 uglyfiscript('script.js');
 uglyfiscript('worker.js');
-
-shell.exec('ffmpeg -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*419 + ' ./www/img/clanicons.min.png', {silent:true}).code

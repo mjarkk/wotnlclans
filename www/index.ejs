@@ -20,9 +20,12 @@
     </style>
   </head>
   <body>
-    <div class="titlebar v-l" v-cloak><h1>{{ sitetitle }}</h1></div>
-    <div class="header">
+    <div class="clanstatspage">
+      <!-- <clanstatspage></clanstatspage> -->
     </div>
+    <div class="loadingbar"><div class="progress"></div></div>
+    <div class="titlebar v-l" v-cloak><h1>{{ sitetitle }}</h1></div>
+    <div class="header"></div>
     <div class="maincontent">
       <div class="clanslist v-l" v-cloak>
         <h1>Clans</h1>
@@ -36,7 +39,7 @@
           <div class="s" v-if="resize > 515">Strongholds</div>
           <div class="gm" v-if="resize > 625">Global map</div>
         </div>
-        <a href="https://google.com" class="items" v-for="(item, id) in items" v-bind:id="'list-' + id">
+        <a v-on:click="open(item.id)" class="items" v-for="(item, id) in items" v-bind:id="'list-' + id">
           <div v-bind:style="{'background-position': item.pos}" class="icon listicons" v-if="resize > 415"></div>
           <div class="cound">{{ id + 1 }}</div>
           <div class="name">{{ item.tag }}<div v-if='!item.tag' class='line'></div></div>
@@ -48,11 +51,12 @@
         </a>
       </div>
     </div>
-    <script src='/js/spf.js'></script>
-    <script src='/dyjs/vue.js'></script>
-    <script src='/dyjs/script.js'></script>
     <div class="madeby">
       <p>Site gemaakt door <a href="<%= madebylink %>"><%= madeby %></a></p>
     </div>
+    <script src='/js/spf.js'></script>
+    <script src='/dyjs/vue.js'></script>
+    <script src='/dyjs/script.js'></script>
+    <script src='/js/anime.min.js'></script>
   </body>
 </html>
