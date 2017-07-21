@@ -1,62 +1,31 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Wot NL/BE clans</title>
-    <link rel="stylesheet" href="css/home.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#212121">
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" href="/icons/favicon-32x32.png" type="image/png">
-    <style media="screen">
-      .v-l {
-        opacity: 1;
-        transition: opacity 0.5s
-      }
-      [v-cloak] {
-        opacity: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="clanstatspage">
-      <!-- <clanstatspage></clanstatspage> -->
+<% include top.ejs %>
+<div class="clanstatspage">
+  <clanstatspage></clanstatspage>
+</div>
+<div class="header"></div>
+<div class="maincontent">
+  <div class="clanslist v-l" v-cloak>
+    <h1>Clans</h1>
+    <div class="listheader">
+      <div class="icon" v-if="resize > 415"></div>
+      <div class="cound">#</div>
+      <div class="name">Tag</div>
+      <div class="clanrating">Rating</div>
+      <div class="winrate">Win</div>
+      <div class="leden" v-if="resize > 365">Leden</div>
+      <div class="s" v-if="resize > 515">Strongholds</div>
+      <div class="gm" v-if="resize > 625">Global map</div>
     </div>
-    <div class="loadingbar"><div class="progress"></div></div>
-    <div class="titlebar v-l" v-cloak><h1>{{ sitetitle }}</h1></div>
-    <div class="header"></div>
-    <div class="maincontent">
-      <div class="clanslist v-l" v-cloak>
-        <h1>Clans</h1>
-        <div class="listheader">
-          <div class="icon" v-if="resize > 415"></div>
-          <div class="cound">#</div>
-          <div class="name">Tag</div>
-          <div class="clanrating">Rating</div>
-          <div class="winrate">Win</div>
-          <div class="leden" v-if="resize > 365">Leden</div>
-          <div class="s" v-if="resize > 515">Strongholds</div>
-          <div class="gm" v-if="resize > 625">Global map</div>
-        </div>
-        <a v-on:click="open(item.id)" class="items" v-for="(item, id) in items" v-bind:id="'list-' + id">
-          <div v-bind:style="{'background-position': item.pos}" class="icon listicons" v-if="resize > 415"></div>
-          <div class="cound">{{ id + 1 }}</div>
-          <div class="name">{{ item.tag }}<div v-if='!item.tag' class='line'></div></div>
-          <div class="clanrating">{{ item.rate }}<div v-if='!item.rate' class='line'></div></div>
-          <div class="winrate">{{ item.win }}<div v-if='!item.win' class='line'></div></div>
-          <div class="leden" v-if="resize > 365">{{ item.leden }}<div v-if='!item.leden' class='line'></div></div>
-          <div class="s" v-if="resize > 515">{{ item.s[item.fun('s')] }}<div v-if='!item.s' class='line'></div></div>
-          <div class="gm" v-if="resize > 625">{{ item.gm[item.fun('gm')] }}<div v-if='!item.gm' class='line'></div></div>
-        </a>
-      </div>
-    </div>
-    <div class="madeby">
-      <p>Site gemaakt door <a href="<%= madebylink %>"><%= madeby %></a></p>
-    </div>
-    <script src='/js/spf.js'></script>
-    <script src='/dyjs/vue.js'></script>
-    <script src='/dyjs/script.js'></script>
-    <script src='/js/anime.min.js'></script>
-  </body>
-</html>
+    <a v-on:click="open(item.id)" class="items" v-for="(item, id) in items" v-bind:id="'list-' + id">
+      <div v-bind:style="{'background-position': item.pos}" class="icon listicons" v-if="resize > 415"></div>
+      <div class="cound">{{ id + 1 }}</div>
+      <div class="name">{{ item.tag }}<div v-if='!item.tag' class='line'></div></div>
+      <div class="clanrating">{{ item.rate }}<div v-if='!item.rate' class='line'></div></div>
+      <div class="winrate">{{ item.win }}<div v-if='!item.win' class='line'></div></div>
+      <div class="leden" v-if="resize > 365">{{ item.leden }}<div v-if='!item.leden' class='line'></div></div>
+      <div class="s" v-if="resize > 515">{{ item.s[item.fun('s')] }}<div v-if='!item.s' class='line'></div></div>
+      <div class="gm" v-if="resize > 625">{{ item.gm[item.fun('gm')] }}<div v-if='!item.gm' class='line'></div></div>
+    </a>
+  </div>
+</div>
+<% include bottom.ejs %>

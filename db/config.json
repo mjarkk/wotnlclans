@@ -9,7 +9,8 @@
     "all": "./db/clandata-all.json",
     "allI": "./db/clandata-all-index.json",
     "firstload": "./db/clandata-firstload.json",
-    "load2": "./db/clandata-load2.json"
+    "load2": "./db/clandata-load2.json",
+    "names": "./db/clandata-names.json"
   },
   "js": {
     "vue.js": {

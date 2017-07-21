@@ -149,14 +149,24 @@ app.get('/claninfo/:time/:clanid', function (req, res) {
 
 app.get('/clan/:clanid', function (req, res) {
   var clanid = req.params.clanid;
-  if (req.url.slice(-13) == '?spf=navigate') {
-    // TODO: replace clanid by clan tag :D
-    res.json({
-      "title": "NL/Be clan: " + clanid
-    })
-  } else {
-    res.send('/_\\');
-  }
+  fs.readFile(config.clandata.names, function(err, claninf) {
+    claninf = JSON.parse(claninf);
+    if (claninf[clanid]) {
+      if (req.url.slice(-13) == '?spf=navigate') {
+        res.json({
+          "title": "NL/Be clan: [" + claninf[clanid].clan_tag + "]"
+        })
+      } else {
+        res.render('clandetails.ejs', {
+          madeby: madeby.name + ' [' + madeby.clan + ']',
+          madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby,
+          full: true
+        })
+      }
+    } else {
+      res.status(404).sendFile(__dirname + '/www/404.html');
+    }
+  })
 })
 
 app.get('/dyjs/:js', function (req, res) {
@@ -350,7 +360,7 @@ function updateclandata() {
       }
       toclanfile = _.difference(toclanfile, RemoveFromToclans);
       console.log("creating files");
-      var t = 4;
+      var t = 5;
       var once = [];
       fs.outputJson(config.clandata.all, toclanfile, err => {
         console.log("1/"+t);
@@ -391,10 +401,22 @@ function updateclandata() {
             }
             fs.outputJson(config.clandata.load2, once, err => {
               console.log("4/"+t);
-
-              // when dune make a image with all clan icons
-              mkimg();
-
+              once = [];
+              for (var i = 0; i < toclanfile.length; i++) {
+                c = toclanfile[i];
+                var json = {
+                  clan_tag: c.clan_tag,
+                  clan_name: c.clan_name,
+                  color: c.color,
+                  clan_id: c.clan_id
+                }
+                once.push(json);
+              }
+              fs.outputJson(config.clandata.names, _.indexBy(once, 'clan_id'), err => {
+                console.log("5/"+t);
+                // when dune make a image with all clan icons
+                mkimg();
+              });
             });
           });
         });

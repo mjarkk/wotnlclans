@@ -177,6 +177,12 @@ function createworker() {
 spf.init();
 
 function openclan(clanid) {
+  var cssProperties = anime({
+    targets: '.clanstatspage',
+    top: '0vh',
+    easing: 'easeOutCubic',
+    duration: 750
+  });
   fetch('/claninfo/now/' + clanid)
   .then(function(response) {
     return response.text()
