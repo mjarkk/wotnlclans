@@ -128,6 +128,13 @@ app.get('/clanicons.png', function (req, res) {
   }
 })
 
+app.get('/clanname/:clanid', function(req, res) {
+  fs.readFile(config.clandata.names, 'utf8', (err, data) => {
+    data = JSON.parse(data);
+    res.json(data[req.params.clanid]);
+  })
+})
+
 app.get('/clandata-firstload/', function(req, res) {
   res.setHeader('Cache-Control', 'no-cache');
   res.set('Content-Type', 'text/plain');
@@ -151,16 +158,20 @@ app.get('/clan/:clanid', function (req, res) {
   var clanid = req.params.clanid;
   fs.readFile(config.clandata.names, function(err, claninf) {
     claninf = JSON.parse(claninf);
-    if (claninf[clanid]) {
+    if (claninf[clanid] || clanid == 'true') {
       if (req.url.slice(-13) == '?spf=navigate') {
         res.json({
           "title": "NL/Be clan: [" + claninf[clanid].clan_tag + "]"
         })
       } else {
+        var full = true;
+        if (clanid == 'true') {
+          full = false;
+        }
         res.render('clandetails.ejs', {
           madeby: madeby.name + ' [' + madeby.clan + ']',
           madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby,
-          full: true
+          full: full
         })
       }
     } else {

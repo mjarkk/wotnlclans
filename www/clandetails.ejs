@@ -1,9 +1,19 @@
 <%if (full) { %>
   <% include top.ejs %>
+  <div class="clanstatspage">
 <% } %>
+<div class="content">
+  <div class="clanintro" v-bind:style="{'background-image': bgimage}"></div>
+  <div class="claniconholder">
+    <div class="iconholder2">
+      <img v-bind:src="image" unselectable="on" draggable="false">
+    </div>
+  </div>
+  <div class="claninfo">
 
-<h1>test</h1>
-
+  </div>
+</div>
 <%if (full) { %>
+  </div>
   <% include bottom.ejs %>
 <% } %>

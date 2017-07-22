@@ -1,13 +1,18 @@
 var clandata = [];
-
+var iconsloaded = false;
 var config = {
   gm: '8',
   s: '8'
 }
-
 var procanjoin = true;
 var prolenght = 0;
 var proneedl = 0;
+var sitetitlestring = 'WOT NL/BE Clans';
+var widthchange = true;
+var lastwidth = 1000;
+var siteurl = document.location.pathname;
+var PlacedVueData = false;
+
 function progressbar(g) {
   var bar = document.getElementsByClassName("progress")[0];
   function animatebar(le) {
@@ -47,123 +52,158 @@ function progressbarreset() {
 }
 progressbar(10)
 
-var sitetitle = 'WOT NL/BE Clans';
-
 var sitetitle = new Vue({
   el: '.titlebar',
   data: {
-    sitetitle: sitetitle
+    sitetitle: sitetitlestring,
+    backicon: false
   }
 })
 
-var clanslist = new Vue({
-  el: '.clanslist',
-  data: {
-    'resize': document.body.clientWidth,
-    'items': clandata
-  },
-  methods: {
-    open: function(url) {
-      spf.navigate('/clan/' + url);
-      openclan(url)
+function mkclanlist() {
+  clanslistvue = new Vue({
+    el: '.clanslist',
+    data: {
+      'resize': document.body.clientWidth,
+      'items': clandata
+    },
+    methods: {
+      open: function(url) {
+        spf.navigate('/clan/' + url);
+        openclan(url)
+      }
     }
-  }
-})
+  })
+  getclanlist();
+}
 
-var widthchange = true;
+if (siteurl.includes("/clan/")) {
+  var clanpage = document.getElementsByClassName("clanstatspage")[0]
+  clanpage.style.top = '0px'
+  sitetitle.backicon = true
+  fetch(siteurl.replace("/clan/","/clanname/"))
+    .then(function(response) {
+      return response.text()
+    }).then(function(body) {
+      body = JSON.parse(body);
+      console.log(body);
+      sitetitle.sitetitle = 'Clan ' + body.clan_tag;
+      openclan(body.clan_id.toString())
+    })
+} else {
+  mkclanlist();
+}
+
 window.addEventListener("resize", function(event) {
   if (widthchange) {
     widthchange = false;
     setTimeout(function () {
-      clanslist.resize = document.body.clientWidth;
+      var nowwidth = document.body.clientWidth;
+      clanslistvue.resize = nowwidth;
       widthchange = true;
+      if (lastwidth < 415 && nowwidth > 415) {
+        clanslistvue.items = clanslistvue.items;
+        var listicons = document.getElementsByClassName("listicons")
+        for (var i = 0; i < listicons.length; i++) {
+          listicons[i].style.backgroundImage = '/clanicons.png'
+        }
+      }
+      lastwidth = nowwidth;
     }, 300);
   }
 })
 
-fetch('/clandata-firstload/', {mode: 'cors'}).then(function(response) {
-  return response.text();
-}).then(function(firstload) {
-  progressbar(30)
-  firstload = JSON.parse(firstload)
-  var pos = 0;
-  for (var i = 0; i < firstload.length; i++) {
-    var j = firstload[i];
-    clandata.push({
-      id: j.i,
-      tag: '[' + j.t + ']',
-      win: j.w + '%',
-      rate: j.e,
-      gm: {
-        "6": undefined,
-        "8": undefined,
-        "10": undefined,
-        'normal': undefined
-      },
-      s: {
-        "6": undefined,
-        "8": undefined,
-        "10": undefined,
-        'normal': undefined
-      },
-      pos: '-' + pos + 'px 0px',
-      fun: function (i) {return (config[i])}
-    })
-    pos += 40;
-  }
-  fetch('/clandata-load2/', {mode: 'cors'}).then(function(response2) {
-    return response2.text();
-  }).then(function(firstload2) {
-    progressbar(50)
-    firstload2 = JSON.parse(firstload2)
-    for (var i = 0; i < firstload2.length; i++) {
-      var j = firstload2[i];
-      clandata[i] = Object.assign(clandata[i], firstload2[i]);
+function getclanlist() {
+  fetch('/clandata-firstload/', {mode: 'cors'}).then(function(response) {
+    return response.text();
+  }).then(function(firstload) {
+    progressbar(30)
+    firstload = JSON.parse(firstload)
+    var pos = 0;
+    for (var i = 0; i < firstload.length; i++) {
+      var j = firstload[i];
+      clandata.push({
+        id: j.i,
+        tag: '[' + j.t + ']',
+        win: j.w + '%',
+        rate: j.e,
+        gm: {
+          "6": undefined,
+          "8": undefined,
+          "10": undefined,
+          'normal': undefined
+        },
+        s: {
+          "6": undefined,
+          "8": undefined,
+          "10": undefined,
+          'normal': undefined
+        },
+        pos: '-' + pos + 'px 0px',
+        fun: function (i) {return (config[i])}
+      })
+      pos += 40;
     }
-    clanslist.items = clandata;
-    var listicons = document.getElementsByClassName("listicons")
-    var objImage = new Image();
-    objImage.src ='/clanicons.png';
-    objImage.onload = function(e){
-      progressbar(100)
-      setTimeout(function () {
-        // console.log(listicons);
-        function nexticon(i) {
-          requestAnimationFrame(function(){
-            var thisitem = i;
-            listicons[i].style.backgroundImage = 'url("' + objImage.src + '")';
-            function animatethis(j) {
-              requestAnimationFrame(function() {
-                listicons[thisitem].style.opacity = j / 70;
-                if (j <= 69) {
-                  animatethis(j + 1)
+    fetch('/clandata-load2/', {mode: 'cors'}).then(function(response2) {
+      return response2.text();
+    }).then(function(firstload2) {
+      progressbar(50)
+      MkVueData()
+      firstload2 = JSON.parse(firstload2);
+      for (var i = 0; i < firstload2.length; i++) {
+        var j = firstload2[i];
+        clandata[i] = Object.assign(clandata[i], firstload2[i]);
+      }
+      var listicons = document.getElementsByClassName("listicons")
+      if (listicons.length > 0) {
+        var objImage = new Image();
+        objImage.src ='/clanicons.png';
+        objImage.onload = function(e) {
+          progressbar(100)
+          setTimeout(function () {
+            var animatiespeed = 20;
+            function nexticon(i) {
+              requestAnimationFrame(function(){
+                var animateinspeed = 70;
+                // timeout between next clan icon
+                if (animatiespeed > 0) {
+                  animatiespeed = animatiespeed - 0.5;
                 }
+                var thisitem = i;
+                listicons[i].style.backgroundImage = 'url("' + objImage.src + '")';
+                function animatethis(j) {
+                  requestAnimationFrame(function() {
+                    listicons[thisitem].style.opacity = j / animateinspeed;
+                    if (j < animateinspeed) {
+                      animatethis(j + 1)
+                    }
+                  })
+                }
+                animatethis(0)
+                setTimeout(function () {
+                  if (listicons[i + 1]) {
+                    nexticon(i + 1)
+                  } else {
+                    iconsloaded = true;
+                    console.log('dune...');
+                  }
+                }, animatiespeed);
               })
             }
-            animatethis(0)
-            setTimeout(function () {
-              if (listicons[i + 1]) {
-                nexticon(i + 1)
-              } else {
-                console.log('dune...');
-              }
-            }, 20);
-          })
+            nexticon(0)
+          }, 20);
         }
-        nexticon(0)
-      }, 20);
-    }
+      }
+      // after everyting is dune create a webworker
+      // createworker()
 
-    // after everyting is dune create a webworker
-    // createworker()
-
-
+    }).catch(function(error) {
+      console.log('Request failed ' + error)
+    });
   }).catch(function(error) {
-    console.log('Request failed' + error)
+    console.log('Request failed ' + error)
   });
-}).catch(function(error) {
-  console.log('Request failed' + error)
-});
+}
 
 function createworker() {
   try {
@@ -174,30 +214,56 @@ function createworker() {
   }
 }
 
-spf.init();
-
 function openclan(clanid) {
-  var cssProperties = anime({
+  MkVueData()
+  anime({
     targets: '.clanstatspage',
     top: '0vh',
     easing: 'easeOutCubic',
     duration: 750
   });
   fetch('/claninfo/now/' + clanid)
-  .then(function(response) {
-    return response.text()
-  }).then(function(body) {
-    body = JSON.parse(body);
-    console.log(body);
-  })
+    .then(function(response) {
+      return response.text()
+    }).then(function(body) {
+      body = JSON.parse(body);
+      console.log(body);
+      ClanDetailsClanData.image = body.emblems.x195.portal;
+      ClanDetailsClanData.bgimage = 'url("' + body.emblems.x24.portal + '")';
+      sitetitle.sitetitle = 'Clan ' + body.clan_tag;
+      sitetitle.backicon = true;
+    })
 }
 
-Vue.component('clanstatspage', {
-  template: '<h1>test</h1>'
-})
+function MkVueData() {
+  if (!PlacedVueData) {
+    PlacedVueData = true;
+    fetch('/clan/true', {mode: 'cors'}).then(function(rs) {
+      return rs.text();
+    }).then(function(vuedata) {
+      if (siteurl.includes("/clan/")) {
+        var clanstatsvue = new Vue({
+          el: '.clanstatspage',
+          data: ClanDetailsClanData
+        })
+      } else {
+        Vue.component('clanstatspagecomp', {
+          template: vuedata,
+          data: function () {
+            return ClanDetailsClanData
+          }
+        });
+        var clanstatsvue = new Vue({
+          el: '.clanstatspage'
+        })
+      }
+    });
+  }
+}
 
-var clanstatspage = new Vue({
-  el: '.clanstatspage',
-  data: {},
-  methods: {}
-})
+var ClanDetailsClanData = {
+  'image': '',
+  'bgimage': ''
+}
+
+spf.init();

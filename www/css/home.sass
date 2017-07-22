@@ -27,7 +27,7 @@ body
   height: 70px
   background-color: #212121
   position: fixed
-  z-index: 10
+  z-index: 40
   top: 0px
   left: 0px
   right: 0px
@@ -37,6 +37,11 @@ body
   color: white
   box-sizing: border-box
   padding: 20px
+  svg
+    height: 35px
+    width: 35px
+    padding-right: 10px
+    cursor: pointer
   h1
     font-weight: 400
     font-size: 30px
@@ -137,7 +142,7 @@ body
   position: fixed
   top: 0px
   left: 0px
-  z-index: 20
+  z-index: 41
   .progress
     width: 0%
     height: 4px
@@ -147,10 +152,48 @@ body
   height: 100vh
   width: 100vw
   position: fixed
-  top: 100vh
   left: 0px
   background-color: #E1E2E1
-  z-index: 30
+  z-index: 20
+  top: 100vh
+
+.clanstatspage
+  .clanintro
+    margin-top: 70px
+    height: 45vh
+    overflow: hidden
+    background-position: center
+    background-size: 120% auto
+    -webkit-filter: blur(70px)
+    -moz-filter: blur(70px)
+    -o-filter: blur(70px)
+    -ms-filter: blur(70px)
+    filter: blur(70px)
+  .claniconholder
+    max-height: 0px
+    position: relative
+    top: -45vh
+    .iconholder2
+      height: 45vh
+      display: flex
+      justify-content: center
+      align-items: center
+      display: -webkit-flex
+      -webkit-justify-content: center
+      -webkit-align-items: center
+    img
+      height: 20vh
+      width: 20vh
+      border-radius: 100px
+      overflow: hidden
+      -moz-user-select: none
+      -webkit-user-select: none
+      user-drag: none
+      -moz-user-select: none
+      -webkit-user-drag: none
+      user-select: none
+      cursor: normal
+      pointer-events: none
 
 @media (max-width: 600px)
   .clanslist
