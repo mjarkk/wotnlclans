@@ -156,31 +156,30 @@ body
   background-color: #E1E2E1
   z-index: 20
   top: 100vh
-
-.clanstatspage
+  .content
+    height: 100vh
+    overflow-x: hidden
+    overflow-y: scroll
+    width: 100vw
+  .clanintro, .claniconholder
+    position: absolute
+    width: 100vw
   .clanintro
-    margin-top: 70px
-    height: 45vh
-    overflow: hidden
-    background-position: center
-    background-size: 120% auto
-    -webkit-filter: blur(70px)
-    -moz-filter: blur(70px)
-    -o-filter: blur(70px)
-    -ms-filter: blur(70px)
-    filter: blur(70px)
+    height: 55vh
+    opacity: 0.4
   .claniconholder
+    margin-top: 70px
     max-height: 0px
-    position: relative
-    top: -45vh
     .iconholder2
       height: 45vh
       display: flex
       justify-content: center
       align-items: center
+      flex-direction: column
       display: -webkit-flex
       -webkit-justify-content: center
       -webkit-align-items: center
+      -webkit-flex-direction: column
     img
       height: 20vh
       width: 20vh
@@ -194,6 +193,72 @@ body
       user-select: none
       cursor: normal
       pointer-events: none
+    p
+      font-size: 50px
+      padding-bottom: 30px
+      text-shadow: 0px 2px 10px rgba(255, 255, 255, 0.4)
+  .claninfo
+    position: relative
+    background-color: white
+    margin: 50vh 3vw 0px 3vw
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px
+    border-top-left-radius: 2px
+    border-top-right-radius: 2px
+    top: 10px
+    .links
+      display: flex
+      justify-content: center
+      align-items: center
+      flex-wrap: wrap
+      a
+        padding: 5px 15px
+        background-color: #212121
+        color: white
+        border-radius: 3px
+        font-size: 18px
+        text-decoration: none
+        margin: 5px
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)
+        transition: all 0.3s cubic-bezier(.25,.8,.25,1)
+        &:hover
+          box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)
+    .stats
+      display: flex
+      justify-content: space-around
+      align-items: center
+      flex-direction: row
+      flex-wrap: wrap
+      display: -webkit-flex
+      -webkit-justify-content: space-around
+      -webkit-align-items: center
+      -webkit-flex-direction: row
+      -webkit-flex-wrap: wrap
+      .item
+        height: 170px
+        display: flex
+        justify-content: center
+        align-items: center
+        flex-direction: column
+        display: -webkit-flex
+        -webkit-justify-content: center
+        -webkit-align-items: center
+        -webkit-flex-direction: column
+        h1
+          font-size: 35px
+        p
+          font-size: 18px
+      .s
+        width: 130px
+      .l
+        width: 350px
+    .clandis
+      padding: 20px 20px 60px 20px
+      h1
+        font-size: 45px
+        font-weight: 400
+        padding-bottom: 10px
+      .dis
+        font-size: 18px
 
 @media (max-width: 600px)
   .clanslist

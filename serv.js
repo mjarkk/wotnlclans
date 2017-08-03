@@ -462,10 +462,6 @@ function mkimg() {
               shell.exec('ffmpeg -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*419 + ' ./www/img/clanicons.min.png', {silent:true}).code
             }
           });
-          // img.getBuffer(img.getMIME(), (inputBuffer) => {
-          //
-          // });
-
         });
     }
     reqimg(0)

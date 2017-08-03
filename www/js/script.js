@@ -228,10 +228,26 @@ function openclan(clanid) {
     }).then(function(body) {
       body = JSON.parse(body);
       console.log(body);
-      ClanDetailsClanData.image = body.emblems.x195.portal;
-      ClanDetailsClanData.bgimage = 'url("' + body.emblems.x24.portal + '")';
+      ClanDetailsClanData.image = body.emblems.x195.portal.replace('http','https');
       sitetitle.sitetitle = 'Clan ' + body.clan_tag;
       sitetitle.backicon = true;
+      ClanDetailsClanData.clantag = '[' + body.clan_tag + ']';
+      ClanDetailsClanData.wglink = 'http://eu.wargaming.net/clans/wot/' + body.clan_id;
+      ClanDetailsClanData.color = body.color;
+      ClanDetailsClanData.win = body.wins_ratio_avg.value;
+      ClanDetailsClanData.eff = body.efficiency.value;
+      ClanDetailsClanData.sh6 = body.fb_elo_rating_6.value;
+      ClanDetailsClanData.sh8 = body.fb_elo_rating_8.value;
+      ClanDetailsClanData.sh10 = body.fb_elo_rating_10.value;
+      ClanDetailsClanData.gm6 = body.gm_elo_rating_6.value;
+      ClanDetailsClanData.gm8 = body.gm_elo_rating_8.value;
+      ClanDetailsClanData.gm10 = body.gm_elo_rating_10.value;
+      ClanDetailsClanData.dis = body.description_html.replace(/'http'/g, 'https');
+      ClanDetailsClanData.leden = body.members_count;
+      ClanDetailsClanData.bgimage = 'background: -moz-linear-gradient(top, ' + body.color + ' 0%, rgba(238,238,238,0) 100%);\
+      background: -webkit-linear-gradient(top, ' + body.color + ' 0%,rgba(238,238,238,0) 100%);\
+      background: linear-gradient(to bottom, ' + body.color + ' 0%,rgba(238,238,238,0) 100%);\
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=\'' + body.color + '\', endColorstr=\#00eeeeee\',GradientType=0 );'
     })
 }
 
@@ -244,7 +260,7 @@ function MkVueData() {
       if (siteurl.includes("/clan/")) {
         var clanstatsvue = new Vue({
           el: '.clanstatspage',
-          data: ClanDetailsClanData
+          data: ClanDetailsClanData,
         })
       } else {
         Vue.component('clanstatspagecomp', {
@@ -262,8 +278,27 @@ function MkVueData() {
 }
 
 var ClanDetailsClanData = {
+  /*'color1': '',
+  'color2': '',
+  'color3': '',
+  'color4': '',*/
   'image': '',
-  'bgimage': ''
+  'bgimage': '',
+  'clantag': '',
+  'wglink': '',
+  'ts': 'sdf',
+  'site': 'sdf',
+  'color': '',
+  'win': 0,
+  'eff': 0,
+  'sh6': 0,
+  'sh8': 0,
+  'sh10': 0,
+  'gm6': 0,
+  'gm8': 0,
+  'gm10': 0,
+  'dis': '',
+  'leden': 0
 }
 
 spf.init();

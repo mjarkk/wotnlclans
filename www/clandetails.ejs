@@ -2,15 +2,46 @@
   <% include top.ejs %>
   <div class="clanstatspage">
 <% } %>
-<div class="content">
-  <div class="clanintro" v-bind:style="{'background-image': bgimage}"></div>
+<div class="content v-l" v-cloak>
+  <div class="clanintro" v-bind:style="bgimage"></div>
   <div class="claniconholder">
     <div class="iconholder2">
-      <img v-bind:src="image" unselectable="on" draggable="false">
+      <p>{{ clantag }}</p>
+      <img v-bind:src="image" unselectable="on" draggable="false" class="claniconstats">
     </div>
   </div>
   <div class="claninfo">
-
+    <div class="links">
+      <a v-bind:href="wglink">Wargaming</a>
+      <a v-if="site != ''" v-bind:href="site">Clan website</a>
+      <a v-if="ts != ''" v-bind:href="ts">Clan teamspeak</a>
+    </div>
+    <div class="stats">
+      <div class="item s">
+        <h1>{{ win }}</h1>
+        <p>Winrate</p>
+      </div>
+      <div class="item s">
+        <h1>{{ eff }}</h1>
+        <p>Rating</p>
+      </div>
+      <div class="item s">
+        <h1>{{ leden }}</h1>
+        <p>Leden</p>
+      </div>
+      <div class="item l">
+        <h1>{{ sh6 }} | {{ sh8 }} | {{ sh10 }}</h1>
+        <p>Strongholds 6,8,10</p>
+      </div>
+      <div class="item l">
+        <h1>{{ gm6 }} | {{ gm8 }} | {{ gm10 }}</h1>
+        <p>global map 6,8,10</p>
+      </div>
+    </div>
+    <div class="clandis">
+      <h1>over</h1>
+      <div class="dis" v-html="dis">{{ dis }}</div>
+    </div>
   </div>
 </div>
 <%if (full) { %>
