@@ -4,6 +4,7 @@
   "clansfile": "./db/clans.json",
   "extraclans": "./db/extra.txt",
   "blockedclans": "./db/blockedclans.json",
+  "news": "./db/news.md",
   "madeby": "516673968",
   "clandata": {
     "all": "./db/clandata-all.json",

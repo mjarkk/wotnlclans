@@ -13,6 +13,88 @@ var lastwidth = 1000;
 var siteurl = document.location.pathname;
 var PlacedVueData = false;
 
+var header = new Vue({
+  el: '.header',
+  data: {
+
+  },
+  methods: {
+    status: function() {
+      OpenStatusPopup();
+    },
+  }
+})
+
+var popup = undefined;
+
+function OpenStatusPopup() {
+  anime({
+    targets: '.popup',
+    top: '0vh',
+    easing: 'easeOutCubic',
+    duration: 750
+  });
+  popup = new Vue({
+    el: '.popup-center',
+    data: {
+      html: '',
+      open: false
+    },
+    methods: {
+      outside: function(e) {
+        if (this.open) {
+          this.open = false;
+          anime({
+            targets: '.popup',
+            top: '100vh',
+            easing: 'easeOutCubic',
+            duration: 750
+          });
+        }
+      }
+    },
+    directives: {
+      'click-outside': {
+        bind: function(el, binding, vNode) {
+          if (typeof binding.value !== 'function') {
+          	const compName = vNode.context.name
+            let warn = `[Vue-click-outside:] provided expression '${binding.expression}' is not a function, but has to be`
+            if (compName) { warn += `Found in component '${compName}'` }
+            console.warn(warn)
+          }
+          const bubble = binding.modifiers.bubble
+          const handler = (e) => {
+            if (bubble || (!el.contains(e.target) && el !== e.target)) {
+            	binding.value(e)
+            }
+          }
+          el.__vueClickOutside__ = handler
+          document.addEventListener('click', handler)
+  			},
+        unbind: function(el, binding) {
+          document.removeEventListener('click', el.__vueClickOutside__)
+          el.__vueClickOutside__ = null
+        }
+      }
+    }
+  });
+  popup.html = '<div class="loading-animation">\
+    <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">\
+      <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>\
+    </svg>\
+  </div>';
+  setTimeout(function () {
+    popup.open = true;
+    fetch('/news.html', {mode: 'cors'})
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(text) {
+      popup.html = text;
+    })
+  }, 100);
+}
+
 function progressbar(g) {
   var bar = document.getElementsByClassName("progress")[0];
   function animatebar(le) {
@@ -50,13 +132,34 @@ function removeprogressbar(i) {
 function progressbarreset() {
   prolenght = 0;
 }
-progressbar(10)
+
+if (!siteurl.includes("/clan/")) {
+  progressbar(10)
+}
 
 var sitetitle = new Vue({
   el: '.titlebar',
   data: {
     sitetitle: sitetitlestring,
     backicon: false
+  },
+  methods: {
+    openstart: function() {
+      spf.navigate('/');
+      if (siteurl.includes("/clan/")) {
+        mkclanlist()
+      } else {
+        // someting
+      }
+      sitetitle.sitetitle = 'WOT NL/BE Clans';
+      sitetitle.backicon = false;
+      anime({
+        targets: '.clanstatspage',
+        top: '100vh',
+        easing: 'easeOutCubic',
+        duration: 750
+      });
+    }
   }
 })
 
@@ -86,7 +189,7 @@ if (siteurl.includes("/clan/")) {
       return response.text()
     }).then(function(body) {
       body = JSON.parse(body);
-      console.log(body);
+      // console.log(body);
       sitetitle.sitetitle = 'Clan ' + body.clan_tag;
       openclan(body.clan_id.toString())
     })
@@ -185,7 +288,7 @@ function getclanlist() {
                     nexticon(i + 1)
                   } else {
                     iconsloaded = true;
-                    console.log('dune...');
+                    // console.log('dune...');
                   }
                 }, animatiespeed);
               })
@@ -209,7 +312,7 @@ function createworker() {
   try {
     var myWorker = new Worker('/dyjs/worker.js');
   } catch (e) {
-    console.log('webworker not supported on this device');
+    // console.log('webworker not supported on this device');
     console.error(e);
   }
 }
@@ -227,7 +330,7 @@ function openclan(clanid) {
       return response.text()
     }).then(function(body) {
       body = JSON.parse(body);
-      console.log(body);
+      // console.log(body);
       ClanDetailsClanData.image = body.emblems.x195.portal.replace('http','https');
       sitetitle.sitetitle = 'Clan ' + body.clan_tag;
       sitetitle.backicon = true;
@@ -278,10 +381,6 @@ function MkVueData() {
 }
 
 var ClanDetailsClanData = {
-  /*'color1': '',
-  'color2': '',
-  'color3': '',
-  'color4': '',*/
   'image': '',
   'bgimage': '',
   'clantag': '',

@@ -22,6 +22,7 @@ const watch = require('node-watch');
 const UglifyJS = require("uglify-js");
 const mergeImg = require("merge-img");
 const shell = require('shelljs');
+const marked = require('marked');
 var config = fs.readJsonSync('./db/config.json');
 
 // startup
@@ -112,10 +113,16 @@ try {
 }
 
 app.get('/', function(req, res) {
-  res.render('index', {
-    madeby: madeby.name + ' [' + madeby.clan + ']',
-    madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby
-  });
+  if (req.url.slice(-13) == '?spf=navigate') {
+    res.json({
+      "title": "WOT NL/BE clans"
+    })
+  } else {
+    res.render('index', {
+      madeby: madeby.name + ' [' + madeby.clan + ']',
+      madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby
+    });
+  }
 })
 
 app.get('/clanicons.png', function (req, res) {
@@ -126,6 +133,12 @@ app.get('/clanicons.png', function (req, res) {
   } else {
     res.sendFile(path.resolve('./www/img/clanicons.png'));
   }
+})
+
+app.get('/news.html',function(req, res) {
+  fs.readFile(config.news, 'utf8', (err, data) => {
+    res.send(marked(data))
+  })
 })
 
 app.get('/clanname/:clanid', function(req, res) {
