@@ -27,5 +27,5 @@ On this site you can view the all the NL/BE clans
 - Inside config.json can't change dev to false because of uglify issue I think it has something todo with es6  
 
 ## Screenshots  
-![Screenshot1](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s1?raw=true "Screenshot1")  
-![Screenshot2](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s2?raw=true "Screenshot2")  
+![Screenshot1](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s1.png)  
+![Screenshot2](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s2.png)  
