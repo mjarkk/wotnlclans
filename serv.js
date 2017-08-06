@@ -2,17 +2,13 @@
 
 // https://material.io/color/#!/?view.left=0&view.right=0&primary.color=212121
 
+// packages
 const path = require('path');
-const express = require('express');
-const compression = require('compression')
 const request = require("request");
 const fs = require('fs-extra');
-const bodyParser = require('body-parser');
 const colors = require('colors');
-const fileUpload = require('express-fileupload');
 const base64 = require('base64-js');
 const pics = require('pics');
-const ejs = require('ejs');
 const promptly = require('promptly');
 const fetch = require('node-fetch');
 const readline = require('readline');
@@ -23,23 +19,38 @@ const UglifyJS = require("uglify-js");
 const mergeImg = require("merge-img");
 const shell = require('shelljs');
 const marked = require('marked');
+const os = require('os');
+const hasha = require('hasha');
+const randomstring = require("randomstring");
+// express & midleware
+const express = require('express');
+const compression = require('compression');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
+const ejs = require('ejs');
+// config file (s)
 var config = fs.readJsonSync('./db/config.json');
 
-// startup
+// checking if ffmpeg is installed / supported
 config['ffmpeg'] = true;
 config['FfmpegPath'] = 'ffmpeg';
 console.log('');
 console.log('clans counted: ' + colors.green(fs.readJsonSync(config.clansfile).length));
 if (!shell.which(config.FfmpegPath)) {
-  config.FfmpegPath = './ffmpeg/ffmpeg.exe';
-  if (!shell.which(config.FfmpegPath)) {
+  if (os.platform().startsWith('win')) {
+    config.FfmpegPath = './ffmpeg/ffmpeg.exe';
+    if (!shell.which(config.FfmpegPath)) {
+      console.log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
+      config.ffmpeg = false
+    };
+  } else {
     console.log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
-    config.ffmpeg = false
-  };
+  }
 };
 console.log('');
 
-// uglify the main script.js
+// uglify the script (s)
 watch(config.js['script.js'].dev, { recursive: true }, function(evt, name) {
   uglyfiscript('script.js');
 });
@@ -60,6 +71,7 @@ function uglyfiscript(name) {
   })
 }
 
+// made by json
 var madeby = {
   name: '',
   clan: '',
@@ -67,6 +79,7 @@ var madeby = {
   icon: ''
 }
 
+// request app personal data
 function aboutme() {
   fetch('https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + config.madeby + '&fields=nickname%2Cclan_id')
     .then(function(res) {
@@ -92,21 +105,26 @@ function aboutme() {
 }
 aboutme()
 
+// a function for turning an array into an url string
 function listtorurl(arrr,begin,end) {
   return (JSON.stringify(arrr.slice(begin, end)).replace('[', '').replace(']', '').replace(/,/g, '%2C').replace(/\"/g, ''))
 }
 
+// express config
 var app = express();
 app.set('json spaces', 2);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/www'));
+app.enable('trust proxy');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 var staticPath = path.join(__dirname, '/www');
-app.use(express.static(staticPath));
+app.use(cookieParser(randomstring.generate(100)));
 app.use(fileUpload());
 app.use(compression({ threshold: 0 }));
+app.use(express.static(staticPath));
 
+// startup app
 try {
   var port = config.port;
   app.listen(port, function() {
@@ -116,7 +134,9 @@ try {
   console.log(colors.red('server can\'t start most likly because of another program that uses the same port'));
 }
 
+// serv home dir
 app.get('/', function(req, res) {
+  // check if the url is an spf request
   if (req.url.slice(-13) == '?spf=navigate') {
     res.json({
       "title": "WOT NL/BE clans"
@@ -129,6 +149,51 @@ app.get('/', function(req, res) {
   }
 })
 
+// get player auth via wargaming api
+var knownpepole = []
+app.get('/redirect/:where', function (req, res) {
+  var where = req.params.where;
+  if (where == 'login') {
+    var RedirectBack = '&redirect_uri=' + encodeURIComponent(req.protocol + '://' + req.get('host') + '/redirect/back')
+    fetch('https://api.worldoftanks.eu/wot/auth/login/?display=popup&nofollow=1&application_id=' + config.wgkey + RedirectBack)
+      .then(function(res) {
+        return res.json();
+      }).then(function(json) {
+        res.redirect(json.data.location);
+      });
+  } else if (where == 'back') {
+    if (req.query.status == 'ok') {
+      var status = true;
+      var data = {
+        access_token: req.query.access_token,
+        nickname: req.query.nickname,
+        account_id: req.query.account_id,
+        expires_at: req.query.expires_at
+      }
+      var datahash = hasha(JSON.stringify(data));
+      for (var i = 0; i < knownpepole.length; i++) {
+        if (req.query.account_id == knownpepole[i].account_id) {
+          status = false;
+          knownpepole[i] = data;
+        }
+      }
+      if (status) {
+        knownpepole.push(data);
+      }
+      var docurl = req.get('host').replace(/:/g,'').replace(/[0-9]/g, '');
+      if (docurl.startsWith("localhost") || docurl == "wotnlclans.mkopenga.com" || docurl == "wotnlclans-api.mkopenga.com") {
+        res.cookie('key', datahash, { domain: docurl, httpOnly: true, signed: true });
+        res.cookie('userid', data.account_id, { domain: docurl, httpOnly: true, signed: true });
+      }
+      res.redirect(req.protocol + '://' + req.get('host'));
+    } else {
+      res.redirect(req.protocol + '://' + req.get('host'));
+    }
+  }
+})
+
+// reqest for clanicons
+// This is 1 image because that's faster to serv
 app.get('/clanicons.png', function (req, res) {
   res.setHeader('Cache-Control', 'no-cache');
   res.set('Content-Type', 'image/png');
@@ -139,12 +204,14 @@ app.get('/clanicons.png', function (req, res) {
   }
 })
 
+// serv the news.md file as html
 app.get('/news.html',function(req, res) {
   fs.readFile(config.news, 'utf8', (err, data) => {
     res.send(marked(data))
   })
 })
 
+// get clan name from clan
 app.get('/clanname/:clanid', function(req, res) {
   fs.readFile(config.clandata.names, 'utf8', (err, data) => {
     data = JSON.parse(data);
@@ -152,18 +219,22 @@ app.get('/clanname/:clanid', function(req, res) {
   })
 })
 
+// first load for website loading clan names and view stats
 app.get('/clandata-firstload/', function(req, res) {
   res.setHeader('Cache-Control', 'no-cache');
   res.set('Content-Type', 'text/plain');
   res.sendFile(path.resolve(config.clandata.firstload));
 })
 
+// second load this will serv the rest of the missing stats
 app.get('/clandata-load2/', function(req, res) {
   res.setHeader('Cache-Control', 'no-cache');
   res.set('Content-Type', 'text/plain');
   res.sendFile(path.resolve(config.clandata.load2));
 })
 
+// serv clan info
+// TODO: be able to make time request
 app.get('/claninfo/:time/:clanid', function (req, res) {
   fs.readFile(config.clandata.allI, 'utf8', (err, data) => {
     data = JSON.parse(data);
@@ -171,6 +242,7 @@ app.get('/claninfo/:time/:clanid', function (req, res) {
   })
 })
 
+// request clan stats page or handle the spf clan stats page request
 app.get('/clan/:clanid', function (req, res) {
   var clanid = req.params.clanid;
   fs.readFile(config.clandata.names, function(err, claninf) {
@@ -197,6 +269,7 @@ app.get('/clan/:clanid', function (req, res) {
   })
 })
 
+// reqest for javascript if dev mode is off it will send the uglify version of the file
 app.get('/dyjs/:js', function (req, res) {
   var script = req.params.js;
   res.setHeader('Cache-Control', 'no-cache');
@@ -212,10 +285,12 @@ app.get('/dyjs/:js', function (req, res) {
   }
 })
 
+// 404 page if not found
 app.get('*', function(req, res){
   res.status(404).sendFile(__dirname + '/www/404.html');
 });
 
+// search for clans clan get all clan stats
 function clanstolist() {
   var list = [];
   function clans(nr) {
@@ -327,6 +402,7 @@ function clanstolist() {
   clans(1)
 }
 
+// update the clan stats
 function updateclandata() {
   fs.readFile(config.clansfile, function(er, clans) {
     clans = JSON.parse(clans.toString());
@@ -453,6 +529,7 @@ function updateclandata() {
   })
 }
 
+// get all clan images and combine them all together
 function mkimg() {
   fs.readJson(config.clandata.all, (err, data) => {
     var imgs = [];
@@ -476,6 +553,9 @@ function mkimg() {
           img.write('./www/img/clanicons.png', () => {
             console.log('done converting all clan icon into one file');
             if (config.ffmpeg) {
+              // for some reason the browser has a limit to the amout of pixel an image can have.
+              // because the image looks bad on full resolution ffmpeg resizes it to 40 * the amout of clans
+              // TODO: change 419 to the amout of clans ;D
               shell.exec(config.FfmpegPath + ' -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*419 + ' ./www/img/clanicons.min.png', {silent:true}).code
             }
           });
