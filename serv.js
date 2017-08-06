@@ -27,11 +27,15 @@ var config = fs.readJsonSync('./db/config.json');
 
 // startup
 config['ffmpeg'] = true;
+config['FfmpegPath'] = 'ffmpeg';
 console.log('');
 console.log('clans counted: ' + colors.green(fs.readJsonSync(config.clansfile).length));
-if (!shell.which('ffmpeg')) {
-  console.log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
-  config.ffmpeg = false
+if (!shell.which(config.FfmpegPath)) {
+  config.FfmpegPath = './ffmpeg/ffmpeg.exe';
+  if (!shell.which(config.FfmpegPath)) {
+    console.log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
+    config.ffmpeg = false
+  };
 };
 console.log('');
 
@@ -472,7 +476,7 @@ function mkimg() {
           img.write('./www/img/clanicons.png', () => {
             console.log('done converting all clan icon into one file');
             if (config.ffmpeg) {
-              shell.exec('ffmpeg -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*419 + ' ./www/img/clanicons.min.png', {silent:true}).code
+              shell.exec(config.FfmpegPath + ' -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*419 + ' ./www/img/clanicons.min.png', {silent:true}).code
             }
           });
         });

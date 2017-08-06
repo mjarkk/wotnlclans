@@ -24,7 +24,7 @@ On this site you can view the all the NL/BE clans
 ## Bugs  
 - On Windows you can't get clan data  
 - On Windows FFMPEG will not work with resolt the icons on the website don't look sharp and take longer to load  
-- Inside config.json can't change dev to false because of uglify issue I think it has something todo with es6  
+- ~~Inside config.json can't change dev to false because of uglify issue I think it has something todo with es6~~  
 
 ## Screenshots  
 ![Screenshot1](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s1.png)  
