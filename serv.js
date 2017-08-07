@@ -131,7 +131,26 @@ try {
     console.log('listening on port: '.green + colors.green(port));
   });
 } catch (e) {
-  console.log(colors.red('server can\'t start most likly because of another program that uses the same port'));
+  console.log(colors.red('server can\'t start most likly because of another program that is using the same port'));
+}
+
+// check if user is loged-in
+function checklogin(req,res) {
+  var LoginStatus = false;
+  if (req.signedCookies.account_id && req.signedCookies.key) {
+    var account_id = req.signedCookies.account_id;
+    for (var i = 0; i < knownpepole.length; i++) {
+      if (knownpepole[i].account_id == account_id) {
+        LoginStatus = true;
+      }
+      knownpepole[i]
+    }
+  }
+  if (!LoginStatus) {
+    res.clearCookie('account_id');
+    res.clearCookie('key');
+  }
+  return LoginStatus;
 }
 
 // serv home dir
@@ -144,7 +163,8 @@ app.get('/', function(req, res) {
   } else {
     res.render('index', {
       madeby: madeby.name + ' [' + madeby.clan + ']',
-      madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby
+      madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby,
+      login: checklogin(req,res)
     });
   }
 })
@@ -183,7 +203,7 @@ app.get('/redirect/:where', function (req, res) {
       var docurl = req.get('host').replace(/:/g,'').replace(/[0-9]/g, '');
       if (docurl.startsWith("localhost") || docurl == "wotnlclans.mkopenga.com" || docurl == "wotnlclans-api.mkopenga.com") {
         res.cookie('key', datahash, { domain: docurl, httpOnly: true, signed: true });
-        res.cookie('userid', data.account_id, { domain: docurl, httpOnly: true, signed: true });
+        res.cookie('account_id', data.account_id, { domain: docurl, httpOnly: true, signed: true });
       }
       res.redirect(req.protocol + '://' + req.get('host'));
     } else {
@@ -191,6 +211,12 @@ app.get('/redirect/:where', function (req, res) {
     }
   }
 })
+
+/*
+cookies
+console.log('wgkey ' + req.signedCookies.key);
+console.log('account_id ' + req.signedCookies.account_id);
+*/
 
 // reqest for clanicons
 // This is 1 image because that's faster to serv
@@ -260,7 +286,8 @@ app.get('/clan/:clanid', function (req, res) {
         res.render('clandetails.ejs', {
           madeby: madeby.name + ' [' + madeby.clan + ']',
           madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby,
-          full: full
+          full: full,
+          login: checklogin(req,res)
         })
       }
     } else {

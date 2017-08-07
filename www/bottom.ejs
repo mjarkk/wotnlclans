@@ -2,6 +2,11 @@
       <div class="info">
         Yay een niuwe site!!! <span v-on:click="status()">Meer Info &amp; waarom</span>
       </div>
+      <%if (login) { %>
+        <p>je bend ingelogt</p>
+      <% } else { %>
+        <a href="/redirect/login">Login</a>
+      <% } %>
     </div>
     <div class="maincontent">
       <div class="clanslist v-l" v-cloak>
