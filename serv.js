@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+// site theme
 // https://material.io/color/#!/?view.left=0&view.right=0&primary.color=212121
 
 // packages
@@ -134,23 +135,95 @@ try {
   console.log(colors.red('server can\'t start most likly because of another program that is using the same port'));
 }
 
+// getplayerinfo plus check if player is loged in
+function playerinf(req,res,callback) {
+  var check = checklogin(req,res,true);
+  if (check.status) {
+    var requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + check.player.account_id + '&access_token=' + check.player.access_token + '&fields=account_id%2Cclan_id';
+    if (check.player.account_id == 516673968 && config.dev) {
+      requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + 503312278 + '&fields=account_id%2Cclan_id';
+    }
+    fetch(requrl)
+      .then(function(res) {
+        return res.json();
+      }).then(function(json) {
+        if (json.status == 'ok') {
+          for (var player in json.data) {
+            if (json.data[player].clan_id) {
+              fs.readFile(config.clandata.allI, 'utf8', (err, data) => {
+                var clans = JSON.parse(data);
+                if (clans[json.data[player].clan_id]) {
+
+                  // TODO: add ceck if player can eddit this from the clan
+
+                  console.log(clans[json.data[player].clan_id]);
+                  var UsersClan = clans[json.data[player].clan_id];
+                  var FileLocation = config.clanconf + UsersClan.clan_id + '-v1.json'
+                  function SendCallBack() {
+                    fs.readJson(FileLocation, (err3, data3) => {
+                      callback({
+                        status: true,
+                        clan: true,
+                        clandetails: Object.assign({},UsersClan, data3)
+                      })
+                    })
+                  }
+                  if (fs.existsSync(FileLocation)) {
+                    SendCallBack()
+                  } else {
+                    fs.outputJson(FileLocation, {
+                      "clansite": "",
+                      "clanteamspeak": "",
+                      "withclan": []
+                    }, err => {
+                      SendCallBack()
+                    });
+                  }
+                } else {
+                  callback({status: true, clan: false})
+                }
+              })
+            } else {
+              callback({status: true, clan: false})
+            }
+          }
+        } else {
+          res.clearCookie('account_id');
+          res.clearCookie('key');
+          callback({status: false})
+        }
+      });
+  } else {
+    callback({status: false})
+  }
+}
+
 // check if user is loged-in
-function checklogin(req,res) {
+function checklogin(req,res,playerinfo) {
+  var ResJson = {};
   var LoginStatus = false;
   if (req.signedCookies.account_id && req.signedCookies.key) {
     var account_id = req.signedCookies.account_id;
     for (var i = 0; i < knownpepole.length; i++) {
       if (knownpepole[i].account_id == account_id) {
         LoginStatus = true;
+        ResJson = knownpepole[i];
       }
-      knownpepole[i]
     }
   }
   if (!LoginStatus) {
     res.clearCookie('account_id');
     res.clearCookie('key');
   }
-  return LoginStatus;
+  if (playerinfo) {
+    if (LoginStatus) {
+      return {status: true, player: ResJson};
+    } else {
+      return {status: false};
+    }
+  } else {
+    return LoginStatus;
+  }
 }
 
 // serv home dir
@@ -168,6 +241,22 @@ app.get('/', function(req, res) {
     });
   }
 })
+
+// submit player's clan data
+app.post('/submitclandata', function(req, res) {
+  playerinf(req,res,function(status) {
+    if (status.status && status.clan) {
+      // TODO: add ceck if player can eddit this from the clan
+      res.json({
+        status: true
+      })
+    } else {
+      res.json({
+        status: false
+      })
+    }
+  })
+});
 
 // get player auth via wargaming api
 var knownpepole = []
@@ -211,12 +300,6 @@ app.get('/redirect/:where', function (req, res) {
     }
   }
 })
-
-/*
-cookies
-console.log('wgkey ' + req.signedCookies.key);
-console.log('account_id ' + req.signedCookies.account_id);
-*/
 
 // reqest for clanicons
 // This is 1 image because that's faster to serv

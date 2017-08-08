@@ -1,3 +1,4 @@
+// config
 var clandata = [];
 var iconsloaded = false;
 var config = {
@@ -12,21 +13,71 @@ var widthchange = true;
 var lastwidth = 1000;
 var siteurl = document.location.pathname;
 var PlacedVueData = false;
+var popup = undefined;
 
+// header element all user configurations are there
 var header = new Vue({
   el: '.header',
   data: {
-
+    clanwebsite: 'test',
+    clanteamspeak: ''
   },
   methods: {
     status: function() {
       OpenStatusPopup();
     },
+    focus: function(what) {
+      var docel = document.getElementsByClassName(what)[0];
+      docel.style.top = '-16px';
+      docel.style.fontSize = '16px';
+      docel.style.color = 'rgba(212, 0, 255, 1)';
+    },
+    blur: function(what) {
+      var docel = document.getElementsByClassName(what)[0];
+      if (document.getElementById(what.replace('-label','')).value == '') {
+        docel.style.top = '14px';
+        docel.style.fontSize = '19px';
+        docel.style.color = 'rgba(212, 0, 255, 0.65)';
+      }
+    },
+    check: function(what) {
+      setTimeout(function () {
+        if (document.getElementById(what.replace('-label','')) && document.getElementById(what.replace('-label','')).value.length > 0) {
+          var docel = document.getElementsByClassName(what)[0];
+          docel.style.top = '-16px';
+          docel.style.fontSize = '16px';
+          docel.style.color = 'rgba(212, 0, 255, 1)';
+        }
+      }, 1000);
+    },
+    save: function() {
+      fetch("/submitclandata", {
+        method: "post",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Cache': 'no-cache'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          clansite: this.clanwebsite,
+          clanteamspeak: this.clanteamspeak
+        })
+      })
+      .then( function functionName(response) {
+         return response.json();
+      }).then(function(JsonData) {
+        console.log(JsonData);
+      });
+    }
+  },
+  created: function() {
+    this.check('clanwebsite-label'),
+    this.check('clanteamspeak-label')
   }
 })
 
-var popup = undefined;
-
+// function (s) for opening news / status popup
 function OpenStatusPopup() {
   anime({
     targets: '.popup',
@@ -80,7 +131,12 @@ function OpenStatusPopup() {
   </div>';
   setTimeout(function () {
     popup.open = true;
-    fetch('/news.html', {mode: 'cors'})
+    fetch('/news.html', {
+      mode: 'cors',
+      headers: {
+        'Cache': 'no-cache'
+      }
+    })
     .then(function(response) {
       return response.text();
     })
@@ -90,6 +146,7 @@ function OpenStatusPopup() {
   }, 100);
 }
 
+// the progressbar function
 function progressbar(g) {
   var bar = document.getElementsByClassName("progress")[0];
   function animatebar(le) {
@@ -113,6 +170,8 @@ function progressbar(g) {
     animatebar(0)
   }
 }
+
+// remove the progressbar
 function removeprogressbar(i) {
   setTimeout(function () {
     var bar = document.getElementsByClassName("loadingbar")[0];
@@ -124,6 +183,8 @@ function removeprogressbar(i) {
     })
   }, 100);
 }
+
+// reset progressbar
 function progressbarreset() {
   prolenght = 0;
 }
@@ -132,6 +193,7 @@ if (!siteurl.includes("/clan/")) {
   progressbar(10)
 }
 
+// site title bar
 var sitetitle = new Vue({
   el: '.titlebar',
   data: {
@@ -158,6 +220,7 @@ var sitetitle = new Vue({
   }
 })
 
+// function for creating the clanlist
 function mkclanlist() {
   clanslistvue = new Vue({
     el: '.clanslist',
@@ -175,12 +238,16 @@ function mkclanlist() {
   getclanlist();
 }
 
+// check if the site is on the home page
 if (siteurl.includes("/clan/")) {
   var clanpage = document.getElementsByClassName("clanstatspage")[0]
   clanpage.style.top = '0px'
   sitetitle.backicon = true
-  fetch(siteurl.replace("/clan/","/clanname/"))
-    .then(function(response) {
+  fetch(siteurl.replace("/clan/","/clanname/"), {
+    headers: {
+      'Cache': 'no-cache'
+    }
+  }).then(function(response) {
       return response.text()
     }).then(function(body) {
       body = JSON.parse(body);
@@ -192,6 +259,7 @@ if (siteurl.includes("/clan/")) {
   mkclanlist();
 }
 
+// function for making the list bigger or smaller depending on the size of you'r screen
 window.addEventListener("resize", function(event) {
   if (widthchange) {
     widthchange = false;
@@ -211,8 +279,14 @@ window.addEventListener("resize", function(event) {
   }
 })
 
+// download and place all clanlist in screen
 function getclanlist() {
-  fetch('/clandata-firstload/', {mode: 'cors'}).then(function(response) {
+  fetch('/clandata-firstload/', {
+    mode: 'cors',
+    headers: {
+      'Cache': 'no-cache'
+    }
+  }).then(function(response) {
     return response.text();
   }).then(function(firstload) {
     progressbar(30)
@@ -242,7 +316,12 @@ function getclanlist() {
       })
       pos += 40;
     }
-    fetch('/clandata-load2/', {mode: 'cors'}).then(function(response2) {
+    fetch('/clandata-load2/', {
+      mode: 'cors',
+      headers: {
+        'Cache': 'no-cache'
+      }
+    }).then(function(response2) {
       return response2.text();
     }).then(function(firstload2) {
       progressbar(50)
@@ -312,6 +391,7 @@ function createworker() {
   }
 }
 
+// when a user clicks on a clan
 function openclan(clanid) {
   MkVueData()
   anime({
@@ -320,8 +400,11 @@ function openclan(clanid) {
     easing: 'easeOutCubic',
     duration: 750
   });
-  fetch('/claninfo/now/' + clanid)
-    .then(function(response) {
+  fetch('/claninfo/now/' + clanid, {
+    headers: {
+      'Cache': 'no-cache'
+    }
+  }).then(function(response) {
       return response.text()
     }).then(function(body) {
       body = JSON.parse(body);
@@ -349,10 +432,17 @@ function openclan(clanid) {
     })
 }
 
+// create vue data
+// this is dune because vue will fail when you start on another page
 function MkVueData() {
   if (!PlacedVueData) {
     PlacedVueData = true;
-    fetch('/clan/true', {mode: 'cors'}).then(function(rs) {
+    fetch('/clan/true', {
+      mode: 'cors',
+      headers: {
+        'Cache': 'no-cache'
+      }
+    }).then(function(rs) {
       return rs.text();
     }).then(function(vuedata) {
       if (siteurl.includes("/clan/")) {
@@ -375,6 +465,7 @@ function MkVueData() {
   }
 }
 
+// all clan details data
 var ClanDetailsClanData = {
   'image': '',
   'bgimage': '',
@@ -395,4 +486,5 @@ var ClanDetailsClanData = {
   'leden': 0
 }
 
+// Start the spf script
 spf.init();

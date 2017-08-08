@@ -6,6 +6,7 @@
   "blockedclans": "./db/blockedclans.json",
   "news": "./db/news.md",
   "madeby": "516673968",
+  "clanconf": "./db/claninf/",
   "clandata": {
     "all": "./db/clandata-all.json",
     "allI": "./db/clandata-all-index.json",

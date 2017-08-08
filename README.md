@@ -9,11 +9,11 @@ On this site you can view the all the NL/BE clans
 - The curent site looks bad on mobiel  
 
 ## Site Goal  
-- In 5s have a site where the top 50+ clans are visable on a "normal" 3G connection  
-- Use dynamic url's for better sharing instaid of 1 page where the url doen't change on what you look at  
-- Not use jquery  
-- More material because the old site did look a little bit uncluttered  
-- minimal 90% score in [Lighthouse](https://developers.google.com/web/tools/lighthouse/)  
+- :heavy_check_mark: In 5s have a site where the top 50+ clans are visable on a "normal" 3G connection  
+- :heavy_check_mark: Use dynamic url's for better sharing instaid of 1 page where the url doen't change on what you look at  
+- :heavy_check_mark: Not use jquery  
+- :heavy_check_mark: More material design because the old site did look a little bit uncluttered  
+- ~~:heavy_multiplication_x: minimal 90% score in [Lighthouse](https://developers.google.com/web/tools/lighthouse/)~~ (can't get a 90%+ socre because the test wait till the webpage is fully loaded)
 
 ## How to install:  
 - Clone the project  

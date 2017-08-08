@@ -2,11 +2,43 @@
       <div class="info">
         Yay een niuwe site!!! <span v-on:click="status()">Meer Info &amp; waarom</span>
       </div>
-      <%if (login) { %>
-        <p>je bend ingelogt</p>
-      <% } else { %>
-        <a href="/redirect/login">Login</a>
-      <% } %>
+      <div class="auth">
+        <%if (login) { %>
+          <div class="logedin">
+            <div class="row">
+              <div class="website thing">
+                <label class="clanwebsite-label" for="clanwebsite">Clanwebsite</label>
+                <input
+                  type="text"
+                  v-model="clanwebsite"
+                  id="clanwebsite"
+                  name="clanwebsite"
+                  class="clanwebsite"
+                  v-on:focus="focus('clanwebsite-label')"
+                  v-on:blur="blur('clanwebsite-label')">
+              </div>
+              <div class="teamspeak thing">
+                <label class="clanteamspeak-label" for="clanteamspeak">Teamspeak</label>
+                <input
+                  type="text"
+                  v-model="clanteamspeak"
+                  id="clanteamspeak"
+                  name="clanteamspeak"
+                  class="clanteamspeak"
+                  v-on:focus="focus('clanteamspeak-label')"
+                  v-on:blur="blur('clanteamspeak-label')">
+              </div>
+              <div class="submit">
+                <button type="button" name="button" v-on:click="save()">Opslaan</button>
+              </div>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="login">
+            <a href="/redirect/login" class="wg-login-button">Login</a> met je wargaming accound
+          </div>
+        <% } %>
+      </div>
     </div>
     <div class="maincontent">
       <div class="clanslist v-l" v-cloak>
