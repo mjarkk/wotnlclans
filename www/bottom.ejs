@@ -9,6 +9,7 @@
               <div class="website thing">
                 <label class="clanwebsite-label" for="clanwebsite">Clanwebsite</label>
                 <input
+                  :disabled="caneddit"
                   type="text"
                   v-model="clanwebsite"
                   id="clanwebsite"
@@ -20,6 +21,7 @@
               <div class="teamspeak thing">
                 <label class="clanteamspeak-label" for="clanteamspeak">Teamspeak</label>
                 <input
+                  :disabled="caneddit"
                   type="text"
                   v-model="clanteamspeak"
                   id="clanteamspeak"
@@ -29,7 +31,7 @@
                   v-on:blur="blur('clanteamspeak-label')">
               </div>
               <div class="submit">
-                <button type="button" name="button" v-on:click="save()">Opslaan</button>
+                <button :disabled="caneddit" type="button" name="button" v-on:click="save()">Opslaan</button>
               </div>
             </div>
           </div>

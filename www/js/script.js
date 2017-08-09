@@ -19,8 +19,9 @@ var popup = undefined;
 var header = new Vue({
   el: '.header',
   data: {
-    clanwebsite: 'test',
-    clanteamspeak: ''
+    clanwebsite: '',
+    clanteamspeak: '',
+    caneddit: true
   },
   methods: {
     status: function() {
@@ -72,8 +73,26 @@ var header = new Vue({
     }
   },
   created: function() {
-    this.check('clanwebsite-label'),
-    this.check('clanteamspeak-label')
+    this.check('clanwebsite-label');
+    this.check('clanteamspeak-label');
+    fetch("/rules", {
+      method: "post",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Cache': 'no-cache'
+      },
+      credentials: 'same-origin'
+    })
+    .then( function functionName(response) {
+       return response.json();
+    }).then(function(JsonData) {
+      if (JsonData.status && JsonData.clan && JsonData.edditclandata) {
+        header.caneddit = false;
+        header.clanwebsite = JsonData.claninfo.clansite
+        header.clanteamspeak = JsonData.claninfo.clanteamspeak
+      }
+    });
   }
 })
 

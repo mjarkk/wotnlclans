@@ -7,6 +7,7 @@
   "news": "./db/news.md",
   "madeby": "516673968",
   "clanconf": "./db/claninf/",
+  "apiversion": "-v1.json",
   "clandata": {
     "all": "./db/clandata-all.json",
     "allI": "./db/clandata-all-index.json",

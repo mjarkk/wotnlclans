@@ -135,13 +135,27 @@ try {
   console.log(colors.red('server can\'t start most likly because of another program that is using the same port'));
 }
 
+var clanroles = [
+  'commander',
+  'executive_officer',
+  'personnel_officer',
+  'combat_officer',
+  'quartermaster',
+  'recruitment_officer',
+  'private',
+  'recruit',
+  'reservist'
+]
+
 // getplayerinfo plus check if player is loged in
 function playerinf(req,res,callback) {
   var check = checklogin(req,res,true);
   if (check.status) {
-    var requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + check.player.account_id + '&access_token=' + check.player.access_token + '&fields=account_id%2Cclan_id';
+    var accoundid = check.player.account_id;
+    var requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + accoundid + '&access_token=' + check.player.access_token + '&fields=clan_id';
     if (check.player.account_id == 516673968 && config.dev) {
-      requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + 503312278 + '&fields=account_id%2Cclan_id';
+      accoundid = 503312278;
+      requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + accoundid + '&fields=clan_id';
     }
     fetch(requrl)
       .then(function(res) {
@@ -153,18 +167,38 @@ function playerinf(req,res,callback) {
               fs.readFile(config.clandata.allI, 'utf8', (err, data) => {
                 var clans = JSON.parse(data);
                 if (clans[json.data[player].clan_id]) {
-
-                  // TODO: add ceck if player can eddit this from the clan
-
-                  console.log(clans[json.data[player].clan_id]);
                   var UsersClan = clans[json.data[player].clan_id];
-                  var FileLocation = config.clanconf + UsersClan.clan_id + '-v1.json'
+                  var FileLocation = config.clanconf + UsersClan.clan_id + config.apiversion;
+                  var Playerlvl = 9;
                   function SendCallBack() {
                     fs.readJson(FileLocation, (err3, data3) => {
+                      var clanrole = 'reservist';
+                      var ForStatus = false;
+                      var edditclandata = false;
+                      for (var i = 0; i < UsersClan.members.length; i++) {
+                        if (UsersClan.members[i].account_id == accoundid) {
+                          ForStatus = true;
+                          clanrole = UsersClan.members[i].role;
+                        }
+                      }
+                      if (ForStatus) {
+                        for (var i = 0; i < clanroles.length; i++) {
+                          var level = i;
+                          if (clanrole == clanroles[i] && (level < data3.lasteddit || level < 3)) {
+                            edditclandata = true;
+                            Playerlvl = level;
+                          }
+                        }
+                      }
                       callback({
                         status: true,
                         clan: true,
-                        clandetails: Object.assign({},UsersClan, data3)
+                        clanid: json.data[player].clan_id,
+                        Playerlvl: Playerlvl,
+                        edditclandata: edditclandata,
+                        accoundid: accoundid,
+                        clandetails: UsersClan,
+                        claninfo: data3
                       })
                     })
                   }
@@ -174,6 +208,7 @@ function playerinf(req,res,callback) {
                     fs.outputJson(FileLocation, {
                       "clansite": "",
                       "clanteamspeak": "",
+                      "lasteddit": 9,
                       "withclan": []
                     }, err => {
                       SendCallBack()
@@ -242,14 +277,50 @@ app.get('/', function(req, res) {
   }
 })
 
+// a function for edditing clan data
+function edditclandata(playerlvl, clan, overwride) {
+  overwride.lasteddit = playerlvl;
+  var file = config.clanconf + clan + config.apiversion;
+  fs.outputJson(file, overwride, err => {
+
+  });
+}
+
+// check if you can change clan data
+app.post('/rules', function(req, res) {
+  playerinf(req,res,function(status) {
+    res.json({
+      status: status.status,
+      clan: status.clan,
+      edditclandata: status.edditclandata,
+      playerlvl: status.Playerlvl,
+      claninfo: status.claninfo
+    })
+  });
+});
+
 // submit player's clan data
 app.post('/submitclandata', function(req, res) {
   playerinf(req,res,function(status) {
     if (status.status && status.clan) {
-      // TODO: add ceck if player can eddit this from the clan
-      res.json({
-        status: true
-      })
+      if (status.edditclandata) {
+
+        // TODO: check if it's an url, ip or someting else
+
+        status.claninfo.clansite = req.body.clansite;
+        status.claninfo.clanteamspeak = req.body.clanteamspeak;
+        edditclandata(status.Playerlvl, status.clanid, status.claninfo);
+        res.json({
+          status: true,
+          data: status.claninfo
+        })
+      } else {
+        // lvl to low means you don't have the rights to change clan info
+        res.json({
+          status: false,
+          why: 'LVL_TO_LOW'
+        })
+      }
     } else {
       res.json({
         status: false
