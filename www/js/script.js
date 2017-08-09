@@ -15,6 +15,16 @@ var siteurl = document.location.pathname;
 var PlacedVueData = false;
 var popup = undefined;
 
+window.addEventListener('popstate', function (event) {
+  if (!event.state.urlPath || event.state.urlPath == '/') {
+    backhome();
+  } else if (event.state.urlPath.includes("/clan/")) {
+    // var gotourl = event.state.urlPath.replace(/[^0-9]/, '')
+    // console.log(gotourl);
+    // openclan(gotourl)
+  }
+});
+
 // header element all user configurations are there
 var header = new Vue({
   el: '.header',
@@ -71,7 +81,7 @@ var header = new Vue({
       .then( function functionName(response) {
          return response.json();
       }).then(function(JsonData) {
-        console.log(JsonData);
+        // console.log(JsonData);
         if (JsonData.status) {
           header.SaveStatus = 'opgelagen';
           setTimeout(function () {
@@ -239,28 +249,33 @@ var sitetitle = new Vue({
   },
   methods: {
     openstart: function() {
-      if (history.pushState) {
-        window.history.pushState({urlPath:'/'},"",'/');
-      } else {
-        document.location.href = '/';
-      }
-      document.title = 'Wot NL/BE clans';
-      if (siteurl.includes("/clan/")) {
-        mkclanlist()
-      } else {
-        // someting
-      }
-      sitetitle.sitetitle = 'WOT NL/BE Clans';
-      sitetitle.backicon = false;
-      anime({
-        targets: '.clanstatspage',
-        top: '100vh',
-        easing: 'easeOutCubic',
-        duration: 750
-      });
+      backhome()
     }
   }
 })
+
+// go back to: /
+function backhome() {
+  if (history.pushState) {
+    window.history.pushState({urlPath:'/'},"",'/');
+  } else {
+    document.location.href = '/';
+  }
+  document.title = 'Wot NL/BE clans';
+  if (siteurl.includes("/clan/")) {
+    mkclanlist()
+  } else {
+    // someting
+  }
+  sitetitle.sitetitle = 'WOT NL/BE Clans';
+  sitetitle.backicon = false;
+  anime({
+    targets: '.clanstatspage',
+    top: '100vh',
+    easing: 'easeOutCubic',
+    duration: 750
+  });
+}
 
 // function for creating the clanlist
 function mkclanlist() {
@@ -277,6 +292,7 @@ function mkclanlist() {
         } else {
           document.location.href = '/clan/' + url;
         }
+        // console.log(url);
         openclan(url)
       }
     }
