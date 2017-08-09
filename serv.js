@@ -760,8 +760,9 @@ function mkimg() {
             if (config.ffmpeg) {
               // for some reason the browser has a limit to the amout of pixel an image can have.
               // because the image looks bad on full resolution ffmpeg resizes it to 40 * the amout of clans
-              // TODO: change 419 to the amout of clans ;D
-              shell.exec(config.FfmpegPath + ' -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*419 + ' ./www/img/clanicons.min.png', {silent:true}).code
+              fs.readJson(config.clandata.all, (err4, clanlenght) => {
+                shell.exec(config.FfmpegPath + ' -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*clanlenght.length + ' ./www/img/clanicons.min.png', {silent:true}).code
+              })
             }
           });
         });
