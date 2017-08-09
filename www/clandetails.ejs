@@ -13,8 +13,8 @@
   <div class="claninfo">
     <div class="links">
       <a v-bind:href="wglink">Wargaming</a>
-      <a v-if="site != ''" v-bind:href="site">Clan website</a>
-      <a v-if="ts != ''" v-bind:href="ts">Clan teamspeak</a>
+      <a v-if="site != ''" target="_blank" v-bind:href="site">Clan website</a>
+      <a v-if="ts != ''" >Clan TS: {{ ts }}</a>
     </div>
     <div class="stats">
       <div class="item s">

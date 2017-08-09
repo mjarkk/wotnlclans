@@ -24,13 +24,8 @@ Afgezien van dat zijn er nog wel een aantal andere dingen die zijn toegevoegt al
 
 ### Web dev details
 - Gzip staad aan
-- Nieuwe site gebruikt max 200KB de oude site gebruikt minimaal 2.2MB (dit is een test waarbij alle site data word gefetched van het netwerk totdat de stats op het scherm staan)
+- Nieuwe site gebruikt max 200KB de oude site gebruikt minimaal 2.2MB (dit is een test waarbij alle site data word herladen van het netwerk totdat de stats op het scherm staan)
 - Jquery vervangen met vue.js
 - Automaties uglify alle javascript code waneer je geen devolopment mode hebt aan staan
-
-### Waarom stop je zo veel tijd in deze site?
-- Omdat ik het leuk vind om te programeren :D
-- Omdat je van het maken van deze site veel kan leren
-- Omdat de oude site slecht gescreven code had en dat is voor het beheren en bijhouden een slecht idee
 
 Heb je nog vragen of surgesties? vraag het in wot: [mjarkk](https://worldoftanks.eu/en/community/accounts/516673968)

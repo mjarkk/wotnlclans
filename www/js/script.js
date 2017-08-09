@@ -21,7 +21,8 @@ var header = new Vue({
   data: {
     clanwebsite: '',
     clanteamspeak: '',
-    caneddit: true
+    caneddit: true,
+    SaveStatus: ''
   },
   methods: {
     status: function() {
@@ -52,6 +53,8 @@ var header = new Vue({
       }, 1000);
     },
     save: function() {
+      header.caneddit = true;
+      header.SaveStatus = 'opslaan...';
       fetch("/submitclandata", {
         method: "post",
         headers: {
@@ -69,31 +72,46 @@ var header = new Vue({
          return response.json();
       }).then(function(JsonData) {
         console.log(JsonData);
+        if (JsonData.status) {
+          header.SaveStatus = 'opgelagen';
+          setTimeout(function () {
+            header.SaveStatus = '';
+          }, 1000);
+        } else {
+          header.SaveStatus = 'Data ongeldig';
+          setTimeout(function () {
+            header.SaveStatus = '';
+          }, 2000);
+        }
+        header.caneddit = false;
+
       });
     }
   },
   created: function() {
-    this.check('clanwebsite-label');
-    this.check('clanteamspeak-label');
-    fetch("/rules", {
-      method: "post",
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Cache': 'no-cache'
-      },
-      credentials: 'same-origin'
-    })
-    .then( function functionName(response) {
-       return response.json();
-    }).then(function(JsonData) {
-      if (JsonData.status && JsonData.clan && JsonData.edditclandata) {
-        header.caneddit = false;
-        header.clanwebsite = JsonData.claninfo.clansite
-        header.clanteamspeak = JsonData.claninfo.clanteamspeak
-      }
-    });
-  }
+    if (document.cookie.indexOf('logedin=true') !== -1) {
+      this.check('clanwebsite-label');
+      this.check('clanteamspeak-label');
+      fetch("/rules", {
+        method: "post",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Cache': 'no-cache'
+        },
+        credentials: 'same-origin'
+      })
+      .then( function functionName(response) {
+         return response.json();
+      }).then(function(JsonData) {
+        if (JsonData.status && JsonData.clan && JsonData.edditclandata) {
+          header.caneddit = false;
+          header.clanwebsite = JsonData.claninfo.clansite
+          header.clanteamspeak = JsonData.claninfo.clanteamspeak
+        }
+      });
+    }
+    }
 })
 
 // function (s) for opening news / status popup
@@ -221,7 +239,12 @@ var sitetitle = new Vue({
   },
   methods: {
     openstart: function() {
-      spf.navigate('/');
+      if (history.pushState) {
+        window.history.pushState({urlPath:'/'},"",'/');
+      } else {
+        document.location.href = '/';
+      }
+      document.title = 'Wot NL/BE clans';
       if (siteurl.includes("/clan/")) {
         mkclanlist()
       } else {
@@ -249,7 +272,11 @@ function mkclanlist() {
     },
     methods: {
       open: function(url) {
-        spf.navigate('/clan/' + url);
+        if (history.pushState) {
+          window.history.pushState({urlPath:'/clan/' + url}, "", '/clan/' + url);
+        } else {
+          document.location.href = '/clan/' + url;
+        }
         openclan(url)
       }
     }
@@ -272,6 +299,7 @@ if (siteurl.includes("/clan/")) {
       body = JSON.parse(body);
       // console.log(body);
       sitetitle.sitetitle = 'Clan ' + body.clan_tag;
+      document.title = body.clan_tag + ' | Wot NL/BE clans';
       openclan(body.clan_id.toString())
     })
 } else {
@@ -428,6 +456,7 @@ function openclan(clanid) {
     }).then(function(body) {
       body = JSON.parse(body);
       // console.log(body);
+      document.title = body.clan_tag + ' | Wot NL/BE clans';
       ClanDetailsClanData.image = body.emblems.x195.portal.replace('http','https');
       sitetitle.sitetitle = 'Clan ' + body.clan_tag;
       sitetitle.backicon = true;
@@ -444,6 +473,8 @@ function openclan(clanid) {
       ClanDetailsClanData.gm10 = body.gm_elo_rating_10.value;
       ClanDetailsClanData.dis = body.description_html.replace(/'http'/g, 'https');
       ClanDetailsClanData.leden = body.members_count;
+      ClanDetailsClanData.ts = body.clanteamspeak || '';
+      ClanDetailsClanData.site = body.clansite || '';
       ClanDetailsClanData.bgimage = 'background: -moz-linear-gradient(top, ' + body.color + ' 0%, rgba(238,238,238,0) 100%);\
       background: -webkit-linear-gradient(top, ' + body.color + ' 0%,rgba(238,238,238,0) 100%);\
       background: linear-gradient(to bottom, ' + body.color + ' 0%,rgba(238,238,238,0) 100%);\
@@ -504,6 +535,3 @@ var ClanDetailsClanData = {
   'dis': '',
   'leden': 0
 }
-
-// Start the spf script
-spf.init();

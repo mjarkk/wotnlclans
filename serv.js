@@ -225,6 +225,7 @@ function playerinf(req,res,callback) {
         } else {
           res.clearCookie('account_id');
           res.clearCookie('key');
+          res.clearCookie('logedin');
           callback({status: false})
         }
       });
@@ -249,6 +250,7 @@ function checklogin(req,res,playerinfo) {
   if (!LoginStatus) {
     res.clearCookie('account_id');
     res.clearCookie('key');
+    res.clearCookie('logedin');
   }
   if (playerinfo) {
     if (LoginStatus) {
@@ -304,16 +306,24 @@ app.post('/submitclandata', function(req, res) {
   playerinf(req,res,function(status) {
     if (status.status && status.clan) {
       if (status.edditclandata) {
-
-        // TODO: check if it's an url, ip or someting else
-
-        status.claninfo.clansite = req.body.clansite;
-        status.claninfo.clanteamspeak = req.body.clanteamspeak;
-        edditclandata(status.Playerlvl, status.clanid, status.claninfo);
-        res.json({
-          status: true,
-          data: status.claninfo
-        })
+        var web = req.body.clansite;
+        var teamspeak = req.body.clanteamspeak;
+        if ((ValidURL(web) || ValidIP(web) || web == '') &&
+        (ValidDomain(teamspeak) || ValidIP(teamspeak) || teamspeak == '') &&
+        checkx(teamspeak) && checkx(web)){
+          status.claninfo.clansite = web;
+          status.claninfo.clanteamspeak = teamspeak;
+          edditclandata(status.Playerlvl, status.clanid, status.claninfo);
+          res.json({
+            status: true,
+            data: status.claninfo
+          })
+        } else {
+          res.json({
+            status: false,
+            why: 'wrong input'
+          })
+        }
       } else {
         // lvl to low means you don't have the rights to change clan info
         res.json({
@@ -364,6 +374,7 @@ app.get('/redirect/:where', function (req, res) {
       if (docurl.startsWith("localhost") || docurl == "wotnlclans.mkopenga.com" || docurl == "wotnlclans-api.mkopenga.com") {
         res.cookie('key', datahash, { domain: docurl, httpOnly: true, signed: true });
         res.cookie('account_id', data.account_id, { domain: docurl, httpOnly: true, signed: true });
+        res.cookie('logedin', 'true', {domain: docurl})
       }
       res.redirect(req.protocol + '://' + req.get('host'));
     } else {
@@ -416,9 +427,22 @@ app.get('/clandata-load2/', function(req, res) {
 // serv clan info
 // TODO: be able to make time request
 app.get('/claninfo/:time/:clanid', function (req, res) {
+  var clanid = req.params.clanid;
+  var apipath = config.clanconf + clanid + config.apiversion;
   fs.readFile(config.clandata.allI, 'utf8', (err, data) => {
     data = JSON.parse(data);
-    res.json(data[req.params.clanid]);
+    if (fs.existsSync(apipath)) {
+      fs.readJson(apipath, (err, clanapidata) => {
+        try {
+          var sendjson = _.extend({}, data[clanid], clanapidata);
+          res.json(sendjson);
+        } catch (e) {
+          res.json(data[clanid] || {});
+        }
+      })
+    } else {
+      res.json(data[clanid] || {});
+    }
   })
 })
 
@@ -744,6 +768,56 @@ function mkimg() {
     }
     reqimg(0)
   })
+}
+
+// validation functions from old site
+function checkx(i) {
+  if (
+    i.search("<") > 0 ||
+    i.search(">") > 0 ||
+    i.search("{") > 0 ||
+    i.search("}") > 0 ||
+    i.search("'") > 0 ||
+    i.search('"') > 0
+  ) {
+    return (false)
+  } else {
+    return (true)
+  }
+}
+function reverse(s) {
+  return s.split('').reverse().join('');
+}
+function ValidURL(str) {
+  var regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
+  if(!regex .test(str)) {
+    return false;
+  } else {
+    return true;
+  }
+}
+function ValidDomain(str) {
+  str = str.replace(/\./g, '');
+  str = str.replace(/:/g, '');
+  var filter = /^[A-Za-z0-9]+$/;
+  if (filter.test(str)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+function ValidIP(ipaddress) {
+  if (reverse(ipaddress).indexOf(":") > 0) {
+    if (/^\d+$/.test(reverse(ipaddress).substring(0, reverse(ipaddress).indexOf(":") - 1))) {
+      ipaddress = ipaddress.substring(0 , ipaddress.length - reverse(ipaddress).indexOf(":") - 1);
+    } else {
+      return (false)
+    }
+  }
+  if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
+    return (true)
+  }
+  return (false)
 }
 
 // clanstolist();
