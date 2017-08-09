@@ -22,6 +22,7 @@ On this site you can view the all the NL/BE clans
 - After that's dune type: npm start  
 
 ## Bugs  
+- Back button in the browser does only change the website url  
 - On Windows you can't get clan data  
 - On Windows FFMPEG will not work with resolt the icons on the website don't look sharp and take longer to load  
 - ~~Inside config.json can't change dev to false because of uglify issue I think it has something todo with es6~~  
