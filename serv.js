@@ -263,6 +263,49 @@ function checklogin(req,res,playerinfo) {
   }
 }
 
+app.get('/c1/:clanid/:color/html', function(req, res) {
+  ApiC1(req, res)
+});
+app.get('/c1/:clanid/:color', function(req, res) {
+  ApiC1(req, res)
+});
+function ApiC1(req, res) {
+  var textcolor = 'black';
+  var reqcolor = req.params.color;
+  var reqclanid = req.params.clanid;
+  if (reqcolor == 'black' || reqcolor == '000') {
+    textcolor = 'white';
+  }
+  fs.readJson(config.clandata.all)
+  .then(clans => {
+    var clansearchstatus = false;
+    var clanpos = 0;
+    for (var i = 0; i < clans.length; i++) {
+      if (clans[i].clan_id == reqclanid) {
+        clansearchstatus = true;
+        clanpos = i;
+      }
+    }
+    if (clansearchstatus) {
+      res.render('api-c1', {
+        icon: clans[clanpos].emblems.x195.portal || '',
+        textcolor: textcolor || '',
+        title: '[' + clans[clanpos].clan_tag + ']'  || '',
+        rating: clans[clanpos].efficiency.value || '',
+        place: i + 1 || ''
+      });
+    } else {
+      res.render('api-c1', {
+        icon: '',
+        textcolor: textcolor,
+        title: '',
+        rating: '',
+        place: ''
+      });
+    }
+  })
+};
+
 // serv home dir
 app.get('/', function(req, res) {
   // check if the url is an spf request

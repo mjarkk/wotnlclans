@@ -5,6 +5,7 @@
       <div class="auth">
         <%if (login) { %>
           <div class="logedin">
+            <h1>Clan instellingen</h1>
             <div class="row">
               <div class="website thing">
                 <label class="clanwebsite-label" for="clanwebsite">Clanwebsite</label>
@@ -44,6 +45,33 @@
           </div>
         <% } %>
       </div>
+      <div class="sorting">
+        <h1>Sorteeren</h1>
+        <div class="row">
+          <button type="button" v-on:click="SortClans('win')" v-bind:class="{ active: (Sorting == 'win') }">Win rate</button>
+          <button type="button" v-on:click="SortClans('rate')" v-bind:class="{ active: (Sorting == 'rate') }">Rating</button>
+          <button type="button" v-on:click="SortClans('s')" v-bind:class="{ active: (Sorting == 's') }">Strongholds</button>
+          <button type="button" v-on:click="SortClans('gm')" v-bind:class="{ active: (Sorting == 'gm') }">Global map</button>
+        </div>
+      </div>
+      <div class="settings">
+        <h1>Instellingen</h1>
+        <div class="row">
+          <div>
+            Strongholds tier:
+            <button v-on:click="SetS('6')" v-bind:class="{ active: (SettingsS == '6') }" type="button">6</button>
+            <button v-on:click="SetS('8')" v-bind:class="{ active: (SettingsS == '8') }"  type="button">8</button>
+            <button v-on:click="SetS('10')" v-bind:class="{ active: (SettingsS == '10') }"  type="button">10</button>
+          </div>
+          <div>
+            Global map tier:
+            <button v-on:click="SetGM('6')" v-bind:class="{ active: (SettingsGM == '6') }" type="button">6</button>
+            <button v-on:click="SetGM('8')" v-bind:class="{ active: (SettingsGM == '8') }" type="button">8</button>
+            <button v-on:click="SetGM('10')" v-bind:class="{ active: (SettingsGM == '10') }" type="button">10</button>
+          </div>
+        </div>
+      </div>
+      <div class="feedback">Heb je spellingsfouten, surgesties of ander dingen stuur mij (<a href="<%= madebylink %>"><%= madeby %></a>) gerust een berichtje in wot </div>
     </div>
     <div class="maincontent">
       <div class="clanslist v-l" v-cloak>
@@ -64,14 +92,23 @@
           <div class="name">{{ item.tag }}<div v-if='!item.tag' class='line'></div></div>
           <div class="clanrating">{{ item.rate }}<div v-if='!item.rate' class='line'></div></div>
           <div class="winrate">{{ item.win }}<div v-if='!item.win' class='line'></div></div>
-          <div class="leden" v-if="resize > 365">{{ item.leden }}<div v-if='!item.leden' class='line'></div></div>
-          <div class="s" v-if="resize > 515">{{ item.s[item.fun('s')] }}<div v-if='!item.s' class='line'></div></div>
-          <div class="gm" v-if="resize > 625">{{ item.gm[item.fun('gm')] }}<div v-if='!item.gm' class='line'></div></div>
+          <div class="leden" v-if="resize > 365">{{ item.leden }}
+            <div v-if='!item.leden' class='line'></div>
+          </div>
+          <div class="s" v-if="resize > 515">{{ item.s[item.fun('s')] }}
+            <div v-if='!item.s["6"]' class='line'></div>
+          </div>
+          <div class="gm" v-if="resize > 625">{{ item.gm[item.fun('gm')] }}
+            <div v-if='!item.gm["6"]' class='line'></div>
+          </div>
         </a>
       </div>
     </div>
     <div class="madeby">
-      <p>Site gemaakt door <a href="<%= madebylink %>"><%= madeby %></a></p>
+      <p>
+        Site gemaakt door <a href="<%= madebylink %>"><%= madeby %></a>
+        <br/>Met dank aan <a href="https://worldoftanks.eu/en/community/accounts/501573002">duijm</a> Voor een groot deel van de clans
+      </p>
     </div>
     <div class="popup">
       <div class="popup-center" v-html="html" v-click-outside="outside">
@@ -79,7 +116,8 @@
       </div>
     </div>
     <script src='/dyjs/vue.js'></script>
-    <script src='/dyjs/script.js'></script>
     <script src='/js/anime.min.js'></script>
+    <script src='/dyjs/script.js'></script>
+    <script src='/js/underscore.min.js'></script>
   </body>
 </html>

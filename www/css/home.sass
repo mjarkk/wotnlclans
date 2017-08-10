@@ -50,6 +50,9 @@ body
   background-color: #212121
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)
   color: white
+  h1
+    font-size: 30px
+    color: rgba(255, 255, 255, 1)
   .info
     font-size: 20px
     span
@@ -148,6 +151,42 @@ body
             position: relative
             top: 4px
             font-size: 17px
+  .sorting, .settings
+    .row
+      display: inline-block
+      padding-bottom: 14px
+      button
+        display: inline-block
+        padding: 3px 10px
+        cursor: pointer
+        background-color: rgba(212, 0, 255, 0)
+        color: white
+        border-radius: 2px
+        font-size: 18px
+        position: relative
+        top: 6px
+        border: 2px solid #6A1B9A
+        margin-right: 4px
+        transition: background-color 0.2s
+      button.active
+        background-color: #6A1B9A
+      div
+        display: flex
+        align-items: center
+        display: -webkit-flex
+        -webkit-align-items: center
+        padding-bottom: 5px
+        button
+          margin-left: 10px
+          margin-right: 0px
+  .feedback
+    font-size: 16px
+    color: rgba(255, 255, 255, 0.6)
+    a
+      color: rgba(255, 255, 255, 0.6)
+      transition: color 0.3s
+      &:hover
+        color: rgba(255, 255, 255, 1)
 .popup
   z-index: 50
   width: 100vw
@@ -155,9 +194,6 @@ body
   position: fixed
   top: 100vh
   left: 0px
-  // display: flex
-  // justify-content: center
-  // align-content: flex-start
   overflow-x: hidden
   overflow-y: scroll
   .popup-center
@@ -169,7 +205,6 @@ body
     padding: 20px 20px 50px 20px
     margin: 30vh auto 0vh auto
     display: block
-    // overflow: hidden
     zoom: 1
     clear: both
     &::after
@@ -358,7 +393,6 @@ body
     text-decoration: none
   .icon
     background-size: cover
-    opacity: 0
     border-radius: 100%
     background-repeat: no-repeat
     image-rendering: -webkit-crisp-edges
@@ -366,6 +400,7 @@ body
     image-rendering: -moz-crisp-edges
     image-rendering: crisp-edges
     background-image: url('')
+    background-color: rgba(238, 238, 238, 0.5)
 
 .loadingbar
   height: 4px
@@ -492,7 +527,6 @@ body
         padding-bottom: 10px
       .dis
         font-size: 18px
-
 @media (max-width: 600px)
   .clanslist
     margin: 10px

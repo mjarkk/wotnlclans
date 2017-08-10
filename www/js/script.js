@@ -32,9 +32,40 @@ var header = new Vue({
     clanwebsite: '',
     clanteamspeak: '',
     caneddit: true,
-    SaveStatus: ''
+    SaveStatus: '',
+    Sorting: 'rate',
+    SettingsGM: '8',
+    SettingsS: '8'
   },
   methods: {
+    SetGM: function(setto) {
+      config.gm = setto;
+      this.SettingsGM = setto;
+      for (var i = 0; i < clanslistvue.items.length; i++) {
+        clanslistvue.items[i].fun = function (i) {return (config[i])};
+      }
+      if (this.Sorting == 'gm') {
+        clanslistvue.sortby('gm' + setto);
+      }
+    },
+    SetS: function(setto) {
+      config.s = setto;
+      this.SettingsS = setto;
+      for (var i = 0; i < clanslistvue.items.length; i++) {
+        clanslistvue.items[i].fun = function (i) {return (config[i])};
+      }
+      if (this.Sorting == 's') {
+        clanslistvue.sortby('s' + setto);
+      }
+    },
+    SortClans: function(what) {
+      if (what == 'gm' || what == 's') {
+        clanslistvue.sortby(what + this['Settings' + what.toUpperCase()]);
+      } else {
+        clanslistvue.sortby(what);
+      }
+      this.Sorting = what;
+    },
     status: function() {
       OpenStatusPopup();
     },
@@ -195,40 +226,20 @@ function OpenStatusPopup() {
 
 // the progressbar function
 function progressbar(g) {
-  var bar = document.getElementsByClassName("progress")[0];
-  function animatebar(le) {
-    procanjoin = false;
-    requestAnimationFrame(function() {
-      var now = prolenght + (le * (proneedl - prolenght));
-      bar.style.width = now + '%';
-      if (le < 0.9) {
-        animatebar(le + 0.1)
-      } else {
-        prolenght = Number(bar.style.width.replace('%',''));
-        procanjoin = true;
-        if (prolenght > 98) {
-          removeprogressbar(0)
-        }
-      }
+  console.log(g);
+  anime({
+    targets: '.loadingbar .progress',
+    width: g + '%',
+    duration: 300
+  });
+  if (g == 100) {
+    anime({
+      targets: '.loadingbar',
+      top: '-6px',
+      delay: 300,
+      duration: 100
     })
   }
-  proneedl = g;
-  if (procanjoin) {
-    animatebar(0)
-  }
-}
-
-// remove the progressbar
-function removeprogressbar(i) {
-  setTimeout(function () {
-    var bar = document.getElementsByClassName("loadingbar")[0];
-    requestAnimationFrame(function() {
-      bar.style.top = '-' + (i / 1) + 'px'
-      if (i < 4) {
-        removeprogressbar(i + 1)
-      }
-    })
-  }, 100);
 }
 
 // reset progressbar
@@ -294,6 +305,14 @@ function mkclanlist() {
         }
         // console.log(url);
         openclan(url)
+      },
+      sortby: function(what) {
+        if (this.items[0][what]) {
+          this.items = _.sortBy(this.items, what).reverse();
+        } else {
+          console.log('can\'t find that key in json');
+          console.log(this.items[0]);
+        }
       }
     }
   })
@@ -362,12 +381,21 @@ function getclanlist() {
         tag: '[' + j.t + ']',
         win: j.w + '%',
         rate: j.e,
+        leden: undefined,
+        "gm6": undefined,
+        "gm8": undefined,
+        "gm10": undefined,
+        'gmnormal': undefined,
         gm: {
           "6": undefined,
           "8": undefined,
           "10": undefined,
           'normal': undefined
         },
+        "s6": undefined,
+        "s8": undefined,
+        "s10": undefined,
+        'snormal': undefined,
         s: {
           "6": undefined,
           "8": undefined,
@@ -393,47 +421,26 @@ function getclanlist() {
       for (var i = 0; i < firstload2.length; i++) {
         var j = firstload2[i];
         clandata[i] = Object.assign(clandata[i], firstload2[i]);
+        clandata[i].gm6 = clandata[i].gm['6'];
+        clandata[i].gm8 = clandata[i].gm['8'];
+        clandata[i].gm10 = clandata[i].gm['10'];
+        clandata[i].s6 = clandata[i].s['6'];
+        clandata[i].s8 = clandata[i].s['8'];
+        clandata[i].s10 = clandata[i].s['10'];
+        clandata[i].snormal = clandata[i].s['normal'];
+        clandata[i].gmnormal = clandata[i].gm['normal'];
       }
+
+      // TODO: fix small screen not all data
+      // clanslistvue.items = clandata;
+
       var listicons = document.getElementsByClassName("listicons")
       if (listicons.length > 0) {
-        var objImage = new Image();
-        objImage.src ='/clanicons.png';
-        objImage.onload = function(e) {
-          progressbar(100)
-          setTimeout(function () {
-            var animatiespeed = 20;
-            function nexticon(i) {
-              requestAnimationFrame(function(){
-                var animateinspeed = 70;
-                // timeout between next clan icon
-                if (animatiespeed > 0) {
-                  animatiespeed = animatiespeed - 0.5;
-                }
-                var thisitem = i;
-                listicons[i].style.backgroundImage = 'url("' + objImage.src + '")';
-                function animatethis(j) {
-                  requestAnimationFrame(function() {
-                    listicons[thisitem].style.opacity = j / animateinspeed;
-                    if (j < animateinspeed) {
-                      animatethis(j + 1)
-                    }
-                  })
-                }
-                animatethis(0)
-                setTimeout(function () {
-                  if (listicons[i + 1]) {
-                    nexticon(i + 1)
-                  } else {
-                    iconsloaded = true;
-                    // console.log('dune...');
-                  }
-                }, animatiespeed);
-              })
-            }
-            nexticon(0)
-          }, 20);
-        }
+        addclanicons()
+      } else {
+        progressbar(100)
       }
+
       // after everyting is dune create a webworker
       // createworker()
 
@@ -445,6 +452,38 @@ function getclanlist() {
   });
 }
 
+// load clan icons
+function addclanicons() {
+  var listicons = document.getElementsByClassName("listicons")
+  var objImage = new Image();
+  objImage.src ='/clanicons.png';
+  objImage.onload = function(e) {
+    progressbar(100)
+    for (var i = 0; i < listicons.length; i++) {
+      listicons[i].style.backgroundImage = 'url("' + objImage.src + '")';
+      listicons[i].style.opacity = 0;
+    }
+    function animetethis(l) {
+      requestAnimationFrame(function(){
+        l = Math.round(l * 100) / 100;
+        for (var i = 0; i < listicons.length; i++) {
+          listicons[i].style.opacity = l;
+        }
+        if (l + (0.01 * (l / 0.01)) < 1) {
+          animetethis(l + (0.01 * (l / 0.01)))
+        } else if (l !== 1) {
+          animetethis(1)
+        } else {
+          console.log('dune loading icons');
+          iconsloaded = true;
+        }
+      });
+    }
+    animetethis(0.01)
+  }
+}
+
+// create webworker (this is for later use)
 function createworker() {
   try {
     var myWorker = new Worker('/dyjs/worker.js');
