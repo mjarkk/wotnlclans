@@ -7,6 +7,15 @@
   "news": "./db/news.md",
   "madeby": "516673968",
   "clanconf": "./db/claninf/",
+  "clanreports": "./db/clanreports/",
+  "ClanReportModel": {
+    "yes": 0,
+    "no": 0
+  },
+  "PlayerReportModel": {
+    "block": false,
+    "reportclans": []
+  },
   "apiversion": "-v1.json",
   "clandata": {
     "all": "./db/clandata-all.json",

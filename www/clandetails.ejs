@@ -16,6 +16,15 @@
       <a v-if="site != ''" target="_blank" v-bind:href="site">Clan website</a>
       <a v-if="ts != ''" >Clan TS: {{ ts }}</a>
     </div>
+    <div v-if="login && CanReportClans && !ClansReported[clan_id]" class="review">
+      <h2 v-if="reviewcomplete">review</h2>
+      <p v-if="reviewcomplete">
+        Is dit een NL/BE clan en zijn de spelers actief?
+        <a v-on:click="review(true)">Ja</a>
+        <a v-on:click="review(false)">Nee</a>
+      </p>
+      <p>{{ thanksforsubmit }}</p>
+    </div>
     <div class="stats">
       <div class="item s">
         <h1>{{ win }}</h1>

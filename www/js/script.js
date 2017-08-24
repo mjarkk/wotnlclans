@@ -15,13 +15,36 @@ var siteurl = document.location.pathname;
 var PlacedVueData = false;
 var popup = undefined;
 
+// all clan details data
+var ClanDetailsClanData = {
+  'login': document.cookie.indexOf('logedin=true') !== -1,
+  'reviewcomplete': true,
+  'thanksforsubmit': '',
+  'image': '',
+  'bgimage': '',
+  'clantag': '',
+  'wglink': '',
+  'ts': 'sdf',
+  'site': 'sdf',
+  'color': '',
+  'win': 1,
+  'eff': 1,
+  'sh6': 1,
+  'sh8': 1,
+  'sh10': 1,
+  'gm6': 1,
+  'gm8': 1,
+  'gm10': 1,
+  'dis': '',
+  'leden': 1,
+  'clan_id': 1,
+  'CanReportClans': false,
+  'ClansReported': {}
+}
+
 window.addEventListener('popstate', function (event) {
   if (!event.state.urlPath || event.state.urlPath == '/') {
     backhome();
-  } else if (event.state.urlPath.includes("/clan/")) {
-    // var gotourl = event.state.urlPath.replace(/[^0-9]/, '')
-    // console.log(gotourl);
-    // openclan(gotourl)
   }
 });
 
@@ -149,6 +172,17 @@ var header = new Vue({
           header.caneddit = false;
           header.clanwebsite = JsonData.claninfo.clansite
           header.clanteamspeak = JsonData.claninfo.clanteamspeak
+        }
+        if (JsonData.reports) {
+          var re = JsonData.reports;
+          if (!re.block) {
+            ClanDetailsClanData.CanReportClans = true;
+          }
+          if (re.reportclans) {
+            for (var i = 0; i < re.reportclans.length; i++) {
+              ClanDetailsClanData.ClansReported[re.reportclans[i].clanid] = true;
+            }
+          }
         }
       });
     }
@@ -316,6 +350,7 @@ function mkclanlist() {
       }
     }
   })
+  ResizeEvent();
   getclanlist();
 }
 
@@ -342,24 +377,26 @@ if (siteurl.includes("/clan/")) {
 }
 
 // function for making the list bigger or smaller depending on the size of you'r screen
-window.addEventListener("resize", function(event) {
-  if (widthchange) {
-    widthchange = false;
-    setTimeout(function () {
-      var nowwidth = document.body.clientWidth;
-      clanslistvue.resize = nowwidth;
-      widthchange = true;
-      if (lastwidth < 415 && nowwidth > 415) {
-        clanslistvue.items = clanslistvue.items;
-        var listicons = document.getElementsByClassName("listicons")
-        for (var i = 0; i < listicons.length; i++) {
-          listicons[i].style.backgroundImage = '/clanicons.png'
+function ResizeEvent() {
+  window.addEventListener("resize", function(event) {
+    if (widthchange) {
+      widthchange = false;
+      setTimeout(function () {
+        var nowwidth = document.body.clientWidth;
+        clanslistvue.resize = nowwidth;
+        widthchange = true;
+        if (lastwidth < 415 && nowwidth > 415) {
+          clanslistvue.items = clanslistvue.items;
+          var listicons = document.getElementsByClassName("listicons")
+          for (var i = 0; i < listicons.length; i++) {
+            listicons[i].style.backgroundImage = '/clanicons.png'
+          }
         }
-      }
-      lastwidth = nowwidth;
-    }, 300);
-  }
-})
+        lastwidth = nowwidth;
+      }, 300);
+    }
+  })
+}
 
 // download and place all clanlist in screen
 function getclanlist() {
@@ -517,6 +554,7 @@ function openclan(clanid) {
       sitetitle.backicon = true;
       ClanDetailsClanData.clantag = '[' + body.clan_tag + ']';
       ClanDetailsClanData.wglink = 'http://eu.wargaming.net/clans/wot/' + body.clan_id;
+      ClanDetailsClanData.clan_id = body.clan_id;
       ClanDetailsClanData.color = body.color;
       ClanDetailsClanData.win = body.wins_ratio_avg.value;
       ClanDetailsClanData.eff = body.efficiency.value;
@@ -550,17 +588,46 @@ function MkVueData() {
     }).then(function(rs) {
       return rs.text();
     }).then(function(vuedata) {
+      var ClanDetailsMethods = {
+        review: function(data) {
+          this.reviewcomplete = false;
+          this.thanksforsubmit = 'Bedankt voor het beoordelen van deze clan';
+          setTimeout(function () {
+            ClanDetailsClanData.ClansReported[ClanDetailsClanData.clan_id] = true;
+          }, 3000);
+          fetch("/reportclan", {
+            method: "post",
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Cache': 'no-cache'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+              report: data,
+              clan: this.clan_id
+            })
+          })
+          .then( function functionName(response) {
+             return response.json();
+          }).then(function(JsonData) {
+            console.log(JsonData);
+          });
+        }
+      }
       if (siteurl.includes("/clan/")) {
         var clanstatsvue = new Vue({
           el: '.clanstatspage',
           data: ClanDetailsClanData,
+          methods: ClanDetailsMethods
         })
       } else {
         Vue.component('clanstatspagecomp', {
           template: vuedata,
           data: function () {
             return ClanDetailsClanData
-          }
+          },
+          methods: ClanDetailsMethods
         });
         var clanstatsvue = new Vue({
           el: '.clanstatspage'
@@ -568,25 +635,4 @@ function MkVueData() {
       }
     });
   }
-}
-
-// all clan details data
-var ClanDetailsClanData = {
-  'image': '',
-  'bgimage': '',
-  'clantag': '',
-  'wglink': '',
-  'ts': 'sdf',
-  'site': 'sdf',
-  'color': '',
-  'win': 0,
-  'eff': 0,
-  'sh6': 0,
-  'sh8': 0,
-  'sh10': 0,
-  'gm6': 0,
-  'gm8': 0,
-  'gm10': 0,
-  'dis': '',
-  'leden': 0
 }

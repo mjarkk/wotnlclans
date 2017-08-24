@@ -334,13 +334,89 @@ function edditclandata(playerlvl, clan, overwride) {
 // check if you can change clan data
 app.post('/rules', function(req, res) {
   playerinf(req,res,function(status) {
-    res.json({
-      status: status.status,
-      clan: status.clan,
-      edditclandata: status.edditclandata,
-      playerlvl: status.Playerlvl,
-      claninfo: status.claninfo
-    })
+    const ReportsFile = config.clanreports + 'player-' + status.accoundid + '.json';
+    if (fs.existsSync(ReportsFile)) {
+      fs.readJson(ReportsFile, (err, reports) => {
+        res.json({
+          status: status.status,
+          clan: status.clan,
+          edditclandata: status.edditclandata,
+          playerlvl: status.Playerlvl,
+          claninfo: status.claninfo,
+          reports: reports
+        })
+      });
+    } else {
+      res.json({
+        status: status.status,
+        clan: status.clan,
+        edditclandata: status.edditclandata,
+        playerlvl: status.Playerlvl,
+        claninfo: status.claninfo,
+        reports: false
+      })
+    }
+  });
+});
+
+// function for clan reports
+app.post('/reportclan', function(req, res) {
+  playerinf(req,res,function(status) {
+    if (status.status) {
+      const reportclan = req.body.clan;
+      const report = req.body.report;
+      const PlayFile = config.clanreports + 'player-' + status.accoundid + '.json';
+      const ClanFile = config.clanreports + 'clan-' + reportclan + '.json';
+      function EditClanReport() {
+        function ModifReport(clanconf) {
+          var toeddit = 'no';
+          if (report) {
+            toeddit = 'yes';
+          }
+          clanconf[toeddit] = clanconf[toeddit] + 1;
+          fs.outputJson(ClanFile, clanconf, err => {
+
+          });
+        }
+        if (fs.existsSync(ClanFile)) {
+          fs.readJson(ClanFile, function functionName(err,clanconf) {
+            ModifReport(clanconf);
+          });
+        } else {
+          var clanconf = config.ClanReportModel;
+          ModifReport(clanconf);
+        }
+      }
+      function EditPlayerFile(playerinf) {
+        playerinf.reportclans.push({
+          clanid: reportclan,
+          report: report
+        });
+        fs.outputJson(PlayFile, playerinf, err => {
+
+        });
+      }
+      if (fs.existsSync(PlayFile)) {
+        fs.readJson(PlayFile, function functionName(err,data) {
+          var reportclanstatus = true;
+          for (var i = 0; i < data.reportclans.length; i++) {
+            if (data.reportclans[i].clanid == reportclan) {
+              reportclanstatus = false;
+            }
+          }
+          if (reportclanstatus && !data.block) {
+            EditClanReport();
+            EditPlayerFile(data);
+          }
+        })
+      } else {
+        EditClanReport();
+        EditPlayerFile(config.PlayerReportModel);
+      }
+      res.json({status: true});
+    } else {
+      res.json({status: false})
+    }
   });
 });
 
