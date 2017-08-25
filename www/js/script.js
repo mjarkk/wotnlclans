@@ -15,6 +15,9 @@ var siteurl = document.location.pathname;
 var PlacedVueData = false;
 var popup = undefined;
 
+// uglifyed lockr
+!function(e,t){"undefined"!=typeof exports?"undefined"!=typeof module&&module.exports&&(exports=module.exports=t(e,exports)):"function"==typeof define&&define.amd?define(["exports"],function(r){e.Lockr=t(e,r)}):e.Lockr=t(e,{})}(this,function(e,t){"use strict";return Array.prototype.indexOf||(Array.prototype.indexOf=function(e){var t=this.length>>>0,r=Number(arguments[1])||0;for((r=r<0?Math.ceil(r):Math.floor(r))<0&&(r+=t);r<t;r++)if(r in this&&this[r]===e)return r;return-1}),t.prefix="",t._getPrefixedKey=function(e,t){return(t=t||{}).noPrefix?e:this.prefix+e},t.set=function(e,t,r){var o=this._getPrefixedKey(e,r);try{localStorage.setItem(o,JSON.stringify({data:t}))}catch(r){console&&console.warn("Lockr didn't successfully save the '{"+e+": "+t+"}' pair, because the localStorage is full.")}},t.get=function(e,t,r){var o,n=this._getPrefixedKey(e,r);try{o=JSON.parse(localStorage.getItem(n))}catch(e){o=localStorage[n]?{data:localStorage.getItem(n)}:null}return null===o?t:"object"==typeof o&&void 0!==o.data?o.data:t},t.sadd=function(e,r,o){var n,a=this._getPrefixedKey(e,o),i=t.smembers(e);if(i.indexOf(r)>-1)return null;try{i.push(r),n=JSON.stringify({data:i}),localStorage.setItem(a,n)}catch(t){console.log(t),console&&console.warn("Lockr didn't successfully add the "+r+" to "+e+" set, because the localStorage is full.")}},t.smembers=function(e,t){var r,o=this._getPrefixedKey(e,t);try{r=JSON.parse(localStorage.getItem(o))}catch(e){r=null}return null===r?[]:r.data||[]},t.sismember=function(e,r,o){return t.smembers(e).indexOf(r)>-1},t.keys=function(){var e=[],r=Object.keys(localStorage);return 0===t.prefix.length?r:(r.forEach(function(r){-1!==r.indexOf(t.prefix)&&e.push(r.replace(t.prefix,""))}),e)},t.getAll=function(e){var r=t.keys();return e?r.reduce(function(e,r){var o={};return o[r]=t.get(r),e.push(o),e},[]):r.map(function(e){return t.get(e)})},t.srem=function(e,r,o){var n,a,i=this._getPrefixedKey(e,o),c=t.smembers(e,r);(a=c.indexOf(r))>-1&&c.splice(a,1),n=JSON.stringify({data:c});try{localStorage.setItem(i,n)}catch(t){console&&console.warn("Lockr couldn't remove the "+r+" from the set "+e)}},t.rm=function(e){var t=this._getPrefixedKey(e);localStorage.removeItem(t)},t.flush=function(){t.prefix.length?t.keys().forEach(function(e){localStorage.removeItem(t._getPrefixedKey(e))}):localStorage.clear()},t});
+
 // all clan details data
 var ClanDetailsClanData = {
   'login': document.cookie.indexOf('logedin=true') !== -1,
@@ -52,15 +55,29 @@ window.addEventListener('popstate', function (event) {
 var header = new Vue({
   el: '.header',
   data: {
+    nothidden: Lockr.get('settingsopen') || false,
     clanwebsite: '',
     clanteamspeak: '',
     caneddit: true,
     SaveStatus: '',
     Sorting: 'rate',
     SettingsGM: '8',
-    SettingsS: '8'
+    SettingsS: '8',
+    search: ''
+  },
+  watch: {
+    search: function(NewVal, OldVal) {
+      clanslistvue.search = NewVal;
+    }
   },
   methods: {
+    ViewSettings: function(on) {
+      this.nothidden = !this.nothidden;
+      Lockr.set('settingsopen', !on)
+      if (!on) {
+        this.check();
+      }
+    },
     SetGM: function(setto) {
       config.gm = setto;
       this.SettingsGM = setto;
@@ -107,14 +124,23 @@ var header = new Vue({
       }
     },
     check: function(what) {
-      setTimeout(function () {
-        if (document.getElementById(what.replace('-label','')) && document.getElementById(what.replace('-label','')).value.length > 0) {
-          var docel = document.getElementsByClassName(what)[0];
-          docel.style.top = '-16px';
-          docel.style.fontSize = '16px';
-          docel.style.color = 'rgba(212, 0, 255, 1)';
-        }
-      }, 1000);
+      function runcheck(what) {
+        setTimeout(function () {
+          if (document.getElementById(what.replace('-label','')) && document.getElementById(what.replace('-label','')).value.length > 0) {
+            var docel = document.getElementsByClassName(what)[0];
+            docel.style.top = '-16px';
+            docel.style.fontSize = '16px';
+            docel.style.color = 'rgba(212, 0, 255, 1)';
+          }
+        }, 700);
+      }
+      if (!what) {
+        runcheck('clanwebsite-label');
+        runcheck('clanteamspeak-label');
+        runcheck('search-label');
+      } else {
+        runcheck(what);
+      }
     },
     save: function() {
       header.caneddit = true;
@@ -154,8 +180,7 @@ var header = new Vue({
   },
   created: function() {
     if (document.cookie.indexOf('logedin=true') !== -1) {
-      this.check('clanwebsite-label');
-      this.check('clanteamspeak-label');
+      this.check();
       fetch("/rules", {
         method: "post",
         headers: {
@@ -260,7 +285,6 @@ function OpenStatusPopup() {
 
 // the progressbar function
 function progressbar(g) {
-  console.log(g);
   anime({
     targets: '.loadingbar .progress',
     width: g + '%',
@@ -328,7 +352,9 @@ function mkclanlist() {
     el: '.clanslist',
     data: {
       'resize': document.body.clientWidth,
-      'items': clandata
+      'items': clandata,
+      'search': '',
+      'img': ''
     },
     methods: {
       open: function(url) {
@@ -453,6 +479,7 @@ function getclanlist() {
       return response2.text();
     }).then(function(firstload2) {
       progressbar(50)
+      // MkVueData is a function for loading the elements for the clan detials
       MkVueData()
       firstload2 = JSON.parse(firstload2);
       for (var i = 0; i < firstload2.length; i++) {
@@ -467,16 +494,8 @@ function getclanlist() {
         clandata[i].snormal = clandata[i].s['normal'];
         clandata[i].gmnormal = clandata[i].gm['normal'];
       }
-
-      // TODO: fix small screen not all data
-      // clanslistvue.items = clandata;
-
       var listicons = document.getElementsByClassName("listicons")
-      if (listicons.length > 0) {
-        addclanicons()
-      } else {
-        progressbar(100)
-      }
+      addclanicons()
 
       // after everyting is dune create a webworker
       // createworker()
@@ -496,6 +515,7 @@ function addclanicons() {
   objImage.src ='/clanicons.png';
   objImage.onload = function(e) {
     progressbar(100)
+    clanslistvue.img = 'url("' + objImage.src + '")';
     for (var i = 0; i < listicons.length; i++) {
       listicons[i].style.backgroundImage = 'url("' + objImage.src + '")';
       listicons[i].style.opacity = 0;
@@ -511,12 +531,13 @@ function addclanicons() {
         } else if (l !== 1) {
           animetethis(1)
         } else {
-          console.log('dune loading icons');
           iconsloaded = true;
         }
       });
     }
-    animetethis(0.01)
+    if (listicons.length > 0) {
+      animetethis(0.01)
+    }
   }
 }
 
