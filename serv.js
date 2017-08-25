@@ -263,6 +263,12 @@ function checklogin(req,res,playerinfo) {
   }
 }
 
+// api redirect
+app.get('/api', function(req, res) {
+  res.render('api');
+});
+
+// api for iframes on someones website
 app.get('/c1/:clanid/:color/html', function(req, res) {
   ApiC1(req, res)
 });

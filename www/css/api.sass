@@ -1,0 +1,87 @@
+.api-content
+  padding-top: 100px
+  display: flex
+  justify-content: center
+  align-items: center
+  flex-wrap: wrap
+  flex-direction: row
+  display: -webkit-flex
+  -webkit-justify-content: center
+  -webkit-align-items: center
+  -webkit-flex-wrap: wrap
+  -webkit-flex-direction: row
+  .switch
+    display: inline-block
+    height: 30px
+    max-width: 60px
+    min-width: 60px
+    border-radius: 15px
+    background-color: #eee
+    margin: 15px
+    cursor: pointer
+    div
+      display: inline-block
+      height: 20px
+      margin: 5px
+      width: 20px
+      background-color: black
+      border-radius: 100%
+      cursor: pointer
+      position: relative
+      left: 0px
+      transition: left 0.4s
+  .switchon
+    div
+      left: 30px
+
+  .item
+    width: 350px
+    background-color: white
+    box-sizing: border-box
+    border-radius: 3px
+    overflow: hidden
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)
+    display: flex
+    flex-direction: column
+    display: -webkit-flex
+    -webkit-flex-direction: column
+    transition: background-color 0.3s
+    h1
+      padding: 10px
+    .inputtext
+      padding-left: 10px
+    p
+      font-size: 20px
+    input
+      font-size: 20px
+      height: 30px
+      background-color: rgba(238, 238, 238, 0.6)
+      box-sizing: border-box
+      padding: 20px 10px
+      border-bottom: 2px solid rgb(249, 17, 215)
+      margin: 10px
+    .onsite, .iframe, .darktheme, .err
+      box-sizing: border-box
+      padding: 10px
+      p
+        font-size: 23px
+      textarea
+        width: 100%
+        resize: none
+        height: 120px
+        background-color: #eee
+        transition: background-color 0.3s
+        box-sizing: border-box
+        padding: 5px
+    .darktheme
+      display: flex
+      align-items: center
+      display: -webkit-flex
+      -webkit-align-items: center
+
+  .item.dark
+    background-color: black
+    color: white
+    textarea
+      background-color: #1b1b1b
+      color: white
