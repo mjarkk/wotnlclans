@@ -1,11 +1,11 @@
 # World of tanks NL/BE clans    
 The new wot nl/be clans site as update for [wotnlclans.mkopenga.com](https://wotnlclans.mkopenga.com)  
-On this site you can view the all the NL/BE clans  
+On this site you can view the all the NL/BE clans and their stats  
 
 ## Why?  
-- Because I want to learn Vue.js.  
-- Because the old site uses 3 npm scripts (that can break), 2 domains, 1 domain for making the website and a view other scripts for copying and some other things.  
-- The curent site is slow on a normal mobiel connection it takes 25s  
+- Because I want to learn Vue.js and i wan't to make a good single page [pwa](https://developers.google.com/web/progressive-web-apps/).  
+- Because the old site uses 3 npm scripts (that have broken me a view times), 2 official domains + 1 domain for developing the website and a view other scripts for fixing a view bugs.  
+- The curent site is slow on a normal mobiel connection it takes 25s to view all clans  
 - The curent site looks bad on mobiel  
 
 ## Site Goal  
@@ -13,13 +13,15 @@ On this site you can view the all the NL/BE clans
 - :heavy_check_mark: Use dynamic url's for better sharing instaid of 1 page where the url doen't change on what you look at  
 - :heavy_check_mark: Not use jquery  
 - :heavy_check_mark: More material design because the old site did look a little bit uncluttered  
-- ~~:heavy_multiplication_x: minimal 90% score in [Lighthouse](https://developers.google.com/web/tools/lighthouse/)~~ (can't get a 90%+ socre because the test wait till the webpage is fully loaded)
+- :heavy_check_mark: One script not 3+ folders plus scripts  
+- ~~:heavy_multiplication_x: minimal 90% score in [Lighthouse](https://developers.google.com/web/tools/lighthouse/)~~ --> can't get a 90%+ socre because the test wait till the webpage is fully loaded.  
 
 ## How to install:  
-- Clone the project  
-- Install nodejs  
+- Clone or Download the project  
+- Install [nodejs](https://nodejs.org/en/) (latest version !!NOT LTS!!)  
 - Inside the cloned folder open a terminal and type: npm i  
 - After that's dune type: npm start  
+- Now the script will start a local webserver on [localhost port 2020](http://localhost:2020)
 
 ## Bugs  
 - ~~Back button in the browser does only change the website url~~  
