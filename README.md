@@ -32,6 +32,12 @@ On this site you can view the all the NL/BE clans and their stats
 ## Updates  
 - Removed spf.js because i only use only 1 function of it and javascript has a solution for that with only 1 line of code  
 
+## To Do's  
+This is a list of things that still need to be fixed or made before i can official launch the site  
+- Api site with a promotion for my site and some things for viewing your clan's stats  
+- A section for someones clan promotions or pictures  
+- :question: Add a Service Worker  
+  
 ## Screenshots  
 ![Screenshot1](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s1.png)  
 ![Screenshot2](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s2.png)  
