@@ -63,7 +63,9 @@ var header = new Vue({
     Sorting: 'rate',
     SettingsGM: '8',
     SettingsS: '8',
-    search: ''
+    search: '',
+    displaystats: true,
+    MediaIsLoaded: false
   },
   watch: {
     search: function(NewVal, OldVal) {
@@ -510,6 +512,7 @@ function getclanlist() {
 
 // load clan icons
 function addclanicons() {
+  LoadClanMediaSection()
   var listicons = document.getElementsByClassName("listicons")
   var objImage = new Image();
   objImage.src ='/clanicons.png';
@@ -594,6 +597,32 @@ function openclan(clanid) {
       background: linear-gradient(to bottom, ' + body.color + ' 0%,rgba(238,238,238,0) 100%);\
       filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=\'' + body.color + '\', endColorstr=\#00eeeeee\',GradientType=0 );'
     })
+}
+
+// the media tab
+function LoadClanMediaSection() {
+  fetch('/mediatemplate', {
+    mode: 'cors',
+    headers: {
+      'Cache': 'no-cache'
+    }
+  }).then(function(rs) {
+    return rs.text();
+  }).then(function(mediatemplate) {
+    header.MediaIsLoaded = true;
+    var componentdata = {
+
+    }
+    Vue.component('clanmedia', {
+      template: mediatemplate,
+      data: function () {
+        return componentdata
+      }
+    });
+    new Vue({
+      el: '.clanmedia'
+    })
+  });
 }
 
 // create vue data

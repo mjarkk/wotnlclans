@@ -268,6 +268,11 @@ app.get('/api', function(req, res) {
   res.render('api');
 });
 
+// mediatemplate
+app.get('/mediatemplate', function(req, res) {
+  res.render('mediatemplate');
+})
+
 // api for iframes on someones website
 app.get('/c1/:clanid/:color/html', function(req, res) {
   ApiC1(req, res)

@@ -24,6 +24,10 @@ var api = new Vue({
 </iframe>`,
       err: '',
       darktheme: false
+    },
+    c2: {
+      big: location.origin + '/img/preview-2.png' ,
+      small: location.origin + '/img/preview-1.png'
     }
   },
   watch: {

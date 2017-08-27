@@ -211,6 +211,46 @@ body
       transition: color 0.3s
       &:hover
         color: rgba(255, 255, 255, 1)
+  .switch
+    display: flex
+    justify-content: center
+    align-items: center
+    display: -webkit-flex
+    -webkit-justify-content: center
+    -webkit-align-items: center
+    padding-top: 20px
+    padding-bottom: 10px
+    .op1
+      border-top-left-radius: 3px
+      border-bottom-left-radius: 3px
+    .op2
+      border-top-right-radius: 3px
+      border-bottom-right-radius: 3px
+    .option
+      display: flex
+      color: white
+      justify-content: center
+      align-items: center
+      display: -webkit-flex
+      -webkit-justify-content: center
+      -webkit-align-items: center
+      background-color: rgba(255, 255, 255, 0.1)
+      height: 40px
+      width: 110px
+      margin: 0px
+      font-size: 22px
+      cursor: pointer
+      border-bottom: 4px solid rgba(255, 255, 255, 0.1)
+      -webkit-user-select: none
+      -moz-user-select: none
+      -ms-user-select: none
+      user-select: none
+    .option:disabled, .option[disabled]
+      color: rgb(96, 96, 96)
+    .off
+      border-bottom: 4px solid #d400ff
+      cursor: not-allowed
+
   .flex
     width: 450px
   .notflex

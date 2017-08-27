@@ -2,12 +2,12 @@
   padding-top: 100px
   display: flex
   justify-content: center
-  align-items: center
+  align-items: flex-start
   flex-wrap: wrap
   flex-direction: row
   display: -webkit-flex
   -webkit-justify-content: center
-  -webkit-align-items: center
+  -webkit-align-items: flex-start
   -webkit-flex-wrap: wrap
   -webkit-flex-direction: row
   .switch
@@ -35,6 +35,7 @@
       left: 30px
 
   .item
+    margin: 5px
     width: 350px
     background-color: white
     box-sizing: border-box
@@ -46,6 +47,15 @@
     display: -webkit-flex
     -webkit-flex-direction: column
     transition: background-color 0.3s
+    .inportant
+      color: rgb(255, 0, 92)
+      padding: 10px
+    .imgholder
+      width: 100%
+      padding-bottom: 20px
+      img
+        width: 100%
+        display: inline-block
     h1
       padding: 10px
     .inputtext
@@ -73,6 +83,9 @@
         transition: background-color 0.3s
         box-sizing: border-box
         padding: 5px
+      .small
+        height: 50px
+        font-size: 20px
     .darktheme
       display: flex
       align-items: center
@@ -85,3 +98,6 @@
     textarea
       background-color: #1b1b1b
       color: white
+
+  .morewidth
+    width: 500px

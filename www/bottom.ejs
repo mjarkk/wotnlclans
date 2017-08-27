@@ -98,8 +98,20 @@
           v-on:blur="blur('search-label')">
       </div>
       <div class="feedback notflex">Heb je spellingsfouten, surgesties of ander dingen stuur mij (<a href="<%= madebylink %>"><%= madeby %></a>) gerust een berichtje in wot </div>
+      <div class="switch notflex">
+        <button class="op1 option"
+        v-on:click="displaystats = true"
+        v-bind:class="{off: displaystats}">Stats</button>
+        <button class="op2 option"
+        v-on:click="displaystats = false"
+        :disabled="!MediaIsLoaded"
+        v-bind:class="{off: !displaystats}">Media</button>
+      </div>
     </div>
     <div class="maincontent">
+      <div class="clanmedia">
+        <clanmedia></clanmedia>
+      </div>
       <div class="clanslist v-l" v-cloak>
         <h1>Clans</h1>
         <div class="listheader">
