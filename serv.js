@@ -431,6 +431,20 @@ app.post('/reportclan', function(req, res) {
   });
 });
 
+// upload clan images
+app.post('/submitclammedia', function(req, res) {
+  playerinf(req,res,function(status) {
+    res.json(status)
+  });
+});
+
+// get basic clan media
+app.post('/clanmedia', function(req, res) {
+  res.json({
+    status: true
+  })
+});
+
 // submit player's clan data
 app.post('/submitclandata', function(req, res) {
   playerinf(req,res,function(status) {

@@ -1,3 +1,25 @@
-<div class="mediatemplate">
-  <h1>test</h1>
+<div class="mediatemplate startscreenbox">
+  <h1>Clan media</h1>
+  <p class="inf">Hier kan je media zien van clan's en zelf zelf de media toevoegen aan jou clan</p>
+  <div class="yours">
+
+  </div>
+  <div class="list">
+    <div class="clan" v-for="(item, id) in list">
+      <div class="clanicon">
+        <div></div>
+      </div>
+      <div class="clanmedia">
+        <div class="clan" v-for="(img, id) in item.imgs" v-if="id < 5">
+          <div class="img"></div>
+          <div class="8bit"></div>
+        </div>
+        <div class="morebtn"></div>
+      </div>
+      <div class="allmedia" v-if="id > 5">
+        <div class="img"></div>
+        <div class="8bit"></div>
+      </div>
+    </div>
+  </div>
 </div>

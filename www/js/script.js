@@ -609,9 +609,21 @@ function LoadClanMediaSection() {
   }).then(function(rs) {
     return rs.text();
   }).then(function(mediatemplate) {
+    var linkel = document.createElement('link');
+    linkel.rel = 'stylesheet';
+    linkel.media = "none";
+    linkel.id = "notblockinglink";
+    linkel.href = '/css/media.css';
+    document.head.appendChild(linkel);
+    document.getElementById(linkel.id).onload = function() { if (document.getElementById(linkel.id).media!='all') document.getElementById(linkel.id).media='all' };
     header.MediaIsLoaded = true;
     var componentdata = {
-
+      list: [
+        {
+          imgs: []
+        }
+      ],
+      yourclan: {}
     }
     Vue.component('clanmedia', {
       template: mediatemplate,
