@@ -1,0 +1,12 @@
+{
+  "verbose": true,
+  "ignore": [
+    "db/*",
+    "www/*",
+    "old/*",
+    "ffmpeg/*",
+    "README.md",
+    "node_modules/*",
+    ".git/*"
+  ]
+}

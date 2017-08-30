@@ -5,6 +5,27 @@ var config = {
   gm: '8',
   s: '8'
 }
+var ClanMediaComponentData = {
+  list: [
+    {
+      imgs: []
+    }
+  ],
+  yourclan: {},
+  login: {
+    status: false,
+    clan: false,
+    edditclandata: false,
+    claninfo: {
+      clandata: {
+        clanid: '',
+        clantag: '',
+        smallimg: '',
+        img: ''
+      }
+    }
+  }
+}
 var procanjoin = true;
 var prolenght = 0;
 var proneedl = 0;
@@ -17,6 +38,69 @@ var popup = undefined;
 
 // uglifyed lockr
 !function(e,t){"undefined"!=typeof exports?"undefined"!=typeof module&&module.exports&&(exports=module.exports=t(e,exports)):"function"==typeof define&&define.amd?define(["exports"],function(r){e.Lockr=t(e,r)}):e.Lockr=t(e,{})}(this,function(e,t){"use strict";return Array.prototype.indexOf||(Array.prototype.indexOf=function(e){var t=this.length>>>0,r=Number(arguments[1])||0;for((r=r<0?Math.ceil(r):Math.floor(r))<0&&(r+=t);r<t;r++)if(r in this&&this[r]===e)return r;return-1}),t.prefix="",t._getPrefixedKey=function(e,t){return(t=t||{}).noPrefix?e:this.prefix+e},t.set=function(e,t,r){var o=this._getPrefixedKey(e,r);try{localStorage.setItem(o,JSON.stringify({data:t}))}catch(r){console&&console.warn("Lockr didn't successfully save the '{"+e+": "+t+"}' pair, because the localStorage is full.")}},t.get=function(e,t,r){var o,n=this._getPrefixedKey(e,r);try{o=JSON.parse(localStorage.getItem(n))}catch(e){o=localStorage[n]?{data:localStorage.getItem(n)}:null}return null===o?t:"object"==typeof o&&void 0!==o.data?o.data:t},t.sadd=function(e,r,o){var n,a=this._getPrefixedKey(e,o),i=t.smembers(e);if(i.indexOf(r)>-1)return null;try{i.push(r),n=JSON.stringify({data:i}),localStorage.setItem(a,n)}catch(t){console.log(t),console&&console.warn("Lockr didn't successfully add the "+r+" to "+e+" set, because the localStorage is full.")}},t.smembers=function(e,t){var r,o=this._getPrefixedKey(e,t);try{r=JSON.parse(localStorage.getItem(o))}catch(e){r=null}return null===r?[]:r.data||[]},t.sismember=function(e,r,o){return t.smembers(e).indexOf(r)>-1},t.keys=function(){var e=[],r=Object.keys(localStorage);return 0===t.prefix.length?r:(r.forEach(function(r){-1!==r.indexOf(t.prefix)&&e.push(r.replace(t.prefix,""))}),e)},t.getAll=function(e){var r=t.keys();return e?r.reduce(function(e,r){var o={};return o[r]=t.get(r),e.push(o),e},[]):r.map(function(e){return t.get(e)})},t.srem=function(e,r,o){var n,a,i=this._getPrefixedKey(e,o),c=t.smembers(e,r);(a=c.indexOf(r))>-1&&c.splice(a,1),n=JSON.stringify({data:c});try{localStorage.setItem(i,n)}catch(t){console&&console.warn("Lockr couldn't remove the "+r+" from the set "+e)}},t.rm=function(e){var t=this._getPrefixedKey(e);localStorage.removeItem(t)},t.flush=function(){t.prefix.length?t.keys().forEach(function(e){localStorage.removeItem(t._getPrefixedKey(e))}):localStorage.clear()},t});
+
+// vue componenet(s)
+Vue.component('loadingimg', {
+  template: "<div class='imageloader'>\
+    <transition name=\"fadesmall\">\
+      <img class='small' v-bind:src=\"SmallSrc\" v-if='SmallImgLoaded == 1'/>\
+    </transition>\
+    <transition name=\"fadebig\">\
+      <img class='fullimg' v-bind:src=\"FullSrc\" v-if='FullImgLoaded == 1'/>\
+    </transition>\
+  </div>",
+  data: function() {
+    return {
+      FullImgLoaded: 0,
+      FullSrc: '',
+      SmallImgLoaded: 0,
+      SmallSrc: ''
+    };
+  },
+  props: ['preview','image','base64'],
+  watch: {
+    image: function(newVal, oldVal) {
+      this.load();
+    }
+  },
+  methods: {
+    load: function() {
+      if (this.image == undefined || this.image == '') {
+        // console.info('no image defined')
+      } else {
+        if (this.preview != undefined) {
+          this.LoadSmall(this.preview);
+        } else if (this.base64 != undefined) {
+          this.LoadSmall(this.base64);
+        } else {
+          this.LoadBig()
+        }
+      }
+    },
+    LoadBig: function() {
+      var thisvue = this;
+      var img = new Image();
+      img.src = this.image;
+      img.onload = function() {
+        thisvue.FullSrc = img.src;
+        thisvue.FullImgLoaded = 1;
+      }
+    },
+    LoadSmall: function(src) {
+      var thisvue = this;
+      var img = new Image();
+      img.src = src;
+      img.onload = function() {
+        thisvue.SmallSrc = img.src;
+        thisvue.SmallImgLoaded = 1;
+        thisvue.LoadBig();
+      }
+    }
+  },
+  created: function () {
+    this.load()
+  }
+});
 
 // all clan details data
 var ClanDetailsClanData = {
@@ -42,7 +126,8 @@ var ClanDetailsClanData = {
   'leden': 1,
   'clan_id': 1,
   'CanReportClans': false,
-  'ClansReported': {}
+  'ClansReported': {},
+  'smallimage': ''
 }
 
 window.addEventListener('popstate', function (event) {
@@ -195,6 +280,7 @@ var header = new Vue({
       .then( function functionName(response) {
          return response.json();
       }).then(function(JsonData) {
+        ClanMediaComponentData.login = JsonData;
         if (JsonData.status && JsonData.clan && JsonData.edditclandata) {
           header.caneddit = false;
           header.clanwebsite = JsonData.claninfo.clansite
@@ -573,6 +659,7 @@ function openclan(clanid) {
       body = JSON.parse(body);
       // console.log(body);
       document.title = body.clan_tag + ' | Wot NL/BE clans';
+      ClanDetailsClanData.smallimage = body.emblems.x32.portal.replace('http','https');
       ClanDetailsClanData.image = body.emblems.x195.portal.replace('http','https');
       sitetitle.sitetitle = 'Clan ' + body.clan_tag;
       sitetitle.backicon = true;
@@ -617,18 +704,25 @@ function LoadClanMediaSection() {
     document.head.appendChild(linkel);
     document.getElementById(linkel.id).onload = function() { if (document.getElementById(linkel.id).media!='all') document.getElementById(linkel.id).media='all' };
     header.MediaIsLoaded = true;
-    var componentdata = {
-      list: [
-        {
-          imgs: []
-        }
-      ],
-      yourclan: {}
-    }
     Vue.component('clanmedia', {
       template: mediatemplate,
       data: function () {
-        return componentdata
+        return ClanMediaComponentData
+      },
+      methods: {
+        UpdateClanMedia: function() {
+          fetch('/submitclammedia/', {
+            mode: 'cors',
+            method: "post",
+            headers: {
+              'Cache': 'no-cache'
+            }
+          }).then(function(response) {
+            return response.json();
+          }).then(function(status) {
+            console.log(status);
+          });
+        }
       }
     });
     new Vue({

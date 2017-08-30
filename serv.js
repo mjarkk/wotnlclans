@@ -346,6 +346,12 @@ function edditclandata(playerlvl, clan, overwride) {
 app.post('/rules', function(req, res) {
   playerinf(req,res,function(status) {
     const ReportsFile = config.clanreports + 'player-' + status.accoundid + '.json';
+    var clandetials = {
+      clanid: status.clandetails.clan_id || '',
+      clantag: status.clandetails.tag || '',
+      smallimg: status.clandetails.emblems.x32.portal || '',
+      img: status.clandetails.emblems.x195.portal || ''
+    }
     if (fs.existsSync(ReportsFile)) {
       fs.readJson(ReportsFile, (err, reports) => {
         res.json({
@@ -354,7 +360,8 @@ app.post('/rules', function(req, res) {
           edditclandata: status.edditclandata,
           playerlvl: status.Playerlvl,
           claninfo: status.claninfo,
-          reports: reports
+          reports: reports,
+          clandata: clandetials
         })
       });
     } else {
@@ -364,7 +371,8 @@ app.post('/rules', function(req, res) {
         edditclandata: status.edditclandata,
         playerlvl: status.Playerlvl,
         claninfo: status.claninfo,
-        reports: false
+        reports: false,
+        clandata: clandetials
       })
     }
   });

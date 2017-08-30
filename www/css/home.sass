@@ -8,6 +8,39 @@ body
   overflow-x: hidden
   overflow-y: scroll
   background-color: #E1E2E1
+.imageloader
+  display: block
+  overflow: hidden
+  display: flex
+  flex-direction: column
+  display: -webkit-flex
+  -webkit-flex-direction: column
+  .fullimg, .small
+    min-height: 100%
+    min-width: 100%
+    max-height: 100%
+    max-width: 100%
+    display: block
+    box-sizing: border-box
+    transition: 0.3s
+    opacity: 1
+  .fullimg
+    position: relative
+    top: -100%
+  .small
+    -webkit-filter: blur(7px)
+    -moz-filter: blur(7px)
+    -o-filter: blur(7px)
+    -ms-filter: blur(7px)
+    filter: blur(7px)
+  .fadebig-enter-active, .fadebig-leave-active
+    transition: opacity 0.6s
+  .fadebig-enter, .fadebig-leave-to
+    opacity: 0
+  .fadesmall-enter-active, .fadesmall-leave-active
+    transition: opacity 0.3s
+  .fadesmall-enter, .fadesmall-leave-to
+    opacity: 0
 .searchbox
   width: 250px
   padding: 10px
@@ -525,10 +558,13 @@ body
       display: -webkit-flex
       -webkit-justify-content: center
       -webkit-align-items: center
+    .imageloader
       height: 20vh
       width: 20vh
-    img
       border-radius: 100px
+      overflow: hidden
+      margin: 20px
+    img
       overflow: hidden
       -moz-user-select: none
       -webkit-user-select: none

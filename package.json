@@ -4,7 +4,8 @@
   "description": "the new wot nl/be clans shite",
   "main": "index.js",
   "scripts": {
-    "start": "node serv.js"
+    "start": "node serv.js",
+    "dev": "./node_modules/nodemon/bin/nodemon.js serv.js"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,7 @@
     "merge-img": "^1.0.2",
     "node-fetch": "^1.7.1",
     "node-watch": "^0.5.5",
+    "nodemon": "^1.11.0",
     "pics": "^1.0.3",
     "promptly": "^2.2.0",
     "randomstring": "^1.1.5",

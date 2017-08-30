@@ -1,9 +1,13 @@
 <div class="mediatemplate startscreenbox">
   <h1>Clan media</h1>
   <p class="inf">Hier kan je media zien van clan's en zelf zelf de media toevoegen aan jou clan</p>
-  <div class="yours">
-
-  </div>
+  <pre class="yours" v-if="login.status && login.clan && login.playerlvl < 6">
+    <div class="row">
+      <loadingimg :preview="login.clandata.smallimg" :image="login.clandata.img"></loadingimg>
+    </div>
+    <button v-on:click="UpdateClanMedia()">submit</button>
+    {{ login.clandata.smallimg }}
+  </pre>
   <div class="list">
     <div class="clan" v-for="(item, id) in list">
       <div class="clanicon">
