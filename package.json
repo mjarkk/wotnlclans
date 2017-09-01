@@ -4,8 +4,10 @@
   "description": "the new wot nl/be clans shite",
   "main": "index.js",
   "scripts": {
-    "start": "node serv.js",
-    "dev": "./node_modules/nodemon/bin/nodemon.js serv.js"
+    "// start": "start will start the server for production",
+    "start": "node Dev-False.js && node serv.js",
+    "// dev": "start will start the server in dev mode",
+    "dev": "node Dev-True.js && ./node_modules/nodemon/bin/nodemon.js serv.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,7 @@
     "express-fileupload": "^0.1.4",
     "fs-extra": "^3.0.1",
     "hasha": "^3.0.0",
+    "image-size": "^0.6.1",
     "marked": "^0.3.6",
     "merge-img": "^1.0.2",
     "node-fetch": "^1.7.1",

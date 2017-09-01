@@ -23,7 +23,7 @@ const marked = require('marked');
 const os = require('os');
 const hasha = require('hasha');
 const randomstring = require("randomstring");
-// express & midleware
+// express packages
 const express = require('express');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
@@ -32,6 +32,8 @@ const fileUpload = require('express-fileupload');
 const ejs = require('ejs');
 // config file (s)
 var config = fs.readJsonSync('./db/config.json');
+var devon = fs.readJsonSync('./db/dev.json');
+config['dev'] = devon.on;
 
 // checking if ffmpeg is installed / supported
 config['ffmpeg'] = true;
@@ -58,6 +60,9 @@ watch(config.js['script.js'].dev, { recursive: true }, function(evt, name) {
 watch(config.js['worker.js'].dev, { recursive: true }, function(evt, name) {
   uglyfiscript('worker.js');
 });
+watch(config.js['changeclandata.js'].dev, { recursive: true }, function(evt, name) {
+  uglyfiscript('changeclandata.js');
+});
 function uglyfiscript(name) {
   fs.readFile(config.js[name].dev, 'utf8', (errr, data) => {
     var uglyjs = UglifyJS.minify(data);
@@ -66,7 +71,7 @@ function uglyfiscript(name) {
 
       })
     } else {
-      console.log(colors.red('error uglifying js file: '));
+      console.log(colors.red('error uglifying js file: ' + config.js[name].normal));
       console.log(colors.red(uglyjs.error));
     }
   })
@@ -441,8 +446,59 @@ app.post('/reportclan', function(req, res) {
 
 // upload clan images
 app.post('/submitclammedia', function(req, res) {
+  // var req = req;
+  // var res = res;
   playerinf(req,res,function(status) {
-    res.json(status)
+    // var status = status;
+    try {
+      if (req.files.file && req.body.title && req.body.url && status.clan && status.status && status.Playerlvl < 6 && req.files.file.mimetype.startsWith("image/")) {
+        // fs.writeFile(filename, data,  "binary", function(){...});
+        var imgcount = 0;
+        var claninffile = config.clanmedia + status.clanid + '/claninf.json';
+        if (!fs.existsSync(claninffile)) {
+          var claninf = {
+            imgcount: imgcount,
+            imgs: []
+          }
+          fs.outputJsonSync(claninffile, claninf)
+        } else {
+          var claninf = fs.readJsonSync(claninffile);
+          imgcount = claninf.imgcount;
+        }
+        var foroutputfile = config.clanmedia + status.clanid + '/media-' + imgcount + '.' + req.files.file.mimetype.replace("image/",'');
+        fs.outputFile(foroutputfile, req.files.file.data, err => {
+          if (err) {
+            console.log(err);
+          }
+          fs.readJson(claninffile, (claninferr, claninfdata) => {
+            // if (config.ffmpeg) {
+            //   shell.exec(config.FfmpegPath + ' -y -i ' + config.clanmedia + status.clanid + '/media-' + imgcount + '.' + req.files.file.mimetype.replace("image/",'') + ' -vf scale=h=40:w=' + 40*clanlenght.length + ' ./www/img/clanicons.min.png', {silent:true}).code
+            // }
+            claninfdata.imgs.push('/media-' + imgcount + '.' + req.files.file.mimetype.replace("image/",''));
+            claninfdata.imgcount = claninfdata.imgcount + 1;
+            fs.outputJson(claninffile, claninfdata, err => {
+              if (err) {
+                console.log(err);
+              }
+            });
+          })
+        });
+        res.json({
+          status: true,
+          servstatus: status,
+          files: req.files.file,
+          body: req.body
+        });
+      } else {
+        res.json({
+          status: false
+        })
+      }
+    } catch (e) {
+      res.json({
+        status: false
+      })
+    }
   });
 });
 
@@ -977,3 +1033,4 @@ function ValidIP(ipaddress) {
 // updateclandata();
 uglyfiscript('script.js');
 uglyfiscript('worker.js');
+uglyfiscript('changeclandata.js');

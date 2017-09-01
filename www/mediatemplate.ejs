@@ -2,9 +2,8 @@
   <h1>Clan media</h1>
   <p class="inf">Hier kan je media zien van clan's en zelf zelf de media toevoegen aan jou clan</p>
   <pre class="yours" v-if="login.status && login.clan && login.playerlvl < 6">
-    <div class="row">
-      <loadingimg :preview="login.clandata.smallimg" :image="login.clandata.img"></loadingimg>
-    </div>
+    <loadingimg :preview="login.clandata.smallimg" :image="login.clandata.img"></loadingimg>
+    <changeclanmedia :clan="login"></changeclanmedia>
     <button v-on:click="UpdateClanMedia()">submit</button>
     {{ login.clandata.smallimg }}
   </pre>

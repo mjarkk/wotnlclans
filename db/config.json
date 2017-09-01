@@ -7,6 +7,7 @@
   "news": "./db/news.md",
   "madeby": "516673968",
   "clanconf": "./db/claninf/",
+  "clanmedia": "./db/clanmedia/",
   "clanreports": "./db/clanreports/",
   "ClanReportModel": {
     "yes": 0,
@@ -36,7 +37,10 @@
     "worker.js": {
       "dev": "./www/js/worker.js",
       "normal": "./www/js/worker.min.js"
+    },
+    "changeclandata.js": {
+      "dev": "./www/js/changeclandata.js",
+      "normal": "./www/js/changeclandata.min.js"
     }
-  },
-  "dev": true
+  }
 }

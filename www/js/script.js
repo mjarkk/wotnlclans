@@ -43,7 +43,7 @@ var popup = undefined;
 Vue.component('loadingimg', {
   template: "<div class='imageloader'>\
     <transition name=\"fadesmall\">\
-      <img class='small' v-bind:src=\"SmallSrc\" v-if='SmallImgLoaded == 1'/>\
+      <img class='small' v-bind:style='css' v-bind:src=\"SmallSrc\" v-if='SmallImgLoaded == 1'/>\
     </transition>\
     <transition name=\"fadebig\">\
       <img class='fullimg' v-bind:src=\"FullSrc\" v-if='FullImgLoaded == 1'/>\
@@ -54,10 +54,17 @@ Vue.component('loadingimg', {
       FullImgLoaded: 0,
       FullSrc: '',
       SmallImgLoaded: 0,
-      SmallSrc: ''
+      SmallSrc: '',
+      css: {
+        '-webkit-filter': 'blur(7px)',
+        '-moz-filter': 'blur(7px)',
+        '-o-filter': 'blur(7px)',
+        '-ms-filter': 'blur(7px)',
+        'filter': 'blur(7px)'
+      }
     };
   },
-  props: ['preview','image','base64'],
+  props: ['preview','image','base64','blur'],
   watch: {
     image: function(newVal, oldVal) {
       this.load();
@@ -65,9 +72,17 @@ Vue.component('loadingimg', {
   },
   methods: {
     load: function() {
+      this.FullImgLoaded = 0;
+      this.SmallImgLoaded = 0;
       if (this.image == undefined || this.image == '') {
         // console.info('no image defined')
       } else {
+        if (this.blur) {
+          var list = ['-webkit-filter','-moz-filter','-o-filter','-ms-filter','filter']
+          for (var i = 0; i < list.length; i++) {
+            this.css[list[i]] = 'blur(' + this.blur + 'px)';
+          }
+        }
         if (this.preview != undefined) {
           this.LoadSmall(this.preview);
         } else if (this.base64 != undefined) {
