@@ -23,6 +23,8 @@ const marked = require('marked');
 const os = require('os');
 const hasha = require('hasha');
 const randomstring = require("randomstring");
+const sizeOf = require('image-size');
+const urlExists = require('url-exists');
 // express packages
 const express = require('express');
 const compression = require('compression');
@@ -125,10 +127,12 @@ app.enable('trust proxy');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 var staticPath = path.join(__dirname, '/www');
+var clanmedia = path.join(__dirname, config.clanmedia);
 app.use(cookieParser(randomstring.generate(100)));
 app.use(fileUpload());
 app.use(compression({ threshold: 0 }));
-app.use(express.static(staticPath));
+app.use('/', express.static(staticPath));
+app.use('/clanmedia/', express.static(clanmedia));
 
 // startup app
 try {
@@ -351,11 +355,20 @@ function edditclandata(playerlvl, clan, overwride) {
 app.post('/rules', function(req, res) {
   playerinf(req,res,function(status) {
     const ReportsFile = config.clanreports + 'player-' + status.accoundid + '.json';
-    var clandetials = {
-      clanid: status.clandetails.clan_id || '',
-      clantag: status.clandetails.tag || '',
-      smallimg: status.clandetails.emblems.x32.portal || '',
-      img: status.clandetails.emblems.x195.portal || ''
+    if (status.clan) {
+      var clandetials = {
+        clanid: status.clandetails.clan_id || '',
+        clantag: status.clandetails.tag || '',
+        smallimg: status.clandetails.emblems.x32.portal || '',
+        img: status.clandetails.emblems.x195.portal || ''
+      }
+    } else {
+      var clandetials = {
+        clanid: '',
+        clantag: '',
+        smallimg: '',
+        img: ''
+      }
     }
     if (fs.existsSync(ReportsFile)) {
       fs.readJson(ReportsFile, (err, reports) => {
@@ -446,67 +459,159 @@ app.post('/reportclan', function(req, res) {
 
 // upload clan images
 app.post('/submitclammedia', function(req, res) {
-  // var req = req;
-  // var res = res;
-  playerinf(req,res,function(status) {
-    // var status = status;
-    try {
-      if (req.files.file && req.body.title && req.body.url && status.clan && status.status && status.Playerlvl < 6 && req.files.file.mimetype.startsWith("image/")) {
-        // fs.writeFile(filename, data,  "binary", function(){...});
-        var imgcount = 0;
-        var claninffile = config.clanmedia + status.clanid + '/claninf.json';
-        if (!fs.existsSync(claninffile)) {
+  var req = req;
+  var res = res;
+  var imgwidth = 0;
+  var imgheight = 0;
+  function response(status) {
+    var status = status;
+    var imgcount = 0;
+    var claninffile = config.clanmedia + status.clanid + '/claninf.json';
+    if (!fs.existsSync(claninffile)) {
+      fs.readJson(config.clandata.allI, function(err,clanslist) {
+        try {
           var claninf = {
             imgcount: imgcount,
-            imgs: []
+            imgs: [],
+            icons: clanslist[status.clanid].emblems,
+            tag: clanslist[status.clanid].tag,
+            color: clanslist[status.clanid].color
           }
-          fs.outputJsonSync(claninffile, claninf)
-        } else {
-          var claninf = fs.readJsonSync(claninffile);
-          imgcount = claninf.imgcount;
+          fs.outputJson(claninffile, claninf, function(err, data) {
+            nextpart();
+          });
+        } catch (e) {
+          console.error(e);
         }
-        var foroutputfile = config.clanmedia + status.clanid + '/media-' + imgcount + '.' + req.files.file.mimetype.replace("image/",'');
-        fs.outputFile(foroutputfile, req.files.file.data, err => {
-          if (err) {
-            console.log(err);
-          }
-          fs.readJson(claninffile, (claninferr, claninfdata) => {
-            // if (config.ffmpeg) {
-            //   shell.exec(config.FfmpegPath + ' -y -i ' + config.clanmedia + status.clanid + '/media-' + imgcount + '.' + req.files.file.mimetype.replace("image/",'') + ' -vf scale=h=40:w=' + 40*clanlenght.length + ' ./www/img/clanicons.min.png', {silent:true}).code
-            // }
-            claninfdata.imgs.push('/media-' + imgcount + '.' + req.files.file.mimetype.replace("image/",''));
+      });
+    } else {
+      fs.readJson(claninffile, function(err, claninf) {
+        imgcount = claninf.imgcount;
+        nextpart();
+      });
+    }
+    function nextpart() {
+      var foroutputfile = config.clanmedia + status.clanid + '/media-' + imgcount + '.' + req.files.file.mimetype.replace("image/",'');
+      fs.outputFile(foroutputfile, req.files.file.data, err => {
+        if (err) {
+          console.log(err);
+        }
+        fs.readJson(claninffile, (claninferr, claninfdata) => {
+          sizeOf(foroutputfile, function (err, dimensions) {
+            imgwidth = dimensions.width;
+            imgheight = dimensions.height;
+            var newres = '';
+            var blur = 27;
+            if (imgwidth > imgheight) {
+              var calculate = imgheight / imgwidth * blur;
+              newres = 'scale=h=' + Math.round(calculate) + ':w=' + blur;
+            } else {
+              var calculate = imgwidth / imgheight * blur;
+              newres = 'scale=h=' + blur + ':w=' + Math.round(calculate);
+            }
+            if (config.ffmpeg) {
+              shell.exec(
+                config.FfmpegPath +
+                ' -y -i ' + foroutputfile +
+                ' -vf ' + newres + ' ' +
+                config.clanmedia + status.clanid + '/media-' + imgcount + '.min.' + req.files.file.mimetype.replace("image/",''), {silent:true}
+              ).code
+            }
+            claninfdata.imgs.push({
+              location: '/media-' + imgcount,
+              filetype: req.files.file.mimetype.replace("image/",''),
+              title: req.body.title,
+              url: req.body.url,
+              imgwidth: imgwidth,
+              imgheight: imgheight
+            });
             claninfdata.imgcount = claninfdata.imgcount + 1;
             fs.outputJson(claninffile, claninfdata, err => {
               if (err) {
                 console.log(err);
               }
             });
-          })
-        });
-        res.json({
-          status: true,
-          servstatus: status,
-          files: req.files.file,
-          body: req.body
-        });
+          });
+        })
+      });
+    }
+  }
+  playerinf(req,res,function(status) {
+    try {
+      if (req.files.file && req.body.title && req.body.url && status.clan && status.status && status.Playerlvl < 6 && req.files.file.mimetype.startsWith("image/")) {
+        if (req.body.url == '') {
+          response(status)
+          res.json({
+            status: true,
+            servstatus: status,
+            files: req.files.file,
+            body: req.body
+          });
+        } else {
+          try {
+            urlExists(req.body.url, function(err, exists) {
+              if (exists) {
+                response(status)
+                res.json({
+                  status: true,
+                  servstatus: status,
+                  files: req.files.file,
+                  body: req.body
+                });
+              } else {
+                res.json({
+                  status: false,
+                  why: 'url'
+                })
+              }
+            })
+          } catch (e) {
+            res.json({
+              status: false,
+              why: 'url'
+            })
+          }
+        }
       } else {
         res.json({
-          status: false
+          status: false,
+          why: 'auth'
         })
       }
     } catch (e) {
       res.json({
-        status: false
+        status: false,
+        why: 'auth'
       })
     }
   });
 });
 
 // get basic clan media
-app.post('/clanmedia', function(req, res) {
-  res.json({
-    status: true
-  })
+app.get('/clanmedia', function(req, res) {
+  fs.readdir(config.clanmedia, function(err, items) {
+    function response() {
+      res.json({
+        status: true,
+        content: contentarr
+      })
+    }
+    var items = items;
+    var contentarr = []
+    function foritems(i) {
+      var i = i;
+      if (items[i]) {
+        fs.readJson(config.clanmedia + items[i] + '/claninf.json', (err, data) => {
+          data['id'] = items[i];
+          contentarr.push(data);
+          foritems(i + 1)
+        })
+      } else {
+        response()
+      }
+    }
+    foritems(0)
+  });
 });
 
 // submit player's clan data

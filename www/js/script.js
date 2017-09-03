@@ -6,12 +6,10 @@ var config = {
   s: '8'
 }
 var ClanMediaComponentData = {
-  list: [
-    {
-      imgs: []
-    }
-  ],
-  yourclan: {},
+  list: [],
+  yourclan: {
+    imgs: []
+  },
   login: {
     status: false,
     clan: false,
@@ -726,18 +724,24 @@ function LoadClanMediaSection() {
       },
       methods: {
         UpdateClanMedia: function() {
-          fetch('/submitclammedia/', {
-            mode: 'cors',
-            method: "post",
-            headers: {
-              'Cache': 'no-cache'
-            }
-          }).then(function(response) {
-            return response.json();
-          }).then(function(status) {
-            console.log(status);
-          });
+          console.log('update clan media');
         }
+      },
+      created: function() {
+        var vm = this;
+        fetch("/clanmedia")
+        .then( function functionName(response) {
+           return response.json();
+        }).then(function(med) {
+          if (med.status) {
+            console.log(ClanMediaComponentData);
+            console.log(med);
+            for (var i = 0; i < med.content.length; i++) {
+              med.content[i]['open'] = false;
+              vm.list.push(med.content[i]);
+            }
+          }
+        });
       }
     });
     new Vue({

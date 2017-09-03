@@ -1,27 +1,40 @@
 <div class="mediatemplate startscreenbox">
   <h1>Clan media</h1>
   <p class="inf">Hier kan je media zien van clan's en zelf zelf de media toevoegen aan jou clan</p>
-  <pre class="yours" v-if="login.status && login.clan && login.playerlvl < 6">
-    <loadingimg :preview="login.clandata.smallimg" :image="login.clandata.img"></loadingimg>
-    <changeclanmedia :clan="login"></changeclanmedia>
-    <button v-on:click="UpdateClanMedia()">submit</button>
-    {{ login.clandata.smallimg }}
-  </pre>
+  <div class="yours" v-if="login.status && login.clan">
+    <div class="myclan">
+      <loadingimg :preview="login.clandata.smallimg" :image="login.clandata.img"></loadingimg>
+      <h1>{{ login.clandata.clantag }}</h1>
+    </div>
+    <changeclanmedia :clan="login" v-if="login.playerlvl < 6"></changeclanmedia>
+    <div v-if="yourclan.imgs.length == 0" class="nope">Jou clan heeft nog geen media om weer te geven :(</div>
+  </div>
   <div class="list">
     <div class="clan" v-for="(item, id) in list">
       <div class="clanicon">
-        <div></div>
+        <loadingimg :preview="item.icons.x24.portal" :image="item.icons.x195.portal"></loadingimg>
+        <h1>{{ item.tag }}</h1>
       </div>
       <div class="clanmedia">
         <div class="clan" v-for="(img, id) in item.imgs" v-if="id < 5">
-          <div class="img"></div>
-          <div class="8bit"></div>
+          <loadingimg :preview="'/clanmedia/' + item.id + img.location + '.min.' + img.filetype" :image="'/clanmedia/' + item.id + img.location + '.' + img.filetype"></loadingimg>
         </div>
-        <div class="morebtn"></div>
       </div>
-      <div class="allmedia" v-if="id > 5">
-        <div class="img"></div>
-        <div class="8bit"></div>
+      <div class="morebtn" v-if='item.imgs.length > 0'>
+        <svg v-if="!item.open" v-on:click="item.open = !item.open" fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+            <path d="M0 0h24v24H0z" fill="none"/>
+        </svg>
+        <svg v-else="!item.open" v-on:click="item.open = !item.open" fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
+            <path d="M0 0h24v24H0z" fill="none"/>
+        </svg>
+      </div>
+    </div>
+    <div class="allmedia" v-for="(item, id) in list" v-if="item.open">
+      <h1>Alle afbeeldingen</h1>
+      <div class="clan" v-for="(img, id) in item.imgs">
+        <loadingimg :preview="'/clanmedia/' + item.id + img.location + '.min.' + img.filetype" :image="'/clanmedia/' + item.id + img.location + '.' + img.filetype"></loadingimg>
       </div>
     </div>
   </div>

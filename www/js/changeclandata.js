@@ -1,7 +1,7 @@
 Vue.component('changeclanmedia', {
   template: '<div class="changeclanmedia">\
-    <div class="button">{{ addtext || "Media toevoegen"}}</div>\
-    <div class="thispopup">\
+    <div class="button" v-on:click="show = !show">{{ addtext || "Media toevoegen"}}</div>\
+    <div class="thispopup" v-if="show">\
       <div class="placeholder">\
         <div class="titles">\
           <h1>{{ clan.clandata.clantag }}</h1>\
@@ -27,11 +27,13 @@ Vue.component('changeclanmedia', {
           <input type=\'text\' v-model="doctitle" placeholder="Title"/>\
           <p>Url <span>*niet verplight</span></p>\
           <input type=\'text\' v-model="docurl" placeholder="Url"/>\
+          <p class="wrong" v-if="urlerr">Moet een url zijn</p>\
+          <p class="wrong" v-else></p>\
         </div>\
         <div class="imgholder">\
           <p class="textpreview">Preview</p>\
           <div class="preview" v-bind:style="{\'background-image\':\'url(\' + image + \')\'}">\
-            <p v-if="docurl != \'\'">\
+            <p v-if="!urlerr && docurl != \'\'">\
               <a :href="docurl" target="_blank" :title="docurl">\
               <svg fill="#ffffff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">\
                   <path d="M0 0h24v24H0z" fill="none"/>\
@@ -42,8 +44,8 @@ Vue.component('changeclanmedia', {
           </div>\
         </div>\
         <div class="submit">\
-          <button class="cancel">Cancel</button>\
-          <button v-on:click="upload" class="update">Update</button>\
+          <button v-on:click="close" :disabled="prossessing" class="cancel">Cancel</button>\
+          <button v-on:click="upload" :disabled="prossessing || urlerr || image == \'\' || typeof(sendimg) != \'object\'" class="update">Update</button>\
         </div>\
       </div>\
     </div>\
@@ -55,11 +57,37 @@ Vue.component('changeclanmedia', {
       sendimg: '',
       doctitle: '',
       docurl: '',
-      inputid: 'input' + _.sample('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6).join('')
+      urlerr: false,
+      inputid: 'input' + _.sample('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6).join(''),
+      show: false,
+      prossessing: false
+    }
+  },
+  watch: {
+    docurl: function(newval) {
+      function isURL(str) {
+        var a  = document.createElement('a');
+        a.href = str;
+        return (a.host && a.host != window.location.host);
+      }
+      if (isURL(newval) || newval == '') {
+        this.urlerr = false;
+      } else {
+        this.urlerr = true;
+      }
     }
   },
   methods: {
+    close: function() {
+      this.show = false;
+      this.doctitle = '';
+      this.docurl = '';
+      this.image = '';
+      this.sendimg = '';
+    },
     upload: function() {
+      var vm = this;
+      vm.prossessing = true;
       var input = document.getElementsByClassName(this.inputid)[0];
       var data = new FormData();
       data.append('file', input.files[0]);
@@ -77,6 +105,12 @@ Vue.component('changeclanmedia', {
         return response.json();
       }).then(function(status) {
         console.log(status);
+        vm.prossessing = false;
+        if (status.status) {
+          vm.close();
+        } else {
+          vm.urlerr = true;
+        }
       });
     },
     uploadimgdragleave: function() {
