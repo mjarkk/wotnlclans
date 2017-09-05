@@ -20,7 +20,7 @@ Vue.component('changeclanmedia', {
               <path d="M0 0h24v24H0z" fill="none"/>\
               <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>\
             </svg>\
-            <p>Speel bestanden hier heen </br>of klik op de upload knop</p>\
+            <p>Sleep bestanden hier heen </br>of klik op de upload knop</p>\
           </div>\
           <input :class="inputid" type=\'file\' accept="image/*" id="imginput" @change="loadFile"/>\
           <p>Title <span>*niet verplight</span></p>\

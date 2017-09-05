@@ -47,6 +47,12 @@
         <p>global map 6,8,10</p>
       </div>
     </div>
+    <div class="thisclanmedia" v-if="Clanmedia.status && Clanmedia.imgs.length > 0">
+      <h1>Media</h1>
+      <div class="mediaimage" v-for="(img,id) in Clanmedia.imgs" v-on:click="displaybig(Clanmedia,id)">
+        <loadingimg :preview="'/clanmedia/' + clan_id + img.location + '.min.' + img.filetype" :image="'/clanmedia/' + clan_id + img.location + '.' + img.filetype"></loadingimg>
+      </div>
+    </div>
     <div class="clandis">
       <h1>over</h1>
       <div class="dis" v-html="dis">{{ dis }}</div>

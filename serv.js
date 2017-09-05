@@ -32,6 +32,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const ejs = require('ejs');
+const cacheResponseDirective = require('express-cache-response-directive');
 // config file (s)
 var config = fs.readJsonSync('./db/config.json');
 var devon = fs.readJsonSync('./db/dev.json');
@@ -130,6 +131,7 @@ var staticPath = path.join(__dirname, '/www');
 var clanmedia = path.join(__dirname, config.clanmedia);
 app.use(cookieParser(randomstring.generate(100)));
 app.use(fileUpload());
+app.use(cacheResponseDirective());
 app.use(compression({ threshold: 0 }));
 app.use('/', express.static(staticPath));
 app.use('/clanmedia/', express.static(clanmedia));
@@ -163,7 +165,12 @@ function playerinf(req,res,callback) {
     var accoundid = check.player.account_id;
     var requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + accoundid + '&access_token=' + check.player.access_token + '&fields=clan_id';
     if (check.player.account_id == 516673968 && config.dev) {
-      accoundid = 503312278;
+      // rebls
+      // accoundid = 503312278;
+      // requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + accoundid + '&fields=clan_id';
+
+      // bro
+      accoundid = 521504275;
       requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + accoundid + '&fields=clan_id';
     }
     fetch(requrl)
@@ -399,7 +406,7 @@ app.post('/rules', function(req, res) {
 // function for clan reports
 app.post('/reportclan', function(req, res) {
   playerinf(req,res,function(status) {
-    if (status.status) {
+    if (status.status && req.body.report && req.body.clan) {
       const reportclan = req.body.clan;
       const report = req.body.report;
       const PlayFile = config.clanreports + 'player-' + status.accoundid + '.json';
@@ -453,6 +460,54 @@ app.post('/reportclan', function(req, res) {
       res.json({status: true});
     } else {
       res.json({status: false})
+    }
+  });
+});
+
+app.post('/removemedia', function(req, res) {
+  var req = req;
+  var res = res;
+  function backend(status) {
+    var filename = req.body.filename;
+    var clanid = status.clanid;
+    var claninffile = config.clanmedia + clanid + '/claninf.json';
+    fs.readJson(claninffile, function(err,claninf) {
+      for (var i = 0; i < claninf.imgs.length; i++) {
+        if (claninf.imgs[i].location == filename) {
+          var filetype = claninf.imgs[i].filetype;
+          claninf.imgs.splice(i,1);
+          fs.outputJson(claninffile, claninf, err => {
+            if (err) return console.error(err)
+          });
+          fs.remove(config.clanmedia + clanid + filename + '.' + filetype, err => {
+            if (err) return console.error(err)
+          });
+          fs.remove(config.clanmedia + clanid + filename + '.min.' + filetype, err => {
+            if (err) return console.error(err)
+          });
+        }
+      }
+    });
+  }
+  playerinf(req,res,function(status) {
+    try {
+      if (req.body.filename && status.clan && status.status && status.Playerlvl < 6) {
+        backend(status)
+        res.json({
+          status: true,
+          statusdata: status
+        });
+      } else {
+        res.json({
+          status: false,
+          why: 'auth'
+        })
+      }
+    } catch (e) {
+      res.json({
+        status: false,
+        why: 'auth'
+      })
     }
   });
 });
@@ -525,6 +580,16 @@ app.post('/submitclammedia', function(req, res) {
               imgwidth: imgwidth,
               imgheight: imgheight
             });
+            if (claninfdata.imgs.length > 10) {
+              var ToRemove = claninfdata.imgs[0];
+              fs.remove(config.clanmedia + status.clanid + ToRemove.location + '.' + ToRemove.filetype, err => {
+                if (err) return console.error(err)
+              });
+              fs.remove(config.clanmedia + status.clanid + ToRemove.location + '.min.' + ToRemove.filetype, err => {
+                if (err) return console.error(err)
+              });
+              claninfdata.imgs.splice(0,1);
+            }
             claninfdata.imgcount = claninfdata.imgcount + 1;
             fs.outputJson(claninffile, claninfdata, err => {
               if (err) {
@@ -538,7 +603,7 @@ app.post('/submitclammedia', function(req, res) {
   }
   playerinf(req,res,function(status) {
     try {
-      if (req.files.file && req.body.title && req.body.url && status.clan && status.status && status.Playerlvl < 6 && req.files.file.mimetype.startsWith("image/")) {
+      if (req.files.file && req.body.title && (req.body.url || req.body.url == '') && status.clan && status.status && status.Playerlvl < 6 && req.files.file.mimetype.startsWith("image/")) {
         if (req.body.url == '') {
           response(status)
           res.json({
@@ -587,13 +652,37 @@ app.post('/submitclammedia', function(req, res) {
   });
 });
 
+app.get('/clanmedia/:clanid', function(req, res) {
+  var clanid = req.params.clanid;
+  fs.readJson(config.clandata.allI, (err, clans) => {
+    if (clans[clanid]) {
+      if (fs.existsSync(config.clanmedia + clanid + '/claninf.json')) {
+        fs.readJson(config.clanmedia + clanid + '/claninf.json', (err, claninf) => {
+          claninf.imgs = claninf.imgs.reverse()
+          claninf['id'] = clanid;
+          claninf['status'] = true;
+          res.json(claninf)
+        });
+      } else {
+        res.json({
+          status: false
+        })
+      }
+    } else {
+      res.json({
+        status: false
+      })
+    }
+  })
+});
+
 // get basic clan media
 app.get('/clanmedia', function(req, res) {
   fs.readdir(config.clanmedia, function(err, items) {
     function response() {
       res.json({
         status: true,
-        content: contentarr
+        content: contentarr.reverse()
       })
     }
     var items = items;
@@ -603,6 +692,7 @@ app.get('/clanmedia', function(req, res) {
       if (items[i]) {
         fs.readJson(config.clanmedia + items[i] + '/claninf.json', (err, data) => {
           data['id'] = items[i];
+          data.imgs = data.imgs.reverse();
           contentarr.push(data);
           foritems(i + 1)
         })
@@ -719,7 +809,12 @@ app.get('/news.html',function(req, res) {
 app.get('/clanname/:clanid', function(req, res) {
   fs.readFile(config.clandata.names, 'utf8', (err, data) => {
     data = JSON.parse(data);
-    res.json(data[req.params.clanid]);
+    res.cacheControl({maxAge: "300min"});
+    if (data[req.params.clanid]) {
+      res.json(data[req.params.clanid]);
+    } else {
+      res.json({})
+    }
   })
 })
 
@@ -902,7 +997,6 @@ function clanstolist() {
                   }
                 }
                 list = _.difference(list, blockedclans);
-                // output the list to a file to use it later
                 fs.outputJson(config.clansfile, list, err => {
                   updateclandata();
                 });

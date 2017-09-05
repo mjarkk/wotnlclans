@@ -1,4 +1,48 @@
+img
+  -webkit-user-select: none
+  -moz-user-select: none
+  -ms-user-select: none
 .mediatemplate
+  .confirmremove
+    position: fixed
+    top: 0px
+    left: 0px
+    height: 100vh
+    width: 100vw
+    display: flex
+    justify-content: center
+    align-items: center
+    display: -webkit-flex
+    -webkit-justify-content: center
+    -webkit-align-items: center
+    background-color: rgba(0, 0, 0, 0.2)
+    z-index: 50
+    .thispopup
+      max-width: 400px
+      background-color: #eee
+      padding: 20px 0px
+      border-radius: 3px
+      h1
+        padding: 10px
+      img
+        width: 100%
+      .options
+        display: flex
+        justify-content: center
+        align-items: center
+        display: -webkit-flex
+        -webkit-justify-content: center
+        -webkit-align-items: center
+        button
+          font-size: 20px
+          padding: 5px 10px
+          margin: 10px 10px 0px 10px
+          border-radius: 3px
+          background-color: #fff
+          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)
+          cursor: pointer
+        button:disabled
+          opacity: 0.6
   .inf
     font-size: 19px
   .yours
@@ -113,6 +157,27 @@
           height: 100%
           width: 180px
           cursor: pointer
+          .click
+            height: 150px
+            width: 180px
+            position: absolute
+            z-index: 31
+            .holder
+              height: 100%
+              width: 100%
+          .removebutton
+            z-index: 32
+            height: 0px
+            width: 0px
+            max-height: 0px
+            max-width: 0px
+            svg
+              z-index: 32
+              position: relative
+              left: 5px
+              top: -37px
+              height: 30px
+              width: 30px
           .imageloader
             height: 100%
             width: 100%
@@ -148,10 +213,32 @@
       height: 200px
       max-height: 200px
       cursor: pointer
+      overflow: hidden
+      .click
+        width: 300px
+        height: 200px
+        position: absolute
+        z-index: 31
+        .holder
+          height: 100%
+          width: 100%
       .imageloader
         width: 300px
         height: 200px
         max-height: 200px
+      .removebutton
+        z-index: 32
+        height: 0px
+        width: 0px
+        max-height: 0px
+        max-width: 0px
+        svg
+          z-index: 32
+          position: relative
+          left: -35px
+          top: 7px
+          height: 30px
+          width: 30px
   @media (max-width: 570px)
     .allmedia
       .clan

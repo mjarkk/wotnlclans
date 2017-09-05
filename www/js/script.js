@@ -6,6 +6,15 @@ var config = {
   s: '8'
 }
 var ClanMediaComponentData = {
+  opened: false,
+  remworking: false,
+  removepopupurl: '',
+  removeitem: '',
+  bigpreview: '',
+  bigimage: '',
+  bigshow: false,
+  bigclan: {},
+  removepopupopen: false,
   list: [],
   yourclan: {
     imgs: []
@@ -14,16 +23,20 @@ var ClanMediaComponentData = {
     status: false,
     clan: false,
     edditclandata: false,
-    claninfo: {
-      clandata: {
-        clanid: '',
-        clantag: '',
-        smallimg: '',
-        img: ''
-      }
+    clandata: {
+      clanid: '',
+      clantag: '',
+      smallimg: '',
+      img: ''
     }
   }
 }
+
+var imageviewer = new Vue({
+  el: '.imageviewer',
+  data: ClanMediaComponentData
+});
+
 var procanjoin = true;
 var prolenght = 0;
 var proneedl = 0;
@@ -140,7 +153,8 @@ var ClanDetailsClanData = {
   'clan_id': 1,
   'CanReportClans': false,
   'ClansReported': {},
-  'smallimage': ''
+  'smallimage': '',
+  'Clanmedia': {}
 }
 
 window.addEventListener('popstate', function (event) {
@@ -168,6 +182,15 @@ var header = new Vue({
   watch: {
     search: function(NewVal, OldVal) {
       clanslistvue.search = NewVal;
+    },
+    displaystats: function(NewVal) {
+      if (NewVal) {
+        ClanMediaComponentData.opened = false;
+        clanslistvue.show = true;
+      } else {
+        ClanMediaComponentData.opened = true;
+        clanslistvue.show = false;
+      }
     }
   },
   methods: {
@@ -370,10 +393,7 @@ function OpenStatusPopup() {
   setTimeout(function () {
     popup.open = true;
     fetch('/news.html', {
-      mode: 'cors',
-      headers: {
-        'Cache': 'no-cache'
-      }
+      mode: 'cors'
     })
     .then(function(response) {
       return response.text();
@@ -455,7 +475,8 @@ function mkclanlist() {
       'resize': document.body.clientWidth,
       'items': clandata,
       'search': '',
-      'img': ''
+      'img': '',
+      'show': true
     },
     methods: {
       open: function(url) {
@@ -486,11 +507,7 @@ if (siteurl.includes("/clan/")) {
   var clanpage = document.getElementsByClassName("clanstatspage")[0]
   clanpage.style.top = '0px'
   sitetitle.backicon = true
-  fetch(siteurl.replace("/clan/","/clanname/"), {
-    headers: {
-      'Cache': 'no-cache'
-    }
-  }).then(function(response) {
+  fetch(siteurl.replace("/clan/","/clanname/")).then(function(response) {
       return response.text()
     }).then(function(body) {
       body = JSON.parse(body);
@@ -655,6 +672,7 @@ function createworker() {
 
 // when a user clicks on a clan
 function openclan(clanid) {
+  var clanid = clanid;
   MkVueData()
   anime({
     targets: '.clanstatspage',
@@ -670,7 +688,6 @@ function openclan(clanid) {
       return response.text()
     }).then(function(body) {
       body = JSON.parse(body);
-      // console.log(body);
       document.title = body.clan_tag + ' | Wot NL/BE clans';
       ClanDetailsClanData.smallimage = body.emblems.x32.portal.replace('http','https');
       ClanDetailsClanData.image = body.emblems.x195.portal.replace('http','https');
@@ -695,7 +712,20 @@ function openclan(clanid) {
       ClanDetailsClanData.bgimage = 'background: -moz-linear-gradient(top, ' + body.color + ' 0%, rgba(238,238,238,0) 100%);\
       background: -webkit-linear-gradient(top, ' + body.color + ' 0%,rgba(238,238,238,0) 100%);\
       background: linear-gradient(to bottom, ' + body.color + ' 0%,rgba(238,238,238,0) 100%);\
-      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=\'' + body.color + '\', endColorstr=\#00eeeeee\',GradientType=0 );'
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=\'' + body.color + '\', endColorstr=\#00eeeeee\',GradientType=0 );';
+      fetch("/clanmedia/" + clanid, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Cache': 'no-cache'
+        },
+        credentials: 'same-origin'
+      })
+      .then( function functionName(response) {
+        return response.json();
+      }).then(function(JsonData) {
+        ClanDetailsClanData.Clanmedia = JsonData;
+      });
     })
 }
 
@@ -723,8 +753,43 @@ function LoadClanMediaSection() {
         return ClanMediaComponentData
       },
       methods: {
+        OpenBigPicture: function(item, imageid) {
+          var img = item.imgs[imageid];
+          var vm = this;
+          vm.bigclan = item;
+          vm.bigimage = imageid;
+          vm.bigpreview = imageid;
+          vm.bigshow = true;
+        },
         UpdateClanMedia: function() {
           console.log('update clan media');
+        },
+        RemoveMedia: function(id, url) {
+          this.removeitem = id;
+          this.removepopupurl = url;
+          this.removepopupopen = true;
+        },
+        removepopupconfirm: function() {
+          var vm = this;
+          vm.remworking = true;
+          fetch("/removemedia", {
+            method: "post",
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Cache': 'no-cache'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+              filename: vm.removeitem
+            })
+          })
+          .then( function functionName(response) {
+             return response.json();
+          }).then(function(JsonData) {
+            vm.remworking = false;
+            vm.removepopupopen = false;
+          });
         }
       },
       created: function() {
@@ -734,8 +799,6 @@ function LoadClanMediaSection() {
            return response.json();
         }).then(function(med) {
           if (med.status) {
-            console.log(ClanMediaComponentData);
-            console.log(med);
             for (var i = 0; i < med.content.length; i++) {
               med.content[i]['open'] = false;
               vm.list.push(med.content[i]);
@@ -746,7 +809,7 @@ function LoadClanMediaSection() {
     });
     new Vue({
       el: '.clanmedia'
-    })
+    });
   });
 }
 
@@ -764,6 +827,13 @@ function MkVueData() {
       return rs.text();
     }).then(function(vuedata) {
       var ClanDetailsMethods = {
+        displaybig: function(item,imageid) {
+          var img = item.imgs[imageid];
+          ClanMediaComponentData.bigclan = item;
+          ClanMediaComponentData.bigimage = imageid;
+          ClanMediaComponentData.bigpreview = imageid;
+          ClanMediaComponentData.bigshow = true;
+        },
         review: function(data) {
           this.reviewcomplete = false;
           this.thanksforsubmit = 'Bedankt voor het beoordelen van deze clan';
