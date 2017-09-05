@@ -104,10 +104,29 @@ Vue.component('changeclanmedia', {
       }).then(function(response) {
         return response.json();
       }).then(function(status) {
-        console.log(status);
         vm.prossessing = false;
         if (status.status) {
           vm.close();
+          setTimeout(function () {
+            var vm = ClanMediaComponentData;
+            fetch("/clanmedia")
+            .then( function functionName(response) {
+               return response.json();
+            }).then(function(med) {
+              if (med.status) {
+                vm.list = []
+                for (var i = 0; i < med.content.length; i++) {
+                  try {
+                    if (vm.login && vm.login.clandata && vm.login.clandata.clanid.toString() == med.content[i].id) {
+                      vm.yourclan = _(med.content[i]).clone();
+                    }
+                  } catch(e) {}
+                  med.content[i]['open'] = false;
+                  vm.list.push(med.content[i]);
+                }
+              }
+            });
+          }, 750);
         } else {
           vm.urlerr = true;
         }

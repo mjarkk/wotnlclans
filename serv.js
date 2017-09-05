@@ -603,7 +603,7 @@ app.post('/submitclammedia', function(req, res) {
   }
   playerinf(req,res,function(status) {
     try {
-      if (req.files.file && req.body.title && (req.body.url || req.body.url == '') && status.clan && status.status && status.Playerlvl < 6 && req.files.file.mimetype.startsWith("image/")) {
+      if (req.files.file && (req.body.title || req.body.title == '') && (req.body.url || req.body.url == '') && status.clan && status.status && status.Playerlvl < 6 && req.files.file.mimetype.startsWith("image/")) {
         if (req.body.url == '') {
           response(status)
           res.json({
@@ -1226,6 +1226,28 @@ function ValidIP(ipaddress) {
     return (true)
   }
   return (false)
+}
+
+if (!config.dev) {
+  console.log('starting timeout for clansearch');
+  function updateclandataTimeout() {
+    setTimeout(function () {
+      updateclandataTimeout();
+      updateclandata();
+    }, 1000 * 60 * 60 * 5);
+    // 1sec * min*hour* 4
+    // 1000 * 60 * 60 * 5
+  }
+  function clanstolistTimeout() {
+    setTimeout(function () {
+      clanstolistTimeout();
+      clanstolist();
+    }, 1000 * 60 * 60 * 24 * 4);
+    // 1sec * min*hour* 4
+    // 1000 * 60 * 60 * 5
+  }
+  updateclandataTimeout();
+  clanstolistTimeout();
 }
 
 // clanstolist();

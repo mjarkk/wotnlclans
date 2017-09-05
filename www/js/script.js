@@ -1,10 +1,3 @@
-// config
-var clandata = [];
-var iconsloaded = false;
-var config = {
-  gm: '8',
-  s: '8'
-}
 var ClanMediaComponentData = {
   opened: false,
   remworking: false,
@@ -31,11 +24,18 @@ var ClanMediaComponentData = {
     }
   }
 }
-
 var imageviewer = new Vue({
   el: '.imageviewer',
   data: ClanMediaComponentData
 });
+
+// config
+var clandata = [];
+var iconsloaded = false;
+var config = {
+  gm: '8',
+  s: '8'
+}
 
 var procanjoin = true;
 var prolenght = 0;
@@ -461,7 +461,7 @@ function backhome() {
   sitetitle.backicon = false;
   anime({
     targets: '.clanstatspage',
-    top: '100vh',
+    top: '120vh',
     easing: 'easeOutCubic',
     duration: 750
   });
@@ -753,6 +753,9 @@ function LoadClanMediaSection() {
         return ClanMediaComponentData
       },
       methods: {
+        open: function(id,what) {
+          this.list[id].open = what;
+        },
         OpenBigPicture: function(item, imageid) {
           var img = item.imgs[imageid];
           var vm = this;
@@ -762,7 +765,7 @@ function LoadClanMediaSection() {
           vm.bigshow = true;
         },
         UpdateClanMedia: function() {
-          console.log('update clan media');
+          this.create();
         },
         RemoveMedia: function(id, url) {
           this.removeitem = id;
@@ -789,22 +792,34 @@ function LoadClanMediaSection() {
           }).then(function(JsonData) {
             vm.remworking = false;
             vm.removepopupopen = false;
+            setTimeout(function () {
+              vm.UpdateClanMedia()
+            }, 750);
+          });
+        },
+        create: function() {
+          var vm = this;
+          fetch("/clanmedia")
+          .then( function functionName(response) {
+             return response.json();
+          }).then(function(med) {
+            if (med.status) {
+              vm.list = []
+              for (var i = 0; i < med.content.length; i++) {
+                try {
+                  if (vm.login && vm.login.clandata && vm.login.clandata.clanid.toString() == med.content[i].id) {
+                    vm.yourclan = _(med.content[i]).clone();
+                  }
+                } catch(e) {}
+                med.content[i]['open'] = false;
+                vm.list.push(med.content[i]);
+              }
+            }
           });
         }
       },
       created: function() {
-        var vm = this;
-        fetch("/clanmedia")
-        .then( function functionName(response) {
-           return response.json();
-        }).then(function(med) {
-          if (med.status) {
-            for (var i = 0; i < med.content.length; i++) {
-              med.content[i]['open'] = false;
-              vm.list.push(med.content[i]);
-            }
-          }
-        });
+        this.create();
       }
     });
     new Vue({
@@ -856,7 +871,7 @@ function MkVueData() {
           .then( function functionName(response) {
              return response.json();
           }).then(function(JsonData) {
-            console.log(JsonData);
+            // console.log(JsonData);
           });
         }
       }

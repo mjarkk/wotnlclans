@@ -7,6 +7,8 @@
 body
   overflow-x: hidden
   overflow-y: scroll
+  max-width: 100vw
+  width: 100vw
   background-color: #E1E2E1
 .imageloader
   display: block
@@ -263,7 +265,7 @@ body
       -webkit-align-items: center
       background-color: rgba(255, 255, 255, 0.1)
       height: 40px
-      width: 110px
+      width: 130px
       margin: 0px
       font-size: 22px
       cursor: pointer
@@ -272,6 +274,11 @@ body
       -moz-user-select: none
       -ms-user-select: none
       user-select: none
+      span
+        font-size: 13px
+        position: relative
+        top: 4px
+        left: 2px
     .option:disabled, .option[disabled]
       color: rgb(96, 96, 96)
     .off
@@ -603,6 +610,7 @@ body
         height: 200px
         width: 300px
         .imageloader
+          cursor: pointer
           display: inline-block
           height: 200px
           width: 300px
@@ -771,6 +779,7 @@ body
     left: 0px
     height: 100px
     width: 100vw
+    max-width: 100vw
     background: rgba(0,0,0,0)
     background: -moz-linear-gradient(top, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%)
     background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(0,0,0,0)), color-stop(100%, rgba(0,0,0,1)))
@@ -783,9 +792,13 @@ body
     align-items: center
     display: -webkit-flex
     -webkit-align-items: center
+    overflow-x: auto
+    overflow-y: hidden
     .listitem
-      height: 80px
-      width: 110px
+      min-height: 80px
+      min-width: 110px
+      max-height: 80px
+      max-width: 110px
       background-size: cover
       background-position: center
       cursor: pointer

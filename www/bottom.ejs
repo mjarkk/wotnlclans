@@ -1,4 +1,4 @@
-    <div class="header">
+    <div class="header" v-cloak>
       <div class="info notflex">
         <h1>
           opties
@@ -105,7 +105,7 @@
         <button class="op2 option"
         v-on:click="displaystats = false"
         :disabled="!MediaIsLoaded"
-        v-bind:class="{off: !displaystats}">Media</button>
+        v-bind:class="{off: !displaystats}">Media<span>beta</span></button>
       </div>
     </div>
     <div class="maincontent">
@@ -142,6 +142,13 @@
         </a>
       </div>
     </div>
+    <noscript>
+      <div class="noscript">
+        <h1 class="text">Sorry deze site heeft javascript nodig</h1>
+        <h1 class="smyle">:(</h1>
+      </div>
+      <link rel="stylesheet" href="/css/nojs.css">
+    </noscript>
     <div class="madeby">
       <p>
         Site gemaakt door <a href="<%= madebylink %>"><%= madeby %></a>
@@ -153,7 +160,7 @@
         {{ html }}
       </div>
     </div>
-    <div class="imageviewer" v-if="bigshow">
+    <div v-cloak class="imageviewer" v-if="bigshow">
       <div class="actions">
         <div class="thistitles">
           <a v-if="bigclan.imgs[bigimage].url != ''" :href="bigclan.imgs[bigimage].url">
@@ -161,7 +168,7 @@
                 <path d="M0 0h24v24H0z" fill="none"/>
                 <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
             </svg>
-            <h1>{{ bigclan.imgs[bigimage].title }}</h1>
+            <h1>{{ bigclan.imgs[bigimage].title || 'Link' }}</h1>
           </a>
           <h1 v-else="bigclan.imgs[bigimage].url != ''">{{ bigclan.imgs[bigimage].title }}</h1>
         </div>

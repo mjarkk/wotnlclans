@@ -30,12 +30,6 @@ On this site you can view the all the NL/BE clans and their stats
 ## Bugs  
 - On Windows you can't get clan data  
 
-## To Do's  
-This is a list of things that still need to be fixed or made before i can official launch the site  
-- (working on) Report not nl/be clans or request a new clan  
-- (working on) A section for someones clan promotions or pictures  
-- :question: Add a Service Worker  
-
 ## Screenshots  
 ![Screenshot1](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s1.png)  
 ![Screenshot2](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s2.png)  
