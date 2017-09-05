@@ -23,18 +23,17 @@ On this site you can view the all the NL/BE clans and their stats
 - After that's dune type: npm start  
 - Now the script will start a local webserver on [localhost port 2020](http://localhost:2020)
 
-## Bugs  
-- ~~Back button in the browser does only change the website url~~  
-- On Windows you can't get clan data  
-- On Windows FFMPEG will not work with resolt the icons on the website don't look sharp and take longer to load  
-- ~~Inside config.json can't change dev to false because of uglify issue I think it has something todo with es6~~  
+## Dev  
+- Start dev server: npm run dev  
+- This will start the server with no uglified javascript, automatic restart the server on serv.js file change, clan search will max search 20.000 clans and a view other small things.  
 
-## Updates  
-- Removed spf.js because i only use only 1 function of it and javascript has a solution for that with only 1 line of code  
+## Bugs  
+- On Windows you can't get clan data  
 
 ## To Do's  
 This is a list of things that still need to be fixed or made before i can official launch the site  
-- A section for someones clan promotions or pictures  
+- (working on) Report not nl/be clans or request a new clan  
+- (working on) A section for someones clan promotions or pictures  
 - :question: Add a Service Worker  
 
 ## Screenshots  
