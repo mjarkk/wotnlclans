@@ -37,6 +37,7 @@
     "node-fetch": "^1.7.1",
     "node-watch": "^0.5.5",
     "nodemon": "^1.11.0",
+    "open-graph": "^0.2.3",
     "pics": "^1.0.3",
     "promptly": "^2.2.0",
     "randomstring": "^1.1.5",

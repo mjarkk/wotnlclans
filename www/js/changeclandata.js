@@ -25,6 +25,7 @@ Vue.component('changeclanmedia', {
           <input :class="inputid" type=\'file\' accept="image/*" id="imginput" @change="loadFile"/>\
           <p>Title <span>*niet verplight</span></p>\
           <input type=\'text\' v-model="doctitle" placeholder="Title"/>\
+          <p class="wrong" v-if="doctitle.length > 40">mag maximaal 40 tekens lang zijn</p>\
           <p>Url <span>*niet verplight</span></p>\
           <input type=\'text\' v-model="docurl" placeholder="Url"/>\
           <p class="wrong" v-if="urlerr">Moet een url zijn</p>\
@@ -45,7 +46,7 @@ Vue.component('changeclanmedia', {
         </div>\
         <div class="submit">\
           <button v-on:click="close" :disabled="prossessing" class="cancel">Cancel</button>\
-          <button v-on:click="upload" :disabled="prossessing || urlerr || image == \'\' || typeof(sendimg) != \'object\'" class="update">Update</button>\
+          <button v-on:click="upload" :disabled="doctitle.length > 40 || prossessing || urlerr || image == \'\' || typeof(sendimg) != \'object\'" class="update">Update</button>\
         </div>\
       </div>\
     </div>\

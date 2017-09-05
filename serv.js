@@ -603,7 +603,14 @@ app.post('/submitclammedia', function(req, res) {
   }
   playerinf(req,res,function(status) {
     try {
-      if (req.files.file && (req.body.title || req.body.title == '') && (req.body.url || req.body.url == '') && status.clan && status.status && status.Playerlvl < 6 && req.files.file.mimetype.startsWith("image/")) {
+      if (req.files.file &&
+        (req.body.title || req.body.title == '') &&
+        (req.body.url || req.body.url == '') &&
+        req.body.url.length > 40 &&
+        status.clan &&
+        status.status &&
+        status.Playerlvl < 6 &&
+        req.files.file.mimetype.startsWith("image/")) {
         if (req.body.url == '') {
           response(status)
           res.json({
@@ -1252,6 +1259,7 @@ if (!config.dev) {
 
 // clanstolist();
 // updateclandata();
+
 uglyfiscript('script.js');
 uglyfiscript('worker.js');
 uglyfiscript('changeclandata.js');
