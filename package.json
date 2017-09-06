@@ -7,7 +7,9 @@
     "// start": "start will start the server for production",
     "start": "node Dev-False.js && node serv.js",
     "// dev": "start will start the server in dev mode",
-    "dev": "node Dev-True.js && ./node_modules/nodemon/bin/nodemon.js serv.js"
+    "dev": "node Dev-True.js && ./node_modules/nodemon/bin/nodemon.js serv.js",
+    "// update": "a easy update sctipt for on the serverside",
+    "update": "cp ./update/update.sh ../update.sh && ../update.sh"
   },
   "repository": {
     "type": "git",
