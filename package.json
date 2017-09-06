@@ -9,7 +9,7 @@
     "// dev": "start will start the server in dev mode",
     "dev": "node Dev-True.js && ./node_modules/nodemon/bin/nodemon.js serv.js",
     "// update": "a easy update sctipt for on the serverside",
-    "update": "cp ./update/update.sh ../update.sh && ../update.sh"
+    "update": "cp ./update/update.sh ../wotnlclans-update.sh && sh ../wotnlclans-update.sh"
   },
   "repository": {
     "type": "git",
