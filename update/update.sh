@@ -2,7 +2,9 @@
 echo "Start backup ..."
 
 cd ..
-mkdir wotnlclans-backup
+if [[ -d ./wotnlclans-backup ]]; then
+    rm -rf ./wotnlclans-backup
+fi
 rm -rf ./wotnlclans/node_modules
 cp -rf ./wotnlclans ./wotnlclans-backup
 
@@ -19,14 +21,13 @@ echo "Copying old files"
 rm -rf ./wotnlclans/db/clanmedia
 rm -rf ./wotnlclans/db/claninf
 rm -rf ./wotnlclans/db/clanreports
-mkdir ./wotnlclans/db/clanmedia
-mkdir ./wotnlclans/db/claninf
-mkdir ./wotnlclans/db/clanreports
-cp -rf ./wotnlclans-backup/db/clanmedia ./wotnlclans/clanmedia
-cp -rf ./wotnlclans-backup/db/claninf ./wotnlclans/claninf
-cp -rf ./wotnlclans-backup/db/clanreports ./wotnlclans/clanreports
-cp ./wotnlclans-backup/db/dev.json ./wotnlclans/dev.json
-cp ./wotnlclans-backup/db/blockedclans.json ./wotnlclans/blockedclans.json
+rm -f ./wotnlclans/db/dev.json
+rm -f ./wotnlclans/db/blockedclans.json
+cp -rf ./wotnlclans-backup/db/clanmedia ./wotnlclans/db/clanmedia
+cp -rf ./wotnlclans-backup/db/claninf ./wotnlclans/db/claninf
+cp -rf ./wotnlclans-backup/db/clanreports ./wotnlclans/db/clanreports
+cp ./wotnlclans-backup/db/dev.json ./wotnlclans/db/dev.json
+cp ./wotnlclans-backup/db/blockedclans.json ./wotnlclans/db/blockedclans.json
 
 echo "Dune Copying old files"
 echo "Installing npm packages"
