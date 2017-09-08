@@ -296,6 +296,22 @@ app.get('/c1/:clanid/:color/html', function(req, res) {
 app.get('/c1/:clanid/:color', function(req, res) {
   ApiC1(req, res)
 });
+
+app.get('/refrechimgs', function(req,res) {
+  playerinf(req,res,function(status) {
+    if (status.status == true && status.clan == true && (config.dev || status.accoundid == 516673968)) {
+      mkimg()
+      res.json({
+        status: true
+      })
+    } else {
+      res.json({
+        status: false
+      })
+    }
+  })
+});
+
 function ApiC1(req, res) {
   var textcolor = 'black';
   var reqcolor = req.params.color;

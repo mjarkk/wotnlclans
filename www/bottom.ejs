@@ -14,7 +14,7 @@
             <path d="M0 0h24v24H0z" fill="none"/>
           </svg>
         </h1>
-        Yay een niuwe site!!! <span v-on:click="status()">Meer Info &amp; waarom</span>
+        Nieuwe site!!! <span v-on:click="status()">Meer Info &amp; waarom</span>
       </div>
       <div class="auth <%if (login) { %>notflex<% } %>" v-if="nothidden">
         <%if (login) { %>
@@ -55,7 +55,7 @@
           </div>
         <% } else { %>
           <div class="login flex">
-            <div><a href="/redirect/login" class="wg-login-button">Login</a> met je wargaming accound</div>
+            <div><a href="/redirect/login" class="wg-login-button">Login</a> met je wargaming account</div>
             <div><a href="/api" class="wg-login-button">API</a> Wot nl clans api site</div>
           </div>
         <% } %>
@@ -87,7 +87,7 @@
         </div>
       </div>
       <div class="search searchbox" v-if="nothidden">
-        <label class="search-label" for="search">ClansZoekken</label>
+        <label class="search-label" for="search">Clans Zoekken</label>
         <input
           type="text"
           v-model="search"
@@ -97,7 +97,7 @@
           v-on:focus="focus('search-label')"
           v-on:blur="blur('search-label')">
       </div>
-      <div class="feedback notflex">Heb je spellingsfouten, surgesties of ander dingen stuur mij (<a href="<%= madebylink %>"><%= madeby %></a>) gerust een berichtje in wot </div>
+      <div class="feedback notflex">Heb je spellingsfouten, suggesties of andere dingen stuur mij (<a href="<%= madebylink %>"><%= madeby %></a>) gerust een berichtje in wot </div>
       <div class="switch notflex">
         <button class="op1 option"
         v-on:click="displaystats = true"

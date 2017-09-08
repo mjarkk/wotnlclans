@@ -46,7 +46,7 @@ Vue.component('changeclanmedia', {
         </div>\
         <div class="submit">\
           <button v-on:click="close" :disabled="prossessing" class="cancel">Cancel</button>\
-          <button v-on:click="upload" :disabled="doctitle.length > 40 || prossessing || urlerr || image == \'\' || typeof(sendimg) != \'object\'" class="update">Update</button>\
+          <button v-on:click="upload" :disabled="doctitle.length > 40 || prossessing || urlerr || image == \'\' || typeof(sendimg) != \'object\'" class="update">Uploaden</button>\
         </div>\
       </div>\
     </div>\

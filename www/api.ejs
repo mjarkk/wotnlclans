@@ -42,7 +42,7 @@
         </div>
         <div class="err" v-if="c1.err"><p>{{ c1.err }}</p></div>
         <div class="onsite" v-if="!c1.err">
-          <p>code voor op je site</p>
+          <p>Code voor op je site</p>
           <textarea>{{ c1.output }}</textarea>
         </div>
         <div class="iframe" v-if="!c1.err">
@@ -56,21 +56,12 @@
       </div>
       <div class="item morewidth">
         <h1>Ad voor op je site</h1>
-        <p class="inportant">
-          Het beste is om de afbeelding te downloaden vanaf deze site inplaats van een link gebruiken
-        </p>
-        <div class="onsite">
-          <p>Groot</p>
-          <textarea class="small">{{ c2.big }}</textarea>
-        </div>
+        <p class="inportant">Het beste is om de afbeelding te downloaden vanaf deze site inplaats van een link gebruiken</p>
+        <div class="onsite"><p>Groot</p><textarea class="small">{{ c2.big }}</textarea></div>
         <div class="imgholder"><img :src="c2.big"></div>
-        <div class="onsite">
-          <p>Klijn</p>
-          <textarea class="small">{{ c2.small }}</textarea>
-        </div>
+        <div class="onsite"><p>Klijn</p><textarea class="small">{{ c2.small }}</textarea></div>
         <div class="imgholder"><img :src="c2.small"></div>
       </div>
-
     </div>
     <script src='/dyjs/vue.js'></script>
     <script src='/js/anime.min.js'></script>
