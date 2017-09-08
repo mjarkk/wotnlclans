@@ -1,5 +1,5 @@
 # World of tanks NL/BE clans    
-The new wot nl/be clans site as update for [wotnlclans.mkopenga.com](https://wotnlclans.mkopenga.com)  
+The new wot nl/be clans site hosted on [wotnlclans.mkopenga.com](https://wotnlclans.mkopenga.com)  
 On this site you can view the all the NL/BE clans and their stats  
 
 ## Why?  
@@ -22,6 +22,7 @@ On this site you can view the all the NL/BE clans and their stats
 - Inside the cloned folder open a terminal and type: npm i  
 - After that's dune type: npm start  
 - Now the script will start a local webserver on [localhost port 2020](http://localhost:2020)
+- If you use linux I recomment to install: graphicsmagick  
 
 ## Dev  
 - Start dev server: npm run dev  
@@ -29,7 +30,7 @@ On this site you can view the all the NL/BE clans and their stats
 
 ## Bugs  
 - On Windows you can't get clan data  
-- Start script may not start on windows, solution run "node Dev-False.js" and then "node serv.js"
+- Start script may not start on windows, solution run "node Dev-False.js" and then "node serv.js"   
 
 ## Screenshots  
 ![Screenshot1](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s1.png)  
