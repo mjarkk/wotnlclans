@@ -78,7 +78,20 @@ Vue.component('loadingimg', {
   props: ['preview','image','base64','blur'],
   watch: {
     image: function(newVal, oldVal) {
-      this.load();
+      this.FullImgLoaded = 0;
+      this.LoadBig();
+    },
+    preview: function(newVal, oldVal) {
+      if (newVal && newVal != '') {
+        this.SmallImgLoaded = 0;
+        this.LoadSmall(newVal);
+      }
+    },
+    base64: function(newVal, oldVal) {
+      if (newVal && newVal != '') {
+        this.SmallImgLoaded = 0;
+        this.LoadSmall(newVal);
+      }
     }
   },
   methods: {
