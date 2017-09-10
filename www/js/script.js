@@ -83,12 +83,18 @@ Vue.component('loadingimg', {
     },
     preview: function(newVal, oldVal) {
       if (newVal && newVal != '') {
+        if (newVal.startsWith('http://') && location.protocol == 'https') {
+          newVal = newVal.replace('http://', 'https://')
+        }
         this.SmallImgLoaded = 0;
         this.LoadSmall(newVal);
       }
     },
     base64: function(newVal, oldVal) {
       if (newVal && newVal != '') {
+        if (newVal.startsWith('http://') && location.protocol == 'https') {
+          newVal = newVal.replace('http://', 'https://')
+        }
         this.SmallImgLoaded = 0;
         this.LoadSmall(newVal);
       }
@@ -119,7 +125,11 @@ Vue.component('loadingimg', {
     LoadBig: function() {
       var thisvue = this;
       var img = new Image();
-      img.src = this.image;
+      if (thisvue.image.startsWith('http://') && location.protocol == 'https') {
+        img.src = thisvue.image.replace('http://', 'https://');
+      } else {
+        img.src = thisvue.image;
+      }
       img.onload = function() {
         thisvue.FullSrc = img.src;
         thisvue.FullImgLoaded = 1;
