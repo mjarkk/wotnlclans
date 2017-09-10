@@ -146,6 +146,7 @@ try {
   console.log(colors.red('server can\'t start most likly because of another program that is using the same port'));
 }
 
+// a list with all clan roles available in world of tanks
 var clanroles = [
   'commander',
   'executive_officer',
@@ -289,14 +290,7 @@ app.get('/mediatemplate', function(req, res) {
   res.render('mediatemplate');
 })
 
-// api for iframes on someones website
-app.get('/c1/:clanid/:color/html', function(req, res) {
-  ApiC1(req, res)
-});
-app.get('/c1/:clanid/:color', function(req, res) {
-  ApiC1(req, res)
-});
-
+// a url for fixing the clan icons
 app.get('/refrechimgs', function(req,res) {
   playerinf(req,res,function(status) {
     if (status.status == true && status.clan == true && (config.dev || status.accoundid == 516673968)) {
@@ -310,6 +304,14 @@ app.get('/refrechimgs', function(req,res) {
       })
     }
   })
+});
+
+// api for iframes on someones website
+app.get('/c1/:clanid/:color/html', function(req, res) {
+  ApiC1(req, res)
+});
+app.get('/c1/:clanid/:color', function(req, res) {
+  ApiC1(req, res)
 });
 
 function ApiC1(req, res) {
@@ -335,7 +337,7 @@ function ApiC1(req, res) {
         textcolor: textcolor || '',
         title: '[' + clans[clanpos].clan_tag + ']'  || '',
         rating: clans[clanpos].efficiency.value || '',
-        place: i + 1 || ''
+        place: clanpos + 1 || ''
       });
     } else {
       res.render('api-c1', {

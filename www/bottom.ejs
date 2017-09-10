@@ -113,42 +113,40 @@
         <clanmedia></clanmedia>
       </div>
       <div class="clanslist startscreenbox v-l" v-cloak v-if="show">
-        <h1>Clans</h1>
-        <div class="listheader">
-          <div class="icon" v-if="resize > 415"></div>
-          <div class="cound">#</div>
-          <div class="name">Tag</div>
-          <div class="clanrating">Rating</div>
-          <div class="winrate">Win</div>
-          <div class="leden" v-if="resize > 365">Leden</div>
-          <div class="s" v-if="resize > 515">Strongholds</div>
-          <div class="gm" v-if="resize > 625">Global map</div>
+        <div class="side1">
+          <h1>Clans</h1>
+          <div class="listheader">
+            <div class="icon" v-if="resize > 415"></div>
+            <div class="cound">#</div>
+            <div class="name">Tag</div>
+            <div class="clanrating">Rating</div>
+            <div class="winrate">Win</div>
+            <div class="leden" v-if="resize > 365">Leden</div>
+            <div class="s" v-if="resize > 515">Strongholds</div>
+            <div class="gm" v-if="resize > 625">Global map</div>
+          </div>
+          <a v-on:click="open(item.id)" class="items" v-for="(item, id) in items" v-bind:id="'list-' + id" v-if="item.tag.toLowerCase().indexOf(search.toLowerCase()) !== -1">
+            <div v-bind:style="{'background-position': item.pos, 'background-image': img}" class="icon listicons" v-if="resize > 415"></div>
+            <div class="cound">{{ id + 1 }}</div>
+            <div class="name">{{ item.tag }}<div v-if='!item.tag' class='line'></div></div>
+            <div class="clanrating">{{ item.rate }}<div v-if='!item.rate' class='line'></div></div>
+            <div class="winrate">{{ item.win }}<div v-if='!item.win' class='line'></div></div>
+            <div class="leden" v-if="resize > 365">{{ item.leden }}
+              <div v-if='!item.leden' class='line'></div>
+            </div>
+            <div class="s" v-if="resize > 515">{{ item.s[item.fun('s')] }}
+              <div v-if='!item.s["6"]' class='line'></div>
+            </div>
+            <div class="gm" v-if="resize > 625">{{ item.gm[item.fun('gm')] }}
+              <div v-if='!item.gm["6"]' class='line'></div>
+            </div>
+          </a>
         </div>
-        <a v-on:click="open(item.id)" class="items" v-for="(item, id) in items" v-bind:id="'list-' + id" v-if="item.tag.toLowerCase().indexOf(search.toLowerCase()) !== -1">
-          <div v-bind:style="{'background-position': item.pos, 'background-image': img}" class="icon listicons" v-if="resize > 415"></div>
-          <div class="cound">{{ id + 1 }}</div>
-          <div class="name">{{ item.tag }}<div v-if='!item.tag' class='line'></div></div>
-          <div class="clanrating">{{ item.rate }}<div v-if='!item.rate' class='line'></div></div>
-          <div class="winrate">{{ item.win }}<div v-if='!item.win' class='line'></div></div>
-          <div class="leden" v-if="resize > 365">{{ item.leden }}
-            <div v-if='!item.leden' class='line'></div>
-          </div>
-          <div class="s" v-if="resize > 515">{{ item.s[item.fun('s')] }}
-            <div v-if='!item.s["6"]' class='line'></div>
-          </div>
-          <div class="gm" v-if="resize > 625">{{ item.gm[item.fun('gm')] }}
-            <div v-if='!item.gm["6"]' class='line'></div>
-          </div>
-        </a>
+        <div class="side2">
+          <h1>Heb jij een link of poster die hier moet staan stuur mij dan een berichtje in wot: <a href="<%= madebylink %>"><%= madeby %></a></h1>
+        </div>
       </div>
     </div>
-    <noscript>
-      <div class="noscript">
-        <h1 class="text">Sorry deze site heeft javascript nodig</h1>
-        <h1 class="smyle">:(</h1>
-      </div>
-      <link rel="stylesheet" href="/css/nojs.css">
-    </noscript>
     <div class="madeby">
       <p>
         Site gemaakt door <a href="<%= madebylink %>"><%= madeby %></a>
@@ -194,9 +192,9 @@
     <script src='/dyjs/vue.js'></script>
     <script src='/js/anime.min.js'></script>
     <script src='/dyjs/script.js'></script>
-    <script src='/js/underscore.min.js'></script>
-    <script src='/dyjs/changeclandata.js'></script>
-    <script>
+    <script async src='/js/underscore.min.js'></script>
+    <script defer src='/dyjs/changeclandata.js'></script>
+    <script defer>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -204,5 +202,12 @@
       ga('create', 'UA-77662251-2', 'auto');
       ga('send', 'pageview');
     </script>
+    <noscript>
+      <div class="noscript">
+        <h1 class="text">Sorry deze site heeft javascript nodig</h1>
+        <h1 class="smyle">:(</h1>
+      </div>
+      <link rel="stylesheet" href="/css/nojs.css">
+    </noscript>
   </body>
 </html>
