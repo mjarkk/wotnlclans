@@ -1255,29 +1255,29 @@ function ValidIP(ipaddress) {
   return (false)
 }
 
-// if (!config.dev) {
-//   console.log('starting timeout for clansearch');
-//   function updateclandataTimeout() {
-//     setTimeout(function () {
-//       updateclandataTimeout();
-//       updateclandata();
-//     }, 1000 * 60 * 60 * 5);
-//     // 1sec * min*hour* 4
-//     // 1000 * 60 * 60 * 5
-//   }
-//   function clanstolistTimeout() {
-//     setTimeout(function () {
-//       clanstolistTimeout();
-//       clanstolist();
-//     }, 1000 * 60 * 60 * 24 * 4);
-//     // 1sec * min*hour* 4
-//     // 1000 * 60 * 60 * 5
-//   }
-//   updateclandataTimeout();
-//   clanstolistTimeout();
-// }
+if (!config.dev) {
+  console.log('starting timeout for clansearch');
+  function updateclandataTimeout() {
+    setTimeout(function () {
+      updateclandataTimeout();
+      updateclandata();
+    }, 1000 * 60 * 60 * 5);
+    // 1sec * min*hour* 4
+    // 1000 * 60 * 60 * 5
+  }
+  function clanstolistTimeout() {
+    setTimeout(function () {
+      clanstolistTimeout();
+      clanstolist();
+    }, 1000 * 60 * 60 * 24 * 4);
+    // 1sec * min*hour* 4
+    // 1000 * 60 * 60 * 5
+  }
+  updateclandataTimeout();
+  clanstolistTimeout();
+}
 
-clanstolist();
+// clanstolist();
 // updateclandata();
 
 uglyfiscript('script.js');
