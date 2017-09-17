@@ -1190,11 +1190,13 @@ function mkimg() {
           img.write('./www/img/clanicons.png', () => {
             console.log('done converting all clan icon into one file');
             if (config.ffmpeg) {
-              // for some reason the browser has a limit to the amout of pixel an image can have.
-              // because the image looks bad on full resolution ffmpeg resizes it to 40 * the amout of clans
-              fs.readJson(config.clandata.all, (err4, clanlenght) => {
-                shell.exec(config.FfmpegPath + ' -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*clanlenght.length + ' ./www/img/clanicons.min.png', {silent:true}).code
-              })
+              // for some reason some servers will crach at the moment the script creates a small version of the clan icons list
+              // i'm still not shure why but i think a small timeout will do the job
+              setTimeout(function () {
+                fs.readJson(config.clandata.all, (err4, clanlenght) => {
+                  shell.exec(config.FfmpegPath + ' -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*clanlenght.length + ' ./www/img/clanicons.min.png', {silent:true,async:true}).code
+                })
+              }, 5000);
             }
           });
         });
@@ -1253,29 +1255,29 @@ function ValidIP(ipaddress) {
   return (false)
 }
 
-if (!config.dev) {
-  console.log('starting timeout for clansearch');
-  function updateclandataTimeout() {
-    setTimeout(function () {
-      updateclandataTimeout();
-      updateclandata();
-    }, 1000 * 60 * 60 * 5);
-    // 1sec * min*hour* 4
-    // 1000 * 60 * 60 * 5
-  }
-  function clanstolistTimeout() {
-    setTimeout(function () {
-      clanstolistTimeout();
-      clanstolist();
-    }, 1000 * 60 * 60 * 24 * 4);
-    // 1sec * min*hour* 4
-    // 1000 * 60 * 60 * 5
-  }
-  updateclandataTimeout();
-  clanstolistTimeout();
-}
+// if (!config.dev) {
+//   console.log('starting timeout for clansearch');
+//   function updateclandataTimeout() {
+//     setTimeout(function () {
+//       updateclandataTimeout();
+//       updateclandata();
+//     }, 1000 * 60 * 60 * 5);
+//     // 1sec * min*hour* 4
+//     // 1000 * 60 * 60 * 5
+//   }
+//   function clanstolistTimeout() {
+//     setTimeout(function () {
+//       clanstolistTimeout();
+//       clanstolist();
+//     }, 1000 * 60 * 60 * 24 * 4);
+//     // 1sec * min*hour* 4
+//     // 1000 * 60 * 60 * 5
+//   }
+//   updateclandataTimeout();
+//   clanstolistTimeout();
+// }
 
-// clanstolist();
+clanstolist();
 // updateclandata();
 
 uglyfiscript('script.js');
