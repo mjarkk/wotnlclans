@@ -1,3 +1,14 @@
+Object.defineProperty(Array.prototype, 'chunk_inefficient', {
+  value: function(chunkSize) {
+    var array=this;
+    return [].concat.apply([],
+      array.map(function(elem,i) {
+        return i%chunkSize ? [] : [array.slice(i,i+chunkSize)];
+      })
+    );
+  }
+});
+
 var ClanMediaComponentData = {
   opened: false,
   remworking: false,
@@ -498,7 +509,7 @@ function mkclanlist() {
       'resize': document.body.clientWidth,
       'items': clandata,
       'search': '',
-      'img': '',
+      'img': [],
       'show': true
     },
     methods: {
@@ -577,7 +588,6 @@ function getclanlist() {
   }).then(function(firstload) {
     progressbar(30)
     firstload = JSON.parse(firstload)
-    var pos = 0;
     for (var i = 0; i < firstload.length; i++) {
       var j = firstload[i];
       clandata.push({
@@ -606,10 +616,10 @@ function getclanlist() {
           "10": undefined,
           'normal': undefined
         },
-        pos: '-' + pos + 'px 0px',
+        imgid: Math.floor(i / 100),
+        pos: '-' + ((i - (Math.floor(i / 100) * 100)) * 40) + 'px 0px',
         fun: function (i) {return (config[i])}
       })
-      pos += 40;
     }
     fetch('/clandata-load2/', {
       mode: 'cors',
@@ -652,35 +662,48 @@ function getclanlist() {
 // load clan icons
 function addclanicons() {
   LoadClanMediaSection()
-  var listicons = document.getElementsByClassName("listicons")
-  var objImage = new Image();
-  objImage.src ='/clanicons.png';
-  objImage.onload = function(e) {
-    progressbar(100)
-    clanslistvue.img = 'url("' + objImage.src + '")';
-    for (var i = 0; i < listicons.length; i++) {
-      listicons[i].style.backgroundImage = 'url("' + objImage.src + '")';
-      listicons[i].style.opacity = 0;
-    }
-    function animetethis(l) {
-      requestAnimationFrame(function(){
-        l = Math.round(l * 100) / 100;
-        for (var i = 0; i < listicons.length; i++) {
-          listicons[i].style.opacity = l;
-        }
-        if (l + (0.01 * (l / 0.01)) < 1) {
-          animetethis(l + (0.01 * (l / 0.01)))
-        } else if (l !== 1) {
-          animetethis(1)
-        } else {
-          iconsloaded = true;
-        }
-      });
-    }
-    if (listicons.length > 0) {
-      animetethis(0.01)
+  var listiconsselect = document.getElementsByClassName("listicons")
+  var listiconsall = []
+  for (var i = 0; i < listiconsselect.length; i++) {
+    listiconsall.push(listiconsselect[i])
+  }
+  var chunkicons = listiconsall.chunk_inefficient(100)
+  function loadchunk(i) {
+    var listicons = chunkicons[i];
+    var objImage = new Image();
+    objImage.src ='/img/clanicons-' + i + '.min.png';
+    objImage.onload = function(e) {
+      progressbar(100)
+      clanslistvue.img.push('url("' + objImage.src + '")')
+      for (var j = 0; j < listicons.length; j++) {
+        listicons[j].style.opacity = 0;
+        listicons[j].style.backgroundPosition = '-' + (j*40) + 'px 0px';
+        listicons[j].style.backgroundImage = 'url("' + objImage.src + '")';
+      }
+      if (chunkicons[i + 1]) {
+        loadchunk(i + 1)
+      }
+      function animetethis(l) {
+        requestAnimationFrame(function(){
+          l = Math.round(l * 100) / 100;
+          for (var i = 0; i < listicons.length; i++) {
+            listicons[i].style.opacity = l;
+          }
+          if (l + (0.01 * (l / 0.01)) < 1) {
+            animetethis(l + (0.01 * (l / 0.01)))
+          } else if (l !== 1) {
+            animetethis(1)
+          } else {
+            iconsloaded = true;
+          }
+        });
+      }
+      if (listicons.length > 0) {
+        animetethis(0.01)
+      }
     }
   }
+  loadchunk(0)
 }
 
 // create webworker (this is for later use)

@@ -811,18 +811,6 @@ app.get('/redirect/:where', function (req, res) {
   }
 })
 
-// reqest for clanicons
-// This is 1 image because that's faster to serv
-app.get('/clanicons.png', function (req, res) {
-  res.setHeader('Cache-Control', 'no-cache');
-  res.set('Content-Type', 'image/png');
-  if (config.ffmpeg) {
-    res.sendFile(path.resolve('./www/img/clanicons.min.png'));
-  } else {
-    res.sendFile(path.resolve('./www/img/clanicons.png'));
-  }
-})
-
 // serv the news.md file as html
 app.get('/news.html',function(req, res) {
   fs.readFile(config.news, 'utf8', (err, data) => {
@@ -1172,38 +1160,62 @@ function mkimg() {
     var imgs = [];
     function reqimg(i) {
       fetch(data[i].emblems.x64.wot)
-        .then(function(res) {
-          return res.buffer();
-        }).then(function(body) {
-          imgs.push(body);
-          console.log("img: " + i);
-          if (data[i+1]) {
-            reqimg(i+1)
+      .then(function(res) {
+        return res.buffer();
+      }).then(function(body) {
+        imgs.push(body);
+        console.log("img: " + i);
+        if (data[i+1]) {
+          reqimg(i+1)
+        } else {
+          createimg()
+        }
+      });
+    }
+    var multipleimgs = [];
+    function createimg() {
+      multipleimgs = imgs.chunk_inefficient(100);
+      startmerge(0)
+    }
+    function startmerge(to) {
+      var tomerge = multipleimgs[to];
+      mergeImg(tomerge).then((img) => {
+        img.write('./www/img/clanicons-' + to + '.png', () => {
+          if (multipleimgs[to + 1]) {
+            startmerge(to + 1)
           } else {
-            createimg()
+            console.log('dune getting all clan icons');
+            resizeimgs(0)
           }
         });
+      });
     }
-    function createimg() {
-      mergeImg(imgs)
-        .then((img) => {
-          img.write('./www/img/clanicons.png', () => {
-            console.log('done converting all clan icon into one file');
-            if (config.ffmpeg) {
-              // for some reason some servers will crach at the moment the script creates a small version of the clan icons list
-              // i'm still not shure why but i think a small timeout will do the job
-              setTimeout(function () {
-                fs.readJson(config.clandata.all, (err4, clanlenght) => {
-                  shell.exec(config.FfmpegPath + ' -y -i ./www/img/clanicons.png -vf scale=h=40:w=' + 40*clanlenght.length + ' ./www/img/clanicons.min.png', {silent:true,async:true}).code
-                })
-              }, 5000);
-            }
-          });
-        });
+    function resizeimgs(open) {
+      var dimensions = sizeOf('./www/img/clanicons-' + open + '.png');
+      console.log(dimensions.width, dimensions.height);
+      var listicons = dimensions.width / dimensions.height;
+      shell.exec(config.FfmpegPath + ' -y -i ./www/img/clanicons-' + open + '.png -vf scale=h=40:w=' + 40*listicons + ' ./www/img/clanicons-' + open + '.min.png', {silent:true,async:true}).code
+      if (multipleimgs[open + 1]) {
+        resizeimgs(open + 1)
+      } else {
+        console.log('wrote all icons to file');
+      }
     }
     reqimg(0)
   })
 }
+
+// Create array chunks
+Object.defineProperty(Array.prototype, 'chunk_inefficient', {
+    value: function(chunkSize) {
+        var array=this;
+        return [].concat.apply([],
+            array.map(function(elem,i) {
+                return i%chunkSize ? [] : [array.slice(i,i+chunkSize)];
+            })
+        );
+    }
+});
 
 // validation functions from old site
 function checkx(i) {
