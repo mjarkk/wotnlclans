@@ -30,7 +30,8 @@ On this site you can view the all the NL/BE clans and their stats
 
 ## Bugs  
 - On Windows you can't get clan data  
-- Start script may not start on windows, solution run "node Dev-False.js" and then "node serv.js"   
+- Start script may not start on windows, solution run "node Dev-False.js" or "node Dev-True.js" and then "node serv.js"   
+- The script will crash after a view days depending on the ram size  
 
 ## Screenshots  
 ![Screenshot1](https://github.com/mjarkk/wotnlclans/blob/master/www/img/s1.png)  

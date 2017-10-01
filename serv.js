@@ -1169,6 +1169,7 @@ function mkimg() {
           reqimg(i+1)
         } else {
           createimg()
+          return false;
         }
       });
     }
@@ -1181,11 +1182,14 @@ function mkimg() {
       var tomerge = multipleimgs[to];
       mergeImg(tomerge).then((img) => {
         img.write('./www/img/clanicons-' + to + '.png', () => {
+          img = null
           if (multipleimgs[to + 1]) {
             startmerge(to + 1)
           } else {
             console.log('dune getting all clan icons');
+            tomerge = null
             resizeimgs(0)
+            return false;
           }
         });
       });
@@ -1199,6 +1203,8 @@ function mkimg() {
         resizeimgs(open + 1)
       } else {
         console.log('wrote all icons to file');
+        imgs = []
+        return false;
       }
     }
     reqimg(0)
@@ -1207,14 +1213,14 @@ function mkimg() {
 
 // Create array chunks
 Object.defineProperty(Array.prototype, 'chunk_inefficient', {
-    value: function(chunkSize) {
-        var array=this;
-        return [].concat.apply([],
-            array.map(function(elem,i) {
-                return i%chunkSize ? [] : [array.slice(i,i+chunkSize)];
-            })
-        );
-    }
+  value: function(chunkSize) {
+    var array=this;
+    return [].concat.apply([],
+      array.map(function(elem,i) {
+        return i%chunkSize ? [] : [array.slice(i,i+chunkSize)];
+      })
+    );
+  }
 });
 
 // validation functions from old site
