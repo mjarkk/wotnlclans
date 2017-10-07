@@ -145,6 +145,9 @@
         </div>
         <div class="side2">
           <h1>Heb jij een link of poster die hier moet staan stuur mij dan een bericht in wot: <a href="<%= madebylink %>"><%= madeby %></a></h1>
+          <div class="ads" v-if="ShowAds">
+            <a v-for="item in ads" :href="item.href" target="_blank"><img :src="item.src"></a>
+          </div>
         </div>
       </div>
     </div>

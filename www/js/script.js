@@ -510,7 +510,12 @@ function mkclanlist() {
       'items': clandata,
       'search': '',
       'img': [],
-      'show': true
+      'show': true,
+      'ShowAds': false,
+      'ads': [{
+        href: 'https://www.worldoftanksinfo.be/',
+        src: '/img/promo/woti.png'
+      }]
     },
     methods: {
       open: function(url) {
@@ -668,6 +673,7 @@ function addclanicons() {
     listiconsall.push(listiconsselect[i])
   }
   var chunkicons = listiconsall.chunk_inefficient(100)
+  clanslistvue.ShowAds = true
   function loadchunk(i) {
     var listicons = chunkicons[i];
     var objImage = new Image();
