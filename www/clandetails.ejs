@@ -7,10 +7,10 @@
   <div class="claniconholder">
     <div class="iconholder2">
       <p>{{ clantag }}</p>
-      <loadingimg :preview="smallimage" :image="image"></loadingimg>
+      <loadingimg v-if="!showoffline" :preview="smallimage" :image="image"></loadingimg>
     </div>
   </div>
-  <div class="claninfo">
+  <div class="claninfo" v-if="!showoffline">
     <div class="links">
       <a v-bind:href="wglink">Wargaming</a>
       <a v-if="site != ''" target="_blank" v-bind:href="site">Clan website</a>
@@ -56,6 +56,15 @@
     <div class="clandis">
       <h1>over</h1>
       <div class="dis" v-html="dis">{{ dis }}</div>
+    </div>
+  </div>
+  <div class="claninfo detialsoffline" v-else="!showoffline">
+    <div class="offlineinfo">
+      <h1>Clan Is niet offline beschikbaar</h1>
+      <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+      </svg>
     </div>
   </div>
 </div>

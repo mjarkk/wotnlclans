@@ -145,8 +145,8 @@
         </div>
         <div class="side2">
           <h1>Heb jij een link of poster die hier moet staan stuur mij dan een bericht in wot: <a href="<%= madebylink %>"><%= madeby %></a></h1>
-          <div class="ads" v-if="ShowAds">
-            <a v-for="item in ads" :href="item.href" target="_blank"><img :src="item.src"></a>
+          <div class="ads" v-if="ShowAds && checkedwebp != undefined">
+            <a v-for="item in ads" :href="item.href" target="_blank"><img v-if="checkedwebp == false" :src="item.src"><img v-if="checkedwebp == true" :src="item.webp"></a>
           </div>
         </div>
       </div>
@@ -193,11 +193,19 @@
         :style="{'background-image': 'url(' + '/clanmedia/' + bigclan.id + img.location + '.' + img.filetype + ')'}"></div>
       </div>
     </div>
+    <div class="offline" v-bind:class="{ deviceoffline: !isonline }" v-cloak>OFFLINE</div>
     <script src='/dyjs/vue.js'></script>
     <script src='/js/anime.min.js'></script>
     <script src='/dyjs/script.js'></script>
     <script async src='/js/underscore.min.js'></script>
     <script defer src='/dyjs/changeclandata.js'></script>
+    <noscript>
+      <div class="noscript">
+        <h1 class="text">Sorry deze site heeft javascript nodig</h1>
+        <h1 class="smyle">:(</h1>
+      </div>
+      <link rel="stylesheet" href="/css/nojs.css">
+    </noscript>
     <script defer>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -206,12 +214,12 @@
       ga('create', 'UA-77662251-2', 'auto');
       ga('send', 'pageview');
     </script>
-    <noscript>
-      <div class="noscript">
-        <h1 class="text">Sorry deze site heeft javascript nodig</h1>
-        <h1 class="smyle">:(</h1>
-      </div>
-      <link rel="stylesheet" href="/css/nojs.css">
-    </noscript>
+    <script defer>
+      if('serviceWorker' in navigator) {
+        navigator.serviceWorker
+        .register('/serviceworker.js')
+        .then(function() { console.log("Service Worker Registered"); });
+      }
+    </script>
   </body>
 </html>

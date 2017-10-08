@@ -80,7 +80,54 @@ function uglyfiscript(name) {
   })
 }
 
-// made by json
+// update serviceworker on file change
+setTimeout(function () {
+  watch('./www/', {recursive: true}, function(evt, name) {
+    if (name != 'www/swconf.js') {
+      updateserviceworker()
+    }
+  })
+}, 2000);
+function updateserviceworker() {
+  var SwVersionFile = './db/sw_version.json';
+  fs.readJson(config.clandata.firstload, (err, data) => {
+    fs.readJson(SwVersionFile, (err, version) => {
+      swversion = version.version
+      var list = data.chunk_inefficient(100)
+      var filesToCache = [
+        '/',
+        '/css/home.css',
+        '/dyjs/vue.js',
+        '/js/anime.min.js',
+        '/dyjs/script.js',
+        '/js/underscore.min.js',
+        '/dyjs/changeclandata.js',
+        '/manifest.json',
+        '/clan/true',
+        '/mediatemplate',
+        '/img/promo/woti.png',
+        '/css/media.css',
+        '/cache-polyfill.js'
+      ]
+      for (var i = 0; i < list.length; i++) {
+        filesToCache.push('/img/clanicons-' + i + '.min.png');
+      }
+      fs.outputFile('./www/swconf.js', `
+var filesToCache = ` + JSON.stringify(filesToCache) + `
+var cacheName = '#` + swversion + `'
+      `, err => {
+        if (err) {
+          console.log(err);
+        }
+      })
+      fs.outputJson(SwVersionFile, {version: swversion + 1}, err => {
+
+      })
+    })
+  })
+}
+
+// site made by
 var madeby = {
   name: '',
   clan: '',
@@ -279,6 +326,16 @@ function checklogin(req,res,playerinfo) {
     return LoginStatus;
   }
 }
+
+// serviceworkerfile
+app.get('/serviceworker.js', function(req,res) {
+  fs.readFile('./www/swconf.js', 'utf8', (err, part1) => {
+    fs.readFile('./www/sw.js', 'utf8', (err, part2) => {
+      res.set('Content-Type', 'application/javascript');
+      res.send(part1 + part2)
+    })
+  })
+})
 
 // api redirect
 app.get('/api', function(req, res) {
@@ -736,7 +793,7 @@ app.post('/submitclandata', function(req, res) {
       if (status.edditclandata) {
         var web = req.body.clansite;
         var teamspeak = req.body.clanteamspeak;
-        if ((ValidURL(web) || ValidIP(web) || web == '') &&
+        if (web && teamspeak && (ValidURL(web) || ValidIP(web) || web == '') &&
         (ValidDomain(teamspeak) || ValidIP(teamspeak) || teamspeak == '') &&
         checkx(teamspeak) && checkx(web)){
           status.claninfo.clansite = web;
@@ -1187,7 +1244,12 @@ function checkx(i) {
   }
 }
 function reverse(s) {
-  return s.split('').reverse().join('');
+  try {
+    var output = s.split('').reverse().join('');
+    return output;
+  } catch (e) {
+    return false;
+  }
 }
 function ValidURL(str) {
   var regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
@@ -1208,17 +1270,21 @@ function ValidDomain(str) {
   }
 }
 function ValidIP(ipaddress) {
-  if (reverse(ipaddress).indexOf(":") > 0) {
-    if (/^\d+$/.test(reverse(ipaddress).substring(0, reverse(ipaddress).indexOf(":") - 1))) {
-      ipaddress = ipaddress.substring(0 , ipaddress.length - reverse(ipaddress).indexOf(":") - 1);
-    } else {
-      return (false)
+  try {
+    if (reverse(ipaddress).indexOf(":") > 0) {
+      if (/^\d+$/.test(reverse(ipaddress).substring(0, reverse(ipaddress).indexOf(":") - 1))) {
+        ipaddress = ipaddress.substring(0 , ipaddress.length - reverse(ipaddress).indexOf(":") - 1);
+      } else {
+        return (false)
+      }
     }
+    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
+      return (true)
+    }
+    return (false)
+  } catch (e) {
+    return (false)
   }
-  if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
-    return (true)
-  }
-  return (false)
 }
 
 if (!config.dev) {
@@ -1244,7 +1310,7 @@ if (!config.dev) {
 }
 
 // clanstolist();
-// updateclandata();
+updateclandata();
 
 uglyfiscript('script.js');
 uglyfiscript('worker.js');

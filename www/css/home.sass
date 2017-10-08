@@ -720,6 +720,24 @@ body
         padding-bottom: 10px
       .dis
         font-size: 18px
+  .claninfo.detialsoffline
+    .offlineinfo
+      padding: 50px 20px
+      box-sizing: border-box
+      display: flex
+      justify-content: center
+      align-items: center
+      flex-direction: column
+      display: -webkit-flex
+      -webkit-justify-content: center
+      -webkit-align-items: center
+      -webkit-flex-direction: column
+      h1
+        font-size: 30px
+        padding-bottom: 20px
+      svg
+        height: 100px
+        width: 100px
 @media (max-width: 600px)
   .startscreenbox
     margin: 10px
@@ -834,3 +852,23 @@ body
       background-repeat: no-repeat
     .active
       border: 3px solid rgb(190, 52, 198)
+
+.offline
+  position: fixed
+  bottom: -55px
+  left: 0px
+  width: 100vw
+  height: 50px
+  background-color: rgb(43, 43, 43)
+  color: white
+  text-align: center
+  display: flex
+  justify-content: center
+  align-items: center
+  display: -webkit-flex
+  -webkit-justify-content: center
+  -webkit-align-items: center
+  font-size: 20px
+  z-index: 50
+.deviceoffline
+  bottom: -0px
