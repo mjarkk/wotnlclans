@@ -1309,8 +1309,8 @@ if (!config.dev) {
   clanstolistTimeout();
 }
 
-// clanstolist();
-updateclandata();
+clanstolist();
+// updateclandata();
 
 uglyfiscript('script.js');
 uglyfiscript('worker.js');

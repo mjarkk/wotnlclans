@@ -62,7 +62,11 @@ function mkimgV2() {
   var icons = []
   fs.readJson(config.clandata.all, (err, data) => {
     for (var i = 0; i < data.length; i++) {
-      icons.push(data[i].emblems.x64.wot)
+      if (data[i] && data[i].emblems && data[i].emblems.x64 && data[i].emblems.x64.wot) {
+        icons.push(data[i].emblems.x64.wot)
+      } else {
+        icons.push('http://localhost:' + config.port + '/img/empty.png')
+      }
     }
     icons = icons.chunk_inefficient(100)
     for (var i = 0; i < icons.length; i++) {

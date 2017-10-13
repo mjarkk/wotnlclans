@@ -1008,13 +1008,20 @@ function loadintocache() {
 
 setTimeout(function () {
   (function() {
-    var img = new Image();
-    img.onload = function() {
-      clanslistvue.checkedwebp = !!(img.height > 0 && img.width > 0);
-    };
-    img.onerror = function() {
-      clanslistvue.checkedwebp = false;
-    };
-    img.src = '/img/testimg.webp';
+    if (typeof(Lockr.get('webpsupported')) == 'boolean') {
+      clanslistvue.checkedwebp = Lockr.get('webpsupported');
+    } else {
+      var img = new Image();
+      img.onload = function() {
+        var output = !!(img.height > 0 && img.width > 0);
+        clanslistvue.checkedwebp = output;
+        Lockr.set('webpsupported',output)
+      };
+      img.onerror = function() {
+        clanslistvue.checkedwebp = false;
+        Lockr.set('webpsupported',false)
+      };
+      img.src = '/img/testimg.webp';
+    }
   })();
 }, 1000);
