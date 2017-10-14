@@ -25,6 +25,7 @@ const hasha = require('hasha');
 const randomstring = require("randomstring");
 const sizeOf = require('image-size');
 const urlExists = require('url-exists');
+const sm = require('sitemap');
 // express packages
 const express = require('express');
 const compression = require('compression');
@@ -297,6 +298,59 @@ function playerinf(req,res,callback) {
     callback({status: false})
   }
 }
+
+// create sitemap
+var sitemap;
+function generatesitemap() {
+  fs.readJson(config.clandata.all, (err, data) => {
+    var urls = [
+      {url:'/api',changefreq: 'monthly', priority: 0.4},
+      {
+        url:'/',
+        changefreq: 'daily',
+        priority: 1,
+        img: [{
+          url: 'https://wotnlclans.mkopenga.com/img/preview-2.png',
+          caption: 'Wot NL/BE clans'
+        },{
+          url: 'https://wotnlclans.mkopenga.com/img/preview-1.png',
+          caption: 'Wot NL/BE clans'
+        },{
+          url: 'https://wotnlclans.mkopenga.com/img/promo/woti.png',
+          caption: 'WoTi'
+        }]
+      },
+    ]
+    for (var i = 0; i < data.length; i++) {
+      urls.push({
+        url: '/clan/' + data[i].clan_id,
+        changefreq: 'weekly',
+        priority: 0.7,
+        img: [{
+          url: 'https://eu.wargaming.net/clans/media/clans/emblems/cl_274/' + data[i].clan_id + '/emblem_195x195.png',
+          caption: data[i].tag + 'Clan Logo'
+        }]
+      });
+    }
+    sitemap = sm.createSitemap ({
+      hostname: 'https://wotnlclans.mkopenga.com',
+      cacheTime: 14400000,
+      urls: urls
+    })
+  })
+}
+generatesitemap()
+
+// send sitemap
+app.get('/sitemap.xml', function(req, res) {
+  sitemap.toXML( function (err, xml) {
+      if (err) {
+        return res.status(500).end();
+      }
+      res.header('Content-Type', 'application/xml');
+      res.send( xml );
+  });
+});
 
 // check if user is loged-in
 function checklogin(req,res,playerinfo) {
@@ -1213,6 +1267,7 @@ function updateclandata() {
 
 // get all clan images and combine them all together
 function mkimg() {
+  generatesitemap()
   shell.exec('node createicons.js').code
 }
 
@@ -1309,8 +1364,10 @@ if (!config.dev) {
   clanstolistTimeout();
 }
 
-clanstolist();
-// updateclandata();
+if (!config.dev) {
+  clanstolist();
+  // updateclandata();
+}
 
 uglyfiscript('script.js');
 uglyfiscript('worker.js');
