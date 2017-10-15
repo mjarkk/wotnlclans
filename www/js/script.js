@@ -1,3 +1,4 @@
+// a opject function for making chunks
 Object.defineProperty(Array.prototype, 'chunk_inefficient', {
   value: function(chunkSize) {
     var array=this;
@@ -9,6 +10,9 @@ Object.defineProperty(Array.prototype, 'chunk_inefficient', {
   }
 });
 
+// A function for fetching data from the network,
+// I have made a function for this because after it fetches the url it will be stored in the offline storage
+// If the browser is offline i can directly fallback on a result stored in the cache
 function newfetch(url, method, TextOrJson, callback) {
   var dburl = url.replace(/\//g, '');
   // console.log(url);
@@ -52,7 +56,12 @@ function newfetch(url, method, TextOrJson, callback) {
       Lockr.set(dburl, returndata)
       Lockr.set('TypeOf-' + dburl, TextOrJson)
       callback(returndata)
-    })
+    }).catch(function(err) {
+      // if the browser is online but doesn't have internet
+      // the fetch function will automaticly fail so for thouse cases it will fallback on offline()
+      console.log('fetch failed, trying to fallback on offline stored data');
+      offline()
+    });
   }
   // check if browser supports navigator.onLine and is offline
   if (navigator && typeof(navigator.onLine) == "boolean"  && navigator.onLine == false) {
@@ -62,6 +71,7 @@ function newfetch(url, method, TextOrJson, callback) {
   }
 }
 
+// The vue data for "ClanMediaComponent"
 var ClanMediaComponentData = {
   opened: false,
   remworking: false,
@@ -88,6 +98,7 @@ var ClanMediaComponentData = {
     }
   }
 }
+
 var imageviewer = new Vue({
   el: '.imageviewer',
   data: ClanMediaComponentData
@@ -100,7 +111,6 @@ var config = {
   gm: '8',
   s: '8'
 }
-
 var procanjoin = true;
 var proneedl = 0;
 var sitetitlestring = 'WOT NL/BE Clans';
@@ -110,7 +120,7 @@ var siteurl = document.location.pathname;
 var PlacedVueData = false;
 var popup = undefined;
 
-// uglifyed lockr
+// uglifyed https://github.com/tsironis/lockr (this javascript framework makes it easy to store things inside the offline storage)
 !function(e,t){"undefined"!=typeof exports?"undefined"!=typeof module&&module.exports&&(exports=module.exports=t(e,exports)):"function"==typeof define&&define.amd?define(["exports"],function(r){e.Lockr=t(e,r)}):e.Lockr=t(e,{})}(this,function(e,t){"use strict";return Array.prototype.indexOf||(Array.prototype.indexOf=function(e){var t=this.length>>>0,r=Number(arguments[1])||0;for((r=r<0?Math.ceil(r):Math.floor(r))<0&&(r+=t);r<t;r++)if(r in this&&this[r]===e)return r;return-1}),t.prefix="",t._getPrefixedKey=function(e,t){return(t=t||{}).noPrefix?e:this.prefix+e},t.set=function(e,t,r){var o=this._getPrefixedKey(e,r);try{localStorage.setItem(o,JSON.stringify({data:t}))}catch(r){console&&console.warn("Lockr didn't successfully save the '{"+e+": "+t+"}' pair, because the localStorage is full.")}},t.get=function(e,t,r){var o,n=this._getPrefixedKey(e,r);try{o=JSON.parse(localStorage.getItem(n))}catch(e){o=localStorage[n]?{data:localStorage.getItem(n)}:null}return null===o?t:"object"==typeof o&&void 0!==o.data?o.data:t},t.sadd=function(e,r,o){var n,a=this._getPrefixedKey(e,o),i=t.smembers(e);if(i.indexOf(r)>-1)return null;try{i.push(r),n=JSON.stringify({data:i}),localStorage.setItem(a,n)}catch(t){console.log(t),console&&console.warn("Lockr didn't successfully add the "+r+" to "+e+" set, because the localStorage is full.")}},t.smembers=function(e,t){var r,o=this._getPrefixedKey(e,t);try{r=JSON.parse(localStorage.getItem(o))}catch(e){r=null}return null===r?[]:r.data||[]},t.sismember=function(e,r,o){return t.smembers(e).indexOf(r)>-1},t.keys=function(){var e=[],r=Object.keys(localStorage);return 0===t.prefix.length?r:(r.forEach(function(r){-1!==r.indexOf(t.prefix)&&e.push(r.replace(t.prefix,""))}),e)},t.getAll=function(e){var r=t.keys();return e?r.reduce(function(e,r){var o={};return o[r]=t.get(r),e.push(o),e},[]):r.map(function(e){return t.get(e)})},t.srem=function(e,r,o){var n,a,i=this._getPrefixedKey(e,o),c=t.smembers(e,r);(a=c.indexOf(r))>-1&&c.splice(a,1),n=JSON.stringify({data:c});try{localStorage.setItem(i,n)}catch(t){console&&console.warn("Lockr couldn't remove the "+r+" from the set "+e)}},t.rm=function(e){var t=this._getPrefixedKey(e);localStorage.removeItem(t)},t.flush=function(){t.prefix.length?t.keys().forEach(function(e){localStorage.removeItem(t._getPrefixedKey(e))}):localStorage.clear()},t});
 
 // vue componenet(s)
@@ -244,6 +254,7 @@ var ClanDetailsClanData = {
   'showoffline': false
 }
 
+// the event lissener for the back button
 window.addEventListener('popstate', function (event) {
   if (!event.state.urlPath || event.state.urlPath == '/') {
     backhome();
