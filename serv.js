@@ -154,7 +154,7 @@ function aboutme() {
             if (body.status == 'ok') {
               madeby.clan = body.data[clan].tag;
               madeby.color = body.data[clan].color;
-              madeby.icon = body.data[clan].emblems.x195.portal;
+              madeby.icon = body.data[clan].emblems.x195.portal.replace('http://','https://');
             }
           });
       }
@@ -444,7 +444,7 @@ function ApiC1(req, res) {
     }
     if (clansearchstatus) {
       res.render('api-c1', {
-        icon: clans[clanpos].emblems.x195.portal || '',
+        icon: clans[clanpos].emblems.x195.portal.replace('http://','https://') || '',
         textcolor: textcolor || '',
         title: '[' + clans[clanpos].clan_tag + ']'  || '',
         rating: clans[clanpos].efficiency.value || '',
