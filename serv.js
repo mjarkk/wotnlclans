@@ -214,12 +214,8 @@ function playerinf(req,res,callback) {
     var accoundid = check.player.account_id;
     var requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + accoundid + '&access_token=' + check.player.access_token + '&fields=clan_id';
     if (check.player.account_id == 516673968 && config.dev) {
-      // rebls
-      // accoundid = 503312278;
-      // requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + accoundid + '&fields=clan_id';
-
-      // bro
-      accoundid = 521504275;
+      // replace my personal accound with one from a real dutch clan just for testing
+      accoundid = 503312278;
       requrl = 'https://api.worldoftanks.eu/wot/account/info/?application_id=' + config.wgkey + '&account_id=' + accoundid + '&fields=clan_id';
     }
     fetch(requrl)
@@ -735,7 +731,6 @@ app.post('/submitclammedia', function(req, res) {
       if (req.files.file &&
         (req.body.title || req.body.title == '') &&
         (req.body.url || req.body.url == '') &&
-        req.body.url.length > 40 &&
         status.clan &&
         status.status &&
         status.Playerlvl < 6 &&
