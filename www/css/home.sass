@@ -532,7 +532,6 @@ body
     image-rendering: crisp-edges
     background-image: url('')
     background-color: rgba(238, 238, 238, 0.5)
-
 .loadingbar
   height: 4px
   width: 100vw
@@ -550,9 +549,12 @@ body
   width: 100vw
   position: fixed
   left: 0px
+  top: 0px
   background-color: #E1E2E1
   z-index: 20
-  top: 100vh
+  transform: translateY(100vh)
+  -webkit-transform: translateY(100vh)
+  -ms-transform: translateY(100vh)
   .content
     height: 100vh
     overflow-x: hidden
