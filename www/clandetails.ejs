@@ -13,7 +13,7 @@
   <div class="claninfo" v-if="!showoffline">
     <div class="links">
       <a v-bind:href="wglink">Wargaming</a>
-      <a v-if="site != ''" target="_blank" v-bind:href="site">Clan website</a>
+      <a v-if="site != ''" target="_blank" rel="noopener" v-bind:href="site">Clan website</a>
       <a v-if="ts != ''" >Clan TS: {{ ts }}</a>
     </div>
     <div v-if="login && CanReportClans && !ClansReported[clan_id]" class="review">

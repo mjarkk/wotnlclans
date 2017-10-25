@@ -3,6 +3,7 @@
         <h1>
           opties
           <svg
+            aria-label="zoek opties"
             fill="#fff"
             height="24"
             viewBox="0 0 24 24"
@@ -24,6 +25,7 @@
               <div class="website searchbox">
                 <label class="clanwebsite-label" for="clanwebsite">Clanwebsite</label>
                 <input
+                  aria-label="clan website"
                   :disabled="caneddit"
                   type="text"
                   v-model="clanwebsite"
@@ -36,6 +38,7 @@
               <div class="teamspeak searchbox">
                 <label class="clanteamspeak-label" for="clanteamspeak">Teamspeak</label>
                 <input
+                  aria-label="clan teamspeak"
                   :disabled="caneddit"
                   type="text"
                   v-model="clanteamspeak"
@@ -46,7 +49,14 @@
                   v-on:blur="blur('clanteamspeak-label')">
               </div>
               <div class="submit">
-                <button :disabled="caneddit" type="button" name="button" v-on:click="save()">Opslaan</button>
+                <button
+                  aria-label="Opslaan"
+                  :disabled="caneddit"
+                  type="button"
+                  name="button"
+                  v-on:click="save()">
+                  Opslaan
+                </button>
               </div>
               <div class="submit">
                 <p>{{ SaveStatus }}</p>
@@ -63,39 +73,43 @@
       <div class="sorting flex" v-if="nothidden">
         <h1>Sorteeren</h1>
         <div class="row">
-          <button type="button" v-on:click="SortClans('win')" v-bind:class="{ active: (Sorting == 'win') }">Win rate</button>
-          <button type="button" v-on:click="SortClans('rate')" v-bind:class="{ active: (Sorting == 'rate') }">Rating</button>
-          <button type="button" v-on:click="SortClans('s')" v-bind:class="{ active: (Sorting == 's') }">Strongholds</button>
-          <button type="button" v-on:click="SortClans('gm')" v-bind:class="{ active: (Sorting == 'gm') }">Global map</button>
+          <button aria-label="sorteren win rate" type="button" v-on:click="SortClans('win')" v-bind:class="{ active: (Sorting == 'win') }">Win rate</button>
+          <button aria-label="sorteren rating" type="button" v-on:click="SortClans('rate')" v-bind:class="{ active: (Sorting == 'rate') }">Rating</button>
+          <button aria-label="sorteren strongholds" type="button" v-on:click="SortClans('s')" v-bind:class="{ active: (Sorting == 's') }">Strongholds</button>
+          <button aria-label="sorteren global map" type="button" v-on:click="SortClans('gm')" v-bind:class="{ active: (Sorting == 'gm') }">Global map</button>
         </div>
         <div class="row">
           <div v-if='Sorting == "s"'>
             Tier:
-            <button v-on:click="SetS('6')" v-bind:class="{ active: (SettingsS == '6') }" type="button">6</button>
-            <button v-on:click="SetS('8')" v-bind:class="{ active: (SettingsS == '8') }"  type="button">8</button>
-            <button v-on:click="SetS('10')" v-bind:class="{ active: (SettingsS == '10') }"  type="button">10</button>
+            <button aria-label="tier 6" v-on:click="SetS('6')" v-bind:class="{ active: (SettingsS == '6') }" type="button">6</button>
+            <button aria-label="tier 8" v-on:click="SetS('8')" v-bind:class="{ active: (SettingsS == '8') }"  type="button">8</button>
+            <button aria-label="tier 10" v-on:click="SetS('10')" v-bind:class="{ active: (SettingsS == '10') }"  type="button">10</button>
           </div>
           <div v-if='Sorting == "gm"'>
             Tier:
-            <button v-on:click="SetGM('6')" v-bind:class="{ active: (SettingsGM == '6') }" type="button">6</button>
-            <button v-on:click="SetGM('8')" v-bind:class="{ active: (SettingsGM == '8') }" type="button">8</button>
-            <button v-on:click="SetGM('10')" v-bind:class="{ active: (SettingsGM == '10') }" type="button">10</button>
+            <button aria-label="tier 6" v-on:click="SetGM('6')" v-bind:class="{ active: (SettingsGM == '6') }" type="button">6</button>
+            <button aria-label="tier 8" v-on:click="SetGM('8')" v-bind:class="{ active: (SettingsGM == '8') }" type="button">8</button>
+            <button aria-label="tier 10" v-on:click="SetGM('10')" v-bind:class="{ active: (SettingsGM == '10') }" type="button">10</button>
           </div>
         </div>
       </div>
       <div class="switch">
         <button class="option op1"
-        v-on:click="displaystats = true"
-        v-bind:class="{off: displaystats}">
+          aria-label="Clans lijst"
+          name="Clans lijst"
+          v-on:click="displaystats = true"
+          v-bind:class="{off: displaystats}">
           <svg fill="#ffffff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
             <path d="M0 0h24v24H0z" fill="none"/>
           </svg>
         </button>
         <button class="option op2"
-        v-on:click="displaystats = false"
-        :disabled="!MediaIsLoaded"
-        v-bind:class="{off: !displaystats}">
+          aria-label="Clans media"
+          name="Clans media"
+          v-on:click="displaystats = false"
+          :disabled="!MediaIsLoaded"
+          v-bind:class="{off: !displaystats}">
           <svg fill="#ffffff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 0h24v24H0z" fill="none"/>
             <path d="M2 6H0v5h.01L0 20c0 1.1.9 2 2 2h18v-2H2V6zm20-2h-8l-2-2H6c-1.1 0-1.99.9-1.99 2L4 16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM7 15l4.5-6 3.5 4.51 2.5-3.01L21 15H7z"/>
@@ -109,6 +123,7 @@
             </svg>
           </label>
           <input
+            aria-label="Clans Zoekken"
             placeholder="Clans Zoekken"
             type="text"
             v-model="search"
@@ -156,7 +171,7 @@
         <div class="side2">
           <h1>Heb jij een link of poster die hier moet staan stuur mij dan een bericht in wot: <a href="<%= madebylink %>"><%= madeby %></a></h1>
           <div class="ads" v-if="ShowAds && checkedwebp != undefined">
-            <a v-for="item in ads" :href="item.href" target="_blank"><img v-if="checkedwebp == false" :src="item.src"><img v-if="checkedwebp == true" :src="item.webp"></a>
+            <a v-for="item in ads" :href="item.href" rel="noopener" target="_blank"><img v-if="checkedwebp == false" :src="item.src"><img v-if="checkedwebp == true" :src="item.webp"></a>
           </div>
         </div>
       </div>
