@@ -26,6 +26,7 @@ const randomstring = require("randomstring");
 const sizeOf = require('image-size');
 const urlExists = require('url-exists');
 const sm = require('sitemap');
+
 // express packages
 const express = require('express');
 const compression = require('compression');
@@ -34,28 +35,37 @@ const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const ejs = require('ejs');
 const cacheResponseDirective = require('express-cache-response-directive');
+
 // config file (s)
 var config = fs.readJsonSync('./db/config.json');
 var devon = fs.readJsonSync('./db/dev.json');
 config['dev'] = devon.on;
 
+// replace console.log with log
+const log = console.log
+
+// make shure direcotrys exsist:
+fs.ensureDirSync('./db/claninf/')
+fs.ensureDirSync('./db/clanmedia/')
+fs.ensureDirSync('./db/clanreports/')
+
 // checking if ffmpeg is installed / supported
 config['ffmpeg'] = true;
 config['FfmpegPath'] = 'ffmpeg';
-console.log('');
-console.log('clans counted: ' + colors.green(fs.readJsonSync(config.clansfile).length));
+log('');
+log('clans counted: ' + colors.green(fs.readJsonSync(config.clansfile).length));
 if (!shell.which(config.FfmpegPath)) {
   if (os.platform().startsWith('win')) {
     config.FfmpegPath = './ffmpeg/ffmpeg.exe';
     if (!shell.which(config.FfmpegPath)) {
-      console.log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
+      log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
       config.ffmpeg = false
     };
   } else {
-    console.log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
+    log(colors.red('ffmpeg is not detected, this may couse some issu\'s'))
   }
 };
-console.log('');
+log('');
 
 // uglify the script (s)
 watch(config.js['script.js'].dev, { recursive: true }, function(evt, name) {
@@ -75,8 +85,8 @@ function uglyfiscript(name) {
 
       })
     } else {
-      console.log(colors.red('error uglifying js file: ' + config.js[name].normal));
-      console.log(colors.red(uglyjs.error));
+      log(colors.red('error uglifying js file: ' + config.js[name].normal));
+      log(colors.red(uglyjs.error));
     }
   })
 }
@@ -118,7 +128,7 @@ var filesToCache = ` + JSON.stringify(filesToCache) + `
 var cacheName = '#` + swversion + `'
       `, err => {
         if (err) {
-          console.log(err);
+          log(err);
         }
       })
       fs.outputJson(SwVersionFile, {version: swversion + 1}, err => {
@@ -188,10 +198,10 @@ app.use('/clanmedia/', express.static(clanmedia));
 try {
   var port = config.port;
   app.listen(port, function() {
-    console.log('listening on port: '.green + colors.green(port));
+    log('listening on port: '.green + colors.green(port));
   });
 } catch (e) {
-  console.log(colors.red('server can\'t start most likly because of another program that is using the same port'));
+  log(colors.red('server can\'t start most likly because of another program that is using the same port'));
 }
 
 // a list with all clan roles available in world of tanks
@@ -460,18 +470,11 @@ function ApiC1(req, res) {
 
 // serv home dir
 app.get('/', function(req, res) {
-  // check if the url is an spf request
-  if (req.url.slice(-13) == '?spf=navigate') {
-    res.json({
-      "title": "WOT NL/BE clans"
-    })
-  } else {
-    res.render('index', {
-      madeby: madeby.name + ' [' + madeby.clan + ']',
-      madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby,
-      login: checklogin(req,res)
-    });
-  }
+  res.render('index', {
+    madeby: madeby.name + ' [' + madeby.clan + ']',
+    madebylink: 'https://worldoftanks.eu/en/community/accounts/' + config.madeby,
+    login: checklogin(req,res)
+  })
 })
 
 // a function for edditing clan data
@@ -480,7 +483,7 @@ function edditclandata(playerlvl, clan, overwride) {
   var file = config.clanconf + clan + config.apiversion;
   fs.outputJson(file, overwride, err => {
 
-  });
+  })
 }
 
 // check if you can change clan data
@@ -674,7 +677,7 @@ app.post('/submitclammedia', function(req, res) {
       var foroutputfile = config.clanmedia + status.clanid + '/media-' + imgcount + '.' + req.files.file.mimetype.replace("image/",'');
       fs.outputFile(foroutputfile, req.files.file.data, err => {
         if (err) {
-          console.log(err);
+          log(err);
         }
         fs.readJson(claninffile, (claninferr, claninfdata) => {
           sizeOf(foroutputfile, function (err, dimensions) {
@@ -718,7 +721,7 @@ app.post('/submitclammedia', function(req, res) {
             claninfdata.imgcount = claninfdata.imgcount + 1;
             fs.outputJson(claninffile, claninfdata, err => {
               if (err) {
-                console.log(err);
+                log(err);
               }
             });
           });
@@ -952,7 +955,6 @@ app.get('/clandata-load2/', function(req, res) {
 })
 
 // serv clan info
-// TODO: be able to make time request
 app.get('/claninfo/:time/:clanid', function (req, res) {
   var clanid = req.params.clanid;
   var apipath = config.clanconf + clanid + config.apiversion;
@@ -1047,29 +1049,29 @@ function clanstolist() {
                 var description = body2.data[key].description;
                 if ( description.match( /(verplicht|menselijkheid|Pannenkoeken|leeftijd|minimale|opzoek|beginnende|nederlandse|spelers|voldoen|wij zijn|gezelligheid|ons op|Kom erbij|minimaal|gemiddelde|plezier|samenwerking|samenwerken|aangezien|toegelaten|goedkeuring|gebruik|tijdens)/i ) ) {
                   list.push(key);
-                  console.log('--> ' + key);
+                  log('--> ' + key);
                 }
               }
               if (convert.length < 96 || (config.dev == true && nr == 100)) {
-                console.log('finallize');
-                finallize();
+                finallize()
               } else {
-                console.log('list' + nr);
-                clans(nr + 1);
+                log('list' + nr)
+                clans(nr + 1)
               }
             });
         } else {
-          finallize();
+          finallize()
         }
       } catch (e) {
-        finallize();
+        finallize()
       }
       function finallize() {
         // this function will add all the missing clans added by other pepole
-        // and remove clans that have dutch words or are not relevant to this list
+        // and remove clans that have no dutch words or are not relevant to this list
+        log('finallize')
         try {
           fs.readFile(config.extraclans, function(errrr, linesdata) {
-            var lines = linesdata.toString().split("\n");
+            var lines = linesdata.toString().split("\n")
             for (var i = 0; i < lines.length; i++) {
               lines[i] = lines[i].replace(/\r/g, "")
             }
@@ -1083,10 +1085,10 @@ function clanstolist() {
                   body = JSON.parse(body);
                   try {
                     if (body.status != 'ok' || body.data[lines[c]] == null) {
-                      console.log('bad clan: ' + lines[c]);
+                      log('bad clan: ' + lines[c]);
                       removefromlines.push(lines[c])
                     } else if (body.data[lines[c]].tag == undefined || body.data[lines[c]].tag == "") {
-                      console.log('bad clan: ' + lines[c]);
+                      log('bad clan: ' + lines[c]);
                       removefromlines.push(lines[c])
                     }
                   } catch (e) {
@@ -1103,7 +1105,8 @@ function clanstolist() {
             }
             function removeblocked() {
               fs.readFile(config.blockedclans, function(errrrr, blockedclans) {
-                blockedclans = JSON.parse(blockedclans.toString());
+                blockedclans = JSON.parse(blockedclans.toString())
+
                 for (var i = 0; i < lines.length; i++) {
                   var status = true;
                   for (var j = 0; j < list.length; j++) {
@@ -1112,17 +1115,19 @@ function clanstolist() {
                     }
                   }
                   if (status) {
-                    list.push(lines[i]);
+                    list.push(lines[i])
                   }
                 }
-                list = _.difference(list, blockedclans);
-                fs.outputJson(config.clansfile, list, err => {
-                  updateclandata();
-                });
-                console.log('dune');
+                let newlist = _.difference(_.uniq(list), _.uniq(blockedclans))
+
+                fs.outputJson(config.clansfile, newlist, err => {
+                  log('dune')
+                  updateclandata()
+                })
+
               })
             }
-            checkif(0);
+            checkif(0)
           });
         } catch (e) {
           console.error(e);
@@ -1167,7 +1172,7 @@ function updateclandata() {
                   var c = body.data[key];
                   var d = body2.data[key];
                   toclanfile.push(Object.assign({}, c, d));
-                  console.log('--> ' + c.tag);
+                  log('--> ' + c.tag);
                 }
                 if (status) {
                   getclandata(i + 1);
@@ -1194,13 +1199,13 @@ function updateclandata() {
         }
       }
       toclanfile = _.difference(toclanfile, RemoveFromToclans);
-      console.log("creating files");
+      log("creating files");
       var t = 5;
       var once = [];
       fs.outputJson(config.clandata.all, toclanfile, err => {
-        console.log("1/"+t);
+        log("1/"+t);
         fs.outputJson(config.clandata.allI, _.indexBy(toclanfile, 'clan_id'), err => {
-          console.log("2/"+t);
+          log("2/"+t);
           once = [];
           for (var i = 0; i < toclanfile.length; i++) {
             c = toclanfile[i];
@@ -1212,7 +1217,7 @@ function updateclandata() {
             })
           }
           fs.outputJson(config.clandata.firstload, once, err => {
-            console.log("3/"+t);
+            log("3/"+t);
             once = [];
             for (var i = 0; i < toclanfile.length; i++) {
               c = toclanfile[i];
@@ -1235,7 +1240,7 @@ function updateclandata() {
               once.push(json);
             }
             fs.outputJson(config.clandata.load2, once, err => {
-              console.log("4/"+t);
+              log("4/"+t);
               once = [];
               for (var i = 0; i < toclanfile.length; i++) {
                 c = toclanfile[i];
@@ -1248,7 +1253,7 @@ function updateclandata() {
                 once.push(json);
               }
               fs.outputJson(config.clandata.names, _.indexBy(once, 'clan_id'), err => {
-                console.log("5/"+t);
+                log("5/"+t);
                 // when dune make a image with all clan icons
                 mkimg();
               });
@@ -1338,7 +1343,7 @@ function ValidIP(ipaddress) {
 }
 
 if (!config.dev) {
-  console.log('starting timeout for clansearch');
+  log('starting timeout for clansearch');
   function updateclandataTimeout() {
     setTimeout(function () {
       updateclandataTimeout();

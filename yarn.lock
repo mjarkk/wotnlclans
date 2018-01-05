@@ -1751,6 +1751,10 @@ kind-of@^4.0.0:
   dependencies:
     is-buffer "^1.1.5"
 
+languagedetect@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/languagedetect/-/languagedetect-1.1.1.tgz#8be363bd24768f92c6e043706f13b3a9294920ab"
+
 latest-version@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/latest-version/-/latest-version-3.1.0.tgz#a205383fea322b33b5ae3b18abee0dc2f356ee15"
