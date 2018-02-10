@@ -17,12 +17,13 @@ On this site you can view the all the NL/BE clans and their stats
 - ~~:heavy_multiplication_x: minimal 90% score in [Lighthouse](https://developers.google.com/web/tools/lighthouse/)~~ --> can't get a 90%+ socre because the test wait till the webpage is fully loaded.  
 
 ## How to install:  
+- Create a api key and add your server's ip address [here](https://developers.wargaming.net/applications/)  
 - Clone or Download the project  
 - Install [nodejs](https://nodejs.org/en/) (latest version !!NOT LTS!!)  
 - Inside the cloned folder open a terminal and type: npm i  
 - After that's dune type: npm start  
 - Now the script will start a local webserver on [localhost port 2020](http://localhost:2020)
-- If you use linux I recomment to install: graphicsmagick  
+- If you use linux I recomment to install: graphicsmagick and ffmpeg  
 
 ## Dev  
 - Start dev server: npm run dev  
