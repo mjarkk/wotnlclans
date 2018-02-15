@@ -23,7 +23,7 @@ On this site you can view the all the NL/BE clans and their stats
 - Inside the cloned folder open a terminal and type: npm i  
 - After that's dune type: npm start  
 - Now the script will start a local webserver on [localhost port 2020](http://localhost:2020)
-- If you use linux I recomment to install: graphicsmagick, imagemagick and ffmpeg  
+- If you use linux I recomment to install: `graphicsmagick`, `imagemagick` and `ffmpeg`  
 
 ## Dev  
 - Start dev server: npm run dev  
