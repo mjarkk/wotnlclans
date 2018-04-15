@@ -636,10 +636,11 @@ function getclanlist() {
     }
   }, 'text', function(firstload) {
     firstload = JSON.parse(firstload)
-    let sorted = firstload.reduce((acc, el) => {
-      acc[(typeof el == 'number') ? 'blocked' : 'clans'].push(el)
-      return acc
-    }, {clans: [], blocked: []})
+    var sorted = {clans: [], blocked: []}
+    for (var i = 0; i < firstload.length; i++) {
+      var el = firstload[i]
+      sorted[(typeof el == 'number') ? 'blocked' : 'clans'].push(el)
+    }
     firstload = sorted.clans
     for (var i = 0; i < firstload.length; i++) {
       var j = firstload[i];

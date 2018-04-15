@@ -948,7 +948,7 @@ app.get('/clandata-firstload/', function(req, res) {
     (err)
       ? res.json([])
       : fs.readJson(path.resolve(config.blockedclans), (err, blocked) =>
-          res.json([...blocked, ...clans])
+          res.json([...clans, ...blocked])
         )
   )
 })
