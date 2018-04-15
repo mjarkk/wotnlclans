@@ -636,9 +636,15 @@ function getclanlist() {
     }
   }, 'text', function(firstload) {
     firstload = JSON.parse(firstload)
+    let sorted = firstload.reduce((acc, el) => {
+      acc[(typeof el == 'number') ? 'blocked' : 'clans'].push(el)
+      return acc
+    }, {clans: [], blocked: []})
+    firstload = sorted.clans
     for (var i = 0; i < firstload.length; i++) {
       var j = firstload[i];
       clandata.push({
+        blocked: sorted.blocked.indexOf(j.i) != -1,
         id: j.i,
         tag: '[' + j.t + ']',
         win: j.w + '%',

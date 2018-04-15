@@ -944,7 +944,13 @@ app.get('/clanname/:clanid', function(req, res) {
 app.get('/clandata-firstload/', function(req, res) {
   res.setHeader('Cache-Control', 'no-cache');
   res.set('Content-Type', 'text/plain');
-  res.sendFile(path.resolve(config.clandata.firstload));
+  fs.readJson(path.resolve(config.clandata.firstload), (err, clans) => 
+    (err)
+      ? res.json([])
+      : fs.readJson(path.resolve(config.blockedclans), (err, blocked) =>
+          res.json([...blocked, ...clans])
+        )
+  )
 })
 
 // second load this will serv the rest of the missing stats

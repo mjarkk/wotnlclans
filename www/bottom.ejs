@@ -150,7 +150,7 @@
             <div class="s" v-if="resize > 515">Strongholds</div>
             <div class="gm" v-if="resize > 625">Global map</div>
           </div>
-          <a v-on:click="open(item.id)" class="items" v-for="(item, id) in items" v-bind:id="'list-' + id" v-if="item.tag.toLowerCase().indexOf(search.toLowerCase()) !== -1">
+          <a v-on:click="open(item.id)" class="items" v-for="(item, id) in items" v-bind:id="'list-' + id" v-show="!item.blocked" v-if="item.tag.toLowerCase().indexOf(search.toLowerCase()) !== -1">
             <div v-bind:style="{'background-position': item.pos, 'background-image': img[item.imgid]}" class="icon listicons" v-if="resize > 415"></div>
             <!-- <div class="icon listicons" v-if="resize > 415"></div> -->
             <div class="cound">{{ id + 1 }}</div>
