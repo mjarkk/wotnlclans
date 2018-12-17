@@ -2,6 +2,7 @@ package other
 
 import (
 	"flag"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -11,18 +12,29 @@ type Flags struct {
 	Debug     bool
 	Dev       bool
 	SkipBuild bool
+	WGKey     string
 }
 
-// GetFlags returns the program's flags
+// GetFlags returns the program's launch flags and some shell vars
 func GetFlags() Flags {
 	debug := flag.Bool("debug", false, "debug the program")
 	dev := flag.Bool("dev", false, "launch the project in dev mode")
 	skipBuild := flag.Bool("skipBuild", false, "skip the build process")
+
+	wgKey := os.Getenv("WARGAMINGAPIKEY")
+	wgKeyOverWrite := flag.String("wgkey", "", "select the wargaming api key (or use the shell var: WARGAMINGAPIKEY)")
+
 	flag.Parse()
+
+	if len(*wgKeyOverWrite) > 0 {
+		wgKey = *wgKeyOverWrite
+	}
+
 	return Flags{
 		Debug:     *debug,
 		Dev:       *dev,
 		SkipBuild: *skipBuild,
+		WGKey:     wgKey,
 	}
 }
 
