@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: /icons/
-Disallow: /css/
-Disallow: /js/
