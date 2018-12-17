@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/mjarkk/wotnlclans/api"
+	"github.com/mjarkk/wotnlclans/other"
 	"github.com/mjarkk/wotnlclans/server"
 )
 
@@ -20,6 +21,8 @@ func main() {
 			fmt.Println("Running api...")
 		}
 	}()
+
+	other.BuildWebStatic()
 
 	r := server.SetupRouter()
 	fmt.Println("Running server...")
