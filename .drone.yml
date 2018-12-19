@@ -36,4 +36,5 @@ steps:
   when:
     branch:
     - v3
-  secrets: [ privateKey ]
+  secrets: 
+  - privateKey
