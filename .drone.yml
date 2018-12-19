@@ -6,6 +6,7 @@ steps:
   image: golang
   commands:
   - ls
+  - pwd
   when:
     branch:
-      - v3
+    - v3
