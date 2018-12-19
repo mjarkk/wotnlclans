@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -20,15 +21,41 @@ func SetupAPI() error {
 
 // GetDataFromAPI fetches all data from the api
 func GetDataFromAPI() error {
-	for i := 0; i < 1000; i++ {
-		go func(i int) {
-			cb, err := Jobs.Add("Max", "me", map[string]string{"playerID": fmt.Sprintf("%v", i)})
-			if err != nil {
-				fmt.Println("ERROR:", err.Error())
-			}
-			fmt.Println(<-cb)
-		}(i)
-	}
-
+	GetAllClanIds()
 	return nil
+}
+
+// GetAllClanIds returns all clan ids
+func GetAllClanIds() ([]string, error) {
+	ids := []string{}
+	page := 0
+
+	for {
+		page++
+		var out TopClans
+		outString, err := CallRoute("topClans", map[string]string{
+			"pageNum": fmt.Sprintf("%v", page),
+		})
+
+		json.Unmarshal([]byte(outString), &out)
+
+		if err != nil {
+			return ids, err
+		}
+
+		if out.Status != "ok" {
+			return ids, errors.New(out.Error.Message)
+		}
+
+		if len(out.Data) == 0 {
+			break
+		}
+
+		for _, clan := range out.Data {
+			ids = append(ids, clan.ClanID)
+		}
+
+		fmt.Println(page)
+	}
+	return ids, nil
 }

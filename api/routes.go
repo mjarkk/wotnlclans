@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/kirinlabs/HttpRequest"
 	"github.com/mjarkk/wotnlclans/other"
 )
 
@@ -39,4 +40,41 @@ func GetAPIRoute(what string, inputs map[string]string) (string, error) {
 		return "", errors.New("Not all inputs are replaced")
 	}
 	return routePrefix + selectedRoute, nil
+}
+
+// Get returns the response data of a url
+func Get(uri string) (string, error) {
+	req := HttpRequest.NewRequest()
+	res, err := req.Get(uri, nil)
+	if err != nil {
+		return "", nil
+	}
+	out, err := res.Body()
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
+// Post returns the data of a post request to a url
+func Post(uri string, postData map[string]interface{}) (string, error) {
+	req := HttpRequest.NewRequest()
+	res, err := req.Post(uri, postData)
+	if err != nil {
+		return "", err
+	}
+	out, err := res.Body()
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
+// CallRoute makes a network request
+func CallRoute(what string, inputs map[string]string) (string, error) {
+	url, err := GetAPIRoute(what, inputs)
+	if err != nil {
+		return "", err
+	}
+	return Get(url)
 }

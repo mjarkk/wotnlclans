@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Build the go program
 go build
 
-./wotnlclans
+./wotnlclans -wgkey 7e5ce7007256737daa79dbec35f4f072
