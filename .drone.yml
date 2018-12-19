@@ -26,16 +26,16 @@ steps:
 - name: Deploy
   image: karappo/dronedeploy:drone-0.8
   environment:
-  - DEP_MASTER_COMMAND='rsync'
-  - DEP_MASTER_HOST='mkopenga.com'
-  - DEP_MASTER_USER='root'
-  - DEP_MASTER_HOST_DIR='/var/www/wotnlclans'
+    SSH_KEY:
+      from_secret: privateKey
+    DEP_MASTER_COMMAND: rsync
+    DEP_MASTER_HOST: mkopenga.com
+    DEP_MASTER_USER: root
+    DEP_MASTER_HOST_DIR: /var/www/wotnlclans
   commands: 
   - echo "$SSH_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
   - curl https://raw.githubusercontent.com/karappo/drone-deploy/drone-compatible/v0.8/deploy.sh | bash
   when:
     branch:
     - v3
-  secrets: 
-  - privateKey
  
