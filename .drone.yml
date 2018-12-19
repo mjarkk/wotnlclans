@@ -1,19 +1,20 @@
 kind: pipeline
 name: default
 
+workspace:
+  base: /go
+  path: src/github.com/octocat/hello-world
+
 steps:
-- name: test
+- name: Build go files
   image: golang
   commands:
-  - mkdir -p $GOPATH/src/github.com/mjarkk/wotnlclans
-  - export ORIGINALDIR=$(pwd)
-  - mv $ORIGINALDIR/* $GOPATH/src/github.com/mjarkk/wotnlclans/
-  - cd $GOPATH/src/github.com/mjarkk/wotnlclans
   - go get
   - go build
-  - mv $GOPATH/src/github.com/mjarkk/wotnlclans/* $ORIGINALDIR/
-  - cd $ORIGINALDIR
-  - ls
   when:
     branch:
     - v3
+- name: Build web_static files
+  image: kkarczmarczyk/node-yarn
+  commands: 
+  - ls
