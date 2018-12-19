@@ -24,7 +24,7 @@ steps:
     branch:
     - v3
 - name: Deploy
-  image: karappo/dronedeploy:drone-0.8
+  image: golang
   environment:
     PRIVATEKEY:
       from_secret: privateKey
