@@ -26,7 +26,8 @@ steps:
 - name: Deploy
   image: instrumentisto/rsync-ssh
   commands: 
-  - sync ./ /var/wotnlclans
+  - rm -rf /var/wotnlclans/*
+  - cp -r ./* /var/wotnlclans/
   when:
     branch:
     - v3
