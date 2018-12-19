@@ -6,6 +6,7 @@ steps:
   image: golang
   commands:
   - ls
+  - echo "$GOPATH"
   - pwd
   - uname -a
   when:
