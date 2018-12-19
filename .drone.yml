@@ -11,7 +11,7 @@ steps:
   - cd $GOPATH/src/github.com/mjarkk/wotnlclans
   - go get
   - go build
-  - $GOPATH/src/github.com/mjarkk/wotnlclans/* $ORIGINALDIR/
+  - mv $GOPATH/src/github.com/mjarkk/wotnlclans/* $ORIGINALDIR/
   - cd $ORIGINALDIR
   - ls
   when:
