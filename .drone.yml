@@ -16,5 +16,22 @@ steps:
     - v3
 - name: Build web_static files
   image: kkarczmarczyk/node-yarn
+  environment:
+    PRIVATEKEY:
+      from_secret: privateKey
+    PUBLICKEY:
+      from_secret: publicKey
+    SSH: ssh -tt root@mkopenga.com
   commands: 
-  - ls
+  - cd web_static
+  - yarn
+  - yarn build
+- name: Deploy
+  image: golang
+  commands: 
+  - mkdir ~/.ssh/
+  - echo "$PRIVATEKEY" > ~/.ssh/id_rsa
+  - echo "$PUBLICKEY" > ~/.ssh/id_rsa.pub
+  - eval `ssh-agent -s`
+  - ssh-add ~/.ssh/id_rsa
+  - $SSH "pwd"
