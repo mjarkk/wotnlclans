@@ -29,7 +29,7 @@ steps:
   - cp ./wotnlclans /var/wotnlclans/
   - mkdir -p /var/wotnlclans/web_static/build
   - rm -rf /var/wotnlclans/web_static/build/*
-  - cp ./web_static/build/* /var/wotnlclans/web_static/build/
+  - cp -r ./web_static/build/* /var/wotnlclans/web_static/build/
   when:
     branch:
     - v3
