@@ -5,10 +5,10 @@ steps:
 - name: test
   image: golang
   commands:
-  - ls
-  - echo "$GOPATH"
+  - mkdir -p $GOPATH/src/github.com/mjarkk/
+  - mv $(pwd) $GOPATH/src/github.com/mjarkk/wotnlclans
+  - cd $GOPATH/src/github.com/mjarkk/wotnlclans
   - pwd
-  - uname -a
   when:
     branch:
     - v3
