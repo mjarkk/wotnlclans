@@ -5,10 +5,15 @@ steps:
 - name: test
   image: golang
   commands:
-  - mkdir -p $GOPATH/src/github.com/mjarkk/
-  - mv $(pwd) $GOPATH/src/github.com/mjarkk/wotnlclans
+  - mkdir -p $GOPATH/src/github.com/mjarkk/wotnlclans
+  - export ORIGINALDIR=$(pwd)
+  - mv $ORIGINALDIR/* $GOPATH/src/github.com/mjarkk/wotnlclans/
   - cd $GOPATH/src/github.com/mjarkk/wotnlclans
-  - pwd
+  - go get
+  - go build
+  - $GOPATH/src/github.com/mjarkk/wotnlclans/* $ORIGINALDIR/
+  - cd $ORIGINALDIR
+  - ls
   when:
     branch:
     - v3
