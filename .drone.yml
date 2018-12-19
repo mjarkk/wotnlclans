@@ -7,6 +7,7 @@ steps:
   commands:
   - ls
   - pwd
+  - uname -a
   when:
     branch:
     - v3
