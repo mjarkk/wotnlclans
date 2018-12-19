@@ -24,19 +24,16 @@ steps:
     branch:
     - v3
 - name: Deploy
-  image: golang
+  image: karappo/dronedeploy:drone-0.8
   environment:
-    PRIVATEKEY:
-      from_secret: privateKey
-    PUBLICKEY:
-      from_secret: publicKey
-    SSH: ssh -tt root@mkopenga.com
+  - DEP_MASTER_COMMAND='rsync'
+  - DEP_MASTER_HOST='mkopenga.com'
+  - DEP_MASTER_USER='root'
+  - DEP_MASTER_HOST_DIR='/var/www/wotnlclans'
   commands: 
-  - mkdir ~/.ssh/
-  - eval `ssh-agent -s`
-  - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-  - echo "$PRIVATEKEY" | ssh-add -
-  - $SSH "pwd"
+  - echo "$SSH_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+  - curl https://raw.githubusercontent.com/karappo/drone-deploy/drone-compatible/v0.8/deploy.sh | bash
   when:
     branch:
     - v3
+  secrets: [ privateKey ]
