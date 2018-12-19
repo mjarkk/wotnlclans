@@ -6,3 +6,6 @@ steps:
   image: golang
   commands:
   - ls
+  when:
+    branch:
+      - v3
