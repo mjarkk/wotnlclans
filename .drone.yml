@@ -16,6 +16,15 @@ steps:
     - v3
 - name: Build web_static files
   image: kkarczmarczyk/node-yarn
+  commands: 
+  - cd web_static
+  - yarn
+  - yarn build
+  when:
+    branch:
+    - v3
+- name: Deploy
+  image: karappo/dronedeploy:drone-0.8
   environment:
     PRIVATEKEY:
       from_secret: privateKey
@@ -23,18 +32,11 @@ steps:
       from_secret: publicKey
     SSH: ssh -tt root@mkopenga.com
   commands: 
-  - cd web_static
-  - yarn
-  - yarn build
-- name: Deploy
-  image: golang
-  commands: 
   - mkdir ~/.ssh/
-  - echo "$PRIVATEKEY" > ~/.ssh/id_rsa
-  - echo "$PUBLICKEY" > ~/.ssh/id_rsa.pub
-  - chmod 600 ~/.ssh/id_rsa
-  - chmod 600 ~/.ssh/id_rsa.pub
   - eval `ssh-agent -s`
-  - echo "$PRIVATEKEY" | ssh-add -
   - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  - echo "$PRIVATEKEY" | ssh-add -
   - $SSH "pwd"
+  when:
+    branch:
+    - v3
