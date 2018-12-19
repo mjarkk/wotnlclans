@@ -9,14 +9,13 @@ import (
 
 // BuildWebStatic builds the web_static js files
 func BuildWebStatic() {
-	flags := GetFlags()
-	if flags.SkipBuild {
+	if Flags.SkipBuild {
 		return
 	}
 
 	fmt.Println("Setting up the web_static files")
 	cmd := "npm run build"
-	if flags.Dev {
+	if Flags.Dev {
 		cmd = "npm run watch"
 	}
 

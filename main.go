@@ -12,6 +12,8 @@ import (
 func main() {
 	fmt.Printf("------------------------\n press CTRL + C to exit \n------------------------\n\n")
 
+	other.SetupFlags()
+
 	go func() {
 		err := api.SetupAPI()
 		if err != nil {

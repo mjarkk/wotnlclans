@@ -7,16 +7,19 @@ import (
 	"strings"
 )
 
-// Flags is the interface for the program flags
-type Flags struct {
+// FlagsType is the interface for the program flags
+type FlagsType struct {
 	Debug     bool
 	Dev       bool
 	SkipBuild bool
 	WGKey     string
 }
 
-// GetFlags returns the program's launch flags and some shell vars
-func GetFlags() Flags {
+// Flags have some global settings for the program
+var Flags FlagsType
+
+// Setup sets up the Flags var
+func SetupFlags() {
 	debug := flag.Bool("debug", false, "debug the program")
 	dev := flag.Bool("dev", false, "launch the project in dev mode")
 	skipBuild := flag.Bool("skipBuild", false, "skip the build process")
@@ -30,7 +33,7 @@ func GetFlags() Flags {
 		wgKey = *wgKeyOverWrite
 	}
 
-	return Flags{
+	Flags = FlagsType{
 		Debug:     *debug,
 		Dev:       *dev,
 		SkipBuild: *skipBuild,
