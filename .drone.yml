@@ -38,11 +38,14 @@ steps:
     path: /var/wotnlclans
 - name: Restart webserver
   image: appleboy/drone-ssh
+  volumes:
+  - name: privatekey
+    path: /root/ssh/drone_rsa
   settings:
     host: mkopenga.com
     username: root
     port: 22
-    secrets: [ ssh_key ]
+    key_path: /root/ssh/drone_rsa
     script:
     - pwd
   when:
@@ -53,3 +56,6 @@ volumes:
 - name: website
   host:
     path: /var/www/wotnlclans
+- name: privatekey
+  host:
+    path: /root/.ssh/id_rsa
