@@ -26,7 +26,7 @@ func SetupFlags() {
 	dev := flag.Bool("dev", false, "launch the project in dev mode")
 	skipBuild := flag.Bool("skipBuild", false, "skip the build process")
 	maxIndexPages := flag.Int("maxindexpages", 2000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
-	skipStartupIndexing := flag.Bool("skipstartupindexing", false, "skip the indexing of clans when starting this script")
+	skipStartupIndexing := flag.Bool("skipstartupindexing", false, "skip the indexing of clans on start")
 
 	wgKey := os.Getenv("WARGAMINGAPIKEY")
 	wgKeyOverWrite := flag.String("wgkey", "", "select the wargaming api key (or use the shell var: WARGAMINGAPIKEY)")

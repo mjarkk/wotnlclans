@@ -15,23 +15,29 @@ func SetupAPI() error {
 	if len(flags.WGKey) == 0 {
 		return errors.New("No wargaming api key defined use `./wotnlclans -help` to get more info")
 	}
-	GetDataFromAPI()
+	GetDataFromAPI(flags, true)
 	return nil
 }
 
-// GetDataFromAPI fetches all data from the api
-func GetDataFromAPI() error {
-	GetAllClanIds()
+// GetDataFromAPI fetches all data from the wargaming api
+func GetDataFromAPI(flags other.FlagsType, isInit bool) error {
+	if isInit && flags.SkipStartupIndexing {
+		return nil
+	}
+	GetAllClanIds(flags)
 	return nil
 }
 
 // GetAllClanIds returns all clan ids
-func GetAllClanIds() ([]string, error) {
+func GetAllClanIds(flags other.FlagsType) ([]string, error) {
 	ids := []string{}
 	page := 0
 
 	for {
 		page++
+		if page > flags.MaxIndexPages {
+			break
+		}
 		var out TopClans
 		outString, err := CallRoute("topClans", map[string]string{
 			"pageNum": fmt.Sprintf("%v", page),
