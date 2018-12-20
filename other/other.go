@@ -25,7 +25,7 @@ func SetupFlags() {
 	debug := flag.Bool("debug", false, "debug the program")
 	dev := flag.Bool("dev", false, "launch the project in dev mode")
 	skipBuild := flag.Bool("skipBuild", false, "skip the build process")
-	maxIndexPages := flag.Int("maxindexpages", 2000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
+	maxIndexPages := flag.Int("maxindexpages", 4000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
 	skipStartupIndexing := flag.Bool("skipstartupindexing", false, "skip the indexing of clans on start")
 
 	wgKey := os.Getenv("WARGAMINGAPIKEY")
@@ -35,6 +35,14 @@ func SetupFlags() {
 
 	if len(*wgKeyOverWrite) > 0 {
 		wgKey = *wgKeyOverWrite
+	}
+
+	if len(wgKey) == 0 && *dev {
+		wgKey = "7e5ce7007256737daa79dbec35f4f072"
+	}
+
+	if *dev && *maxIndexPages == 4000 {
+		*maxIndexPages = 120
 	}
 
 	Flags = FlagsType{

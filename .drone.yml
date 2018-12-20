@@ -23,7 +23,7 @@ steps:
   when:
     branch:
     - v3
-- name: Deploy
+- name: Copy files to the webserver
   image: instrumentisto/rsync-ssh
   commands: 
   - cp ./wotnlclans /var/wotnlclans/
@@ -36,6 +36,18 @@ steps:
   volumes:
   - name: website
     path: /var/wotnlclans
+- name: Restart webserver
+  image: appleboy/drone-ssh
+  secrets: [ ssh_key ]
+  settings:
+    host: mkopenga.com
+    username: root
+    port: 22
+    script:
+    - pwd
+  when:
+    branch:
+    - v3
 
 volumes:
 - name: website
