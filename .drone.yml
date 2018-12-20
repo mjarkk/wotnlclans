@@ -38,11 +38,11 @@ steps:
     path: /var/wotnlclans
 - name: Restart webserver
   image: appleboy/drone-ssh
-  secrets: [ ssh_key ]
   settings:
     host: mkopenga.com
     username: root
     port: 22
+    secrets: [ ssh_key ]
     script:
     - pwd
   when:
