@@ -19,8 +19,6 @@ func main() {
 		if err != nil {
 			fmt.Println("Api error:" + err.Error())
 			os.Exit(1)
-		} else {
-			fmt.Println("Running api...")
 		}
 	}()
 

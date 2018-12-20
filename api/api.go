@@ -15,6 +15,7 @@ func SetupAPI() error {
 	if len(flags.WGKey) == 0 {
 		return errors.New("No wargaming api key defined use `./wotnlclans -help` to get more info")
 	}
+	fmt.Println("Running api...")
 	GetDataFromAPI(flags, true)
 	return nil
 }
@@ -61,7 +62,9 @@ func GetAllClanIds(flags other.FlagsType) ([]string, error) {
 			ids = append(ids, clan.ClanID)
 		}
 
-		fmt.Println(page)
+		if page%10 == 1 {
+			fmt.Println("Fetched", len(ids), "Clans")
+		}
 	}
 	return ids, nil
 }
