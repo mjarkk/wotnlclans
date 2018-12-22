@@ -15,6 +15,7 @@ type FlagsType struct {
 	WGKey               string
 	MaxIndexPages       int
 	SkipStartupIndexing bool
+	MongoUIR            string
 }
 
 // Flags have some global settings for the program
@@ -22,16 +23,23 @@ var Flags FlagsType
 
 // SetupFlags sets up the Flags var
 func SetupFlags() {
-	debug := flag.Bool("debug", false, "debug the program")
-	dev := flag.Bool("dev", false, "launch the project in dev mode")
-	skipBuild := flag.Bool("skipBuild", false, "skip the build process")
-	maxIndexPages := flag.Int("maxindexpages", 4000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
-	skipStartupIndexing := flag.Bool("skipstartupindexing", false, "skip the indexing of clans on start")
+	debug := fBool("debug", false, "debug the program")
+	dev := fBool("dev", false, "launch the project in dev mode")
+	skipBuild := fBool("skipBuild", false, "skip the build process")
+	maxIndexPages := fInt("maxindexpages", 4000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
+	skipStartupIndexing := fBool("skipstartupindexing", false, "skip the indexing of clans on start")
+
+	mongoURI := os.Getenv("MONGOURI")
+	mongoURIOverWrite := fString("mongoURI", "mongodb://localhost:27017", "the mongodb connection uri (shell var: MONGOURI)")
 
 	wgKey := os.Getenv("WARGAMINGAPIKEY")
-	wgKeyOverWrite := flag.String("wgkey", "", "select the wargaming api key (or use the shell var: WARGAMINGAPIKEY)")
+	wgKeyOverWrite := fString("wgkey", "", "select the wargaming api key (shell var: WARGAMINGAPIKEY)")
 
 	flag.Parse()
+
+	if len(*mongoURIOverWrite) > 0 {
+		mongoURI = *mongoURIOverWrite
+	}
 
 	if len(*wgKeyOverWrite) > 0 {
 		wgKey = *wgKeyOverWrite
@@ -52,6 +60,7 @@ func SetupFlags() {
 		WGKey:               wgKey,
 		MaxIndexPages:       *maxIndexPages,
 		SkipStartupIndexing: *skipStartupIndexing,
+		MongoUIR:            mongoURI,
 	}
 }
 
@@ -65,4 +74,19 @@ func Run(input string, executeingDir string) error {
 	}
 	err := cmd.Run()
 	return err
+}
+
+// fBool can set a boolean flag
+func fBool(name string, value bool, usage string) *bool {
+	return flag.Bool(name, value, usage)
+}
+
+// fString can set a string flag
+func fString(name, value, usage string) *string {
+	return flag.String(name, value, usage)
+}
+
+// fInt can set a int flag
+func fInt(name string, value int, usage string) *int {
+	return flag.Int(name, value, usage)
 }

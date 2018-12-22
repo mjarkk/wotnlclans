@@ -25,7 +25,12 @@ func GetDataFromAPI(flags other.FlagsType, isInit bool) error {
 	if isInit && flags.SkipStartupIndexing {
 		return nil
 	}
-	GetAllClanIds(flags)
+
+	clans, err := GetAllClanIds(flags)
+	if err == nil {
+		fmt.Println("Fetched", len(clans), "clan ids")
+	}
+
 	return nil
 }
 

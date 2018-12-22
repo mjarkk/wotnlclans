@@ -71,6 +71,12 @@
 			"revisionTime": "2018-07-18T01:23:57Z"
 		},
 		{
+			"checksumSHA1": "kEq1UbAWqLqVsrZI34Oh98MFWQE=",
+			"path": "github.com/mongodb/mongo-go-driver/mongo",
+			"revision": "8051092034cf81df0a5ada824da3bf34a2e00535",
+			"revisionTime": "2018-12-19T19:58:13Z"
+		},
+		{
 			"checksumSHA1": "j/aP/n+qaMNBUou/a2m2LDJ5q3Q=",
 			"path": "github.com/ugorji/go/codec",
 			"revision": "772ced7fd4c2f6322c07537a9a93b68d74551fa6",

@@ -3,4 +3,4 @@
 # Build the go program
 go build
 
-./wotnlclans -dev
+./wotnlclans -dev "$@"
