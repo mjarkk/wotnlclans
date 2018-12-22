@@ -1,4 +1,9 @@
 # World of tanks NL/BE clans    
+
+## V3
+I'm currently working on a v3 in this [branch](https://github.com/mjarkk/wotnlclans/tree/v3), issue [#1](https://github.com/mjarkk/wotnlclans/pull/1) contains the progressions of the new site 
+
+## About
 World of tanks NL/BE clans list hosted on [wotnlclans.mkopenga.com](https://wotnlclans.mkopenga.com)  
 On this site you can view the all the NL/BE clans and their stats  
 
