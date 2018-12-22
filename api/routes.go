@@ -12,7 +12,7 @@ var routePrefix = "https://api.worldoftanks.eu"
 
 // Routes are all the possible routes to make
 var Routes = map[string]string{
-	"me":                "/wot/account/info/?application_id={{key}}&account_id={{playerID}}&fields=nickname%2Cclan_id",
+	"nicknameAndClan":   "/wot/account/info/?application_id={{key}}&account_id={{playerID}}&fields=nickname%2Cclan_id",
 	"clanIcon":          "/wgn/clans/info/?application_id={{key}}&clan_id={{clan}}&fields=tag%2Ccolor%2Cemblems.x195",
 	"playerInfoLogedIn": "/wot/account/info/?application_id={{key}}&account_id={{playerID}}&access_token={{playerAccessToken}}",
 	"playerInfo":        "/wot/account/info/?application_id={{key}}&account_id={{playerID}}",

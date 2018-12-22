@@ -29,7 +29,12 @@ func BuildWebStatic() {
 	webStaticFolder := path.Join(currPath, "web_static")
 
 	go func() {
-		_ = Run(cmd, webStaticFolder)
+		err = Run(cmd, webStaticFolder)
+		if err != nil {
+			fmt.Println("Build the web_static files")
+		} else {
+			fmt.Println("Error while building the web static files:")
+			fmt.Println(err.Error())
+		}
 	}()
-
 }

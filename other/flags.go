@@ -25,7 +25,7 @@ var Flags FlagsType
 func SetupFlags() {
 	debug := fBool("debug", false, "debug the program")
 	dev := fBool("dev", false, "launch the project in dev mode")
-	skipBuild := fBool("skipBuild", false, "skip the build process")
+	skipBuild := fBool("skipBuild", false, "skip the web_static build process")
 	maxIndexPages := fInt("maxindexpages", 4000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
 	skipStartupIndexing := fBool("skipstartupindexing", false, "skip the indexing of clans on start")
 
@@ -41,16 +41,20 @@ func SetupFlags() {
 		mongoURI = *mongoURIOverWrite
 	}
 
+	if len(mongoURI) == 0 {
+		mongoURI = "mongodb://localhost:27017" // use the default mongodb url
+	}
+
 	if len(*wgKeyOverWrite) > 0 {
 		wgKey = *wgKeyOverWrite
 	}
 
 	if len(wgKey) == 0 && *dev {
-		wgKey = "7e5ce7007256737daa79dbec35f4f072"
+		wgKey = "7e5ce7007256737daa79dbec35f4f072" // my wargaming key
 	}
 
 	if *dev && *maxIndexPages == 4000 {
-		*maxIndexPages = 120
+		*maxIndexPages = 120 // limit this to 120 to make it easier to devlop
 	}
 
 	Flags = FlagsType{
