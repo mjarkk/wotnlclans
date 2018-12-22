@@ -8,6 +8,7 @@ node_modules/
 .npm
 .yarn-integrity
 build/
+web_static/build/*
 *.exe
 *.exe~
 *.dll
