@@ -28,3 +28,13 @@ func Setup() error {
 	fmt.Println("Connected to MongoDB!")
 	return nil
 }
+
+// GetClanIDs returns the clans ids that where found after searching for new clans
+func GetClanIDs() []string {
+	return []string{}
+}
+
+// SaveClanIDs saves a list of clan id's in the database
+func SaveClanIDs(toSave []string) {
+
+}

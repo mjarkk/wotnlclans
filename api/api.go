@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mjarkk/wotnlclans/db"
 	"github.com/mjarkk/wotnlclans/other"
 )
 
@@ -21,38 +22,104 @@ func SetupAPI() error {
 		return errors.New("No wargaming api key defined use `./wotnlclans -help` to get more info")
 	}
 	fmt.Println("Running api...")
-	GetDataFromAPI(flags, true)
+	GetDataFromAPI(flags)
 	return nil
 }
 
 // GetDataFromAPI fetches all data from the wargaming api
-func GetDataFromAPI(flags other.FlagsType, isInit bool) error {
+func GetDataFromAPI(flags other.FlagsType) error {
+	err := SearchForClanIds(flags, true)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SearchForClanIds searches through all clans for dutch clans and after that saves them in the database
+func SearchForClanIds(flags other.FlagsType, isInit bool) error {
 	if isInit && flags.SkipStartupIndexing {
 		return nil
 	}
 
 	clans, err := GetAllClanIds(flags)
-	if err == nil {
-		other.DevPrint("Fetched", len(clans), "clan ids")
-		clans = FilterOutClans(clans)
-		other.DevPrint("Filtered out all dutch clans, ", len(clans), "clans")
-		// TODO: Add blacklisted clans and extra clans to the clans list
-		clans = RemovedDuplicates(clans)
+	if err != nil {
+		return err
 	}
+
+	other.DevPrint("Fetched", len(clans), "clan ids")
+	clans = FilterOutClans(clans)
+	other.DevPrint("Filtered out all dutch clans, ", len(clans), "clans")
+	// TODO: Remove blacklisted clans and add extra clans to the clans list
+	clans = RemovedDuplicates(clans)
+	other.DevPrint("Removed all duplicate clans")
+	db.SaveClanIDs(clans)
+
+	// when this is ran for the first time make sure to get clan list
+	GetClanListData(clans)
 
 	return nil
 }
 
-// FilterOutClans gets the clan informations about the clans
-func FilterOutClans(clanList []string) []string {
-	tofetch := [][]string{}
-	for _, id := range clanList {
-		if len(tofetch) == 0 || len(tofetch[len(tofetch)-1]) == 100 {
-			tofetch = append(tofetch, []string{})
-		}
-		where := len(tofetch) - 1
-		tofetch[where] = append(tofetch[where], id)
+// GetClanListData returns all needed information about clans
+// includedClans is not needed but if you have a database
+func GetClanListData(includedClans ...[]string) {
+	clans := db.GetClanIDs()
+	if len(includedClans) > 0 && len(includedClans[0]) > 0 {
+		clans = includedClans[0]
 	}
+	toFetch := SplitToChucks(clans)
+	for _, chunk := range toFetch {
+		rawOut, err := CallRoute("clanData", map[string]string{"clanID": strings.Join(chunk, "%2C")})
+		if err != nil {
+			continue
+		}
+		var out ClanData
+		json.Unmarshal([]byte(rawOut), out)
+		if out.Status != "ok" {
+			continue
+		}
+	}
+}
+
+// DutchWords is a list of words and small setences that are usualy in dutch clan discriptions
+var DutchWords = []string{
+	"verplicht", "menselijkheid", "pannenkoeken", "leeftijd", "minimale", "opzoek", "beginnende", "nederlandse", "spelers", "voldoen", "wij zijn", "gezelligheid", "ons op", "Kom erbij", "minimaal", "gemiddelde", "plezier", "samenwerking", "samenwerken", "aangezien", "toegelaten", "goedkeuring", "gebruik", "tijdens",
+}
+
+// IsDutch detecst dutch words in setence
+func IsDutch(input string) bool {
+	if len(input) == 0 {
+		return false
+	}
+	input = strings.ToLower(input)
+	returnStatus := false
+	for _, word := range DutchWords {
+		if strings.Contains(input, word) {
+			returnStatus = true
+			break
+		}
+	}
+	// TODO: check if it contians typical words from other languages to make the searsh more spesific
+	return returnStatus
+}
+
+// SplitToChucks splits up a input list in arrays of 100
+// This makes it easy to request a lot of things at the same time from the wargaming api
+func SplitToChucks(list []string) [][]string {
+	toReturn := [][]string{}
+	for _, item := range list {
+		if len(toReturn) == 0 || len(toReturn[len(toReturn)-1]) == 100 {
+			toReturn = append(toReturn, []string{})
+		}
+		where := len(toReturn) - 1
+		toReturn[where] = append(toReturn[where], item)
+	}
+	return toReturn
+}
+
+// FilterOutClans filters out all not dutch clans out of a input list
+func FilterOutClans(clanList []string) []string {
+	tofetch := SplitToChucks(clanList)
 	toReturn := []string{}
 	for _, ids := range tofetch {
 		rawOut, err := CallRoute("clanDiscription", map[string]string{"clanID": strings.Join(ids, "%2C")}) // %2C = ,
@@ -61,16 +128,16 @@ func FilterOutClans(clanList []string) []string {
 		}
 		var out ClanDiscription
 		json.Unmarshal([]byte(rawOut), &out)
-		fmt.Println(out)
+		if out.Status != "ok" {
+			continue
+		}
+		for clanID, clan := range out.Data {
+			if IsDutch(clan.Description) {
+				toReturn = append(toReturn, clanID)
+				other.DevPrint("found clan:", clan.Tag)
+			}
+		}
 	}
-	// for i, clanID := range clanList {
-	// 	rawOut, err := CallRoute("clanDiscription", map[string]string{"clanID": clanID})
-	// 	if err != nil {
-	// 		continue
-	// 	}
-	// 	fmt.Println(i, rawOut)
-	// 	toReturn = append(toReturn, clanID)
-	// }
 	return toReturn
 }
 
