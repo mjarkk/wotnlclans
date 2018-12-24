@@ -52,7 +52,7 @@ func SearchForClanIds(flags other.FlagsType, isInit bool) error {
 	// TODO: Remove blacklisted clans and add extra clans to the clans list
 	clans = RemovedDuplicates(clans)
 	other.DevPrint("Removed all duplicate clans")
-	db.SaveClanIDs(clans)
+	db.SetClanIDs(clans)
 
 	// when this is ran for the first time make sure to get clan list
 	GetClanListData(clans)
@@ -131,6 +131,7 @@ func GetClanListData(includedClans ...[]string) {
 			})
 		}
 	}
+	db.SetCurrentClansData(toSave)
 }
 
 // DutchWords is a list of words and small setences that are usualy in dutch clan discriptions

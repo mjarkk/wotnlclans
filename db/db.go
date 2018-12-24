@@ -34,8 +34,8 @@ func GetClanIDs() []string {
 	return []string{}
 }
 
-// SaveClanIDs saves a list of clan id's in the database
-func SaveClanIDs(toSave []string) {
+// SetClanIDs saves a list of clan id's in the database
+func SetClanIDs(toSave []string) {
 
 }
 
