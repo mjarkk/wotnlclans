@@ -67,16 +67,68 @@ func GetClanListData(includedClans ...[]string) {
 	if len(includedClans) > 0 && len(includedClans[0]) > 0 {
 		clans = includedClans[0]
 	}
+	toSave := []db.ClanStats{}
 	toFetch := SplitToChucks(clans)
 	for _, chunk := range toFetch {
-		rawOut, err := CallRoute("clanData", map[string]string{"clanID": strings.Join(chunk, "%2C")})
+		var info ClanData
+		infoOut, err := CallRoute("clanData", map[string]string{"clanID": strings.Join(chunk, "%2C")})
 		if err != nil {
 			continue
 		}
-		var out ClanData
-		json.Unmarshal([]byte(rawOut), out)
-		if out.Status != "ok" {
+		json.Unmarshal([]byte(infoOut), info)
+
+		var rating ClanRating
+		ratingOut, err := CallRoute("clanRating", map[string]string{"clanID": strings.Join(chunk, "%2C")})
+		if err != nil {
 			continue
+		}
+		json.Unmarshal([]byte(ratingOut), rating)
+
+		if info.Status != "ok" || rating.Status != "ok" || len(info.Data) != len(rating.Data) {
+			continue
+		}
+
+		for i := range info.Data {
+			cInfo := info.Data[i]
+			cRating := rating.Data[i]
+			toSave = append(toSave, db.ClanStats{
+				Tag:         cInfo.Tag,
+				Name:        cInfo.Name,
+				Color:       cInfo.Color,
+				Members:     cInfo.MembersCount,
+				Description: cInfo.DescriptionHTML,
+				Motto:       cInfo.Motto,
+				ID:          i,
+				Emblems: map[string]string{
+					"X256.Wowp":   cInfo.Emblems.X256.Wowp,
+					"X195.Portal": cInfo.Emblems.X195.Portal,
+					"X64.Portal":  cInfo.Emblems.X64.Portal,
+					"X64.Wot":     cInfo.Emblems.X64.Wot,
+					"X32.Portal":  cInfo.Emblems.X32.Portal,
+					"X24.Portal":  cInfo.Emblems.X24.Portal,
+				},
+				Stats: db.HistoryClanStats{
+					Tag:                cInfo.Tag,
+					Name:               cInfo.Name,
+					ID:                 i,
+					Members:            cInfo.MembersCount,
+					Battles:            cRating.BattlesCountAvg.Value,
+					DailyBattles:       cRating.BattlesCountAvgDaily.Value,
+					Efficiency:         cRating.Efficiency.Value,
+					FbElo10:            cRating.FbEloRating10.Value,
+					FbElo8:             cRating.FbEloRating8.Value,
+					FbElo6:             cRating.FbEloRating6.Value,
+					FbElo:              cRating.FbEloRating.Value,
+					GmElo10:            cRating.GmEloRating10.Value,
+					GmElo8:             cRating.GmEloRating8.Value,
+					GmElo6:             cRating.GmEloRating6.Value,
+					GmElo:              cRating.GmEloRating.Value,
+					GlobRating:         cRating.GlobalRatingAvg.Value,
+					GlobRatingWeighted: cRating.GlobalRatingWeightedAvg.Value,
+					WinRatio:           cRating.WinsRatioAvg.Value,
+					V10l:               cRating.V10lAvg.Value,
+				},
+			})
 		}
 	}
 }

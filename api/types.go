@@ -115,3 +115,103 @@ type ClanData struct {
 		CreatorID       int    `json:"creator_id"`
 	} `json:"data"`
 }
+
+// ClanRating is a type for the clanRating route
+type ClanRating struct {
+	Status string `json:"status"`
+	Error  struct {
+		Code    int    `json:"code"`
+		Field   string `json:"field"`
+		Message string `json:"message"`
+		Value   string `json:"value"`
+	} `json:"error"`
+	Meta struct {
+		Count int `json:"count"`
+	} `json:"meta"`
+	Data map[string]struct {
+		ClanID          int    `json:"clan_id"`
+		ClanName        string `json:"clan_name"`
+		ClanTag         string `json:"clan_tag"`
+		BattlesCountAvg struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"battles_count_avg"`
+		BattlesCountAvgDaily struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"battles_count_avg_daily"`
+		Efficiency struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"efficiency"`
+		ExcludeReasons map[string]string `json:"exclude_reasons"`
+		FbEloRating    struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"fb_elo_rating"`
+		FbEloRating10 struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"fb_elo_rating_10"`
+		FbEloRating6 struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"fb_elo_rating_6"`
+		FbEloRating8 struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"fb_elo_rating_8"`
+		GlobalRatingAvg struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"global_rating_avg"`
+		GlobalRatingWeightedAvg struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"global_rating_weighted_avg"`
+		GmEloRating struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"gm_elo_rating"`
+		GmEloRating10 struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"gm_elo_rating_10"`
+		GmEloRating6 struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"gm_elo_rating_6"`
+		GmEloRating8 struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"gm_elo_rating_8"`
+		RatingFort struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"rating_fort"`
+		V10lAvg struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"v10l_avg"`
+		WinsRatioAvg struct {
+			Rank      float64 `json:"rank"`
+			RankDelta float64 `json:"rank_delta"`
+			Value     float64 `json:"value"`
+		} `json:"wins_ratio_avg"`
+	} `json:"data"`
+}

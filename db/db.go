@@ -38,3 +38,13 @@ func GetClanIDs() []string {
 func SaveClanIDs(toSave []string) {
 
 }
+
+// GetCurrentClansData returns all clan data
+func GetCurrentClansData() []ClanStats {
+	return []ClanStats{}
+}
+
+// SetCurrentClansData saves the latest clan data in the database
+func SetCurrentClansData(toSave []ClanStats) {
+
+}
