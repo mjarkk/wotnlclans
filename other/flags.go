@@ -16,6 +16,7 @@ type FlagsType struct {
 	MaxIndexPages       int
 	SkipStartupIndexing bool
 	MongoUIR            string
+	MongoDataBase       string
 }
 
 // Flags have some global settings for the program
@@ -32,17 +33,28 @@ func SetupFlags() {
 	mongoURI := os.Getenv("MONGOURI")
 	mongoURIOverWrite := fString("mongoURI", "mongodb://localhost:27017", "the mongodb connection uri (shell var: MONGOURI)")
 
+	mongoDataBase := os.Getenv("MONGODATABASE")
+	mongoDataBaseOverWrite := fString("mongoDatabase", "wotnlclans", "the mongodb database to use (shell var: MONGODATABASE)")
+
 	wgKey := os.Getenv("WARGAMINGAPIKEY")
 	wgKeyOverWrite := fString("wgkey", "", "select the wargaming api key (shell var: WARGAMINGAPIKEY)")
 
 	flag.Parse()
 
-	if len(*mongoURIOverWrite) > 0 {
+	if len(mongoURI) == 0 || (*mongoURIOverWrite != "mongodb://localhost:27017" && *mongoURIOverWrite != "") {
 		mongoURI = *mongoURIOverWrite
 	}
 
 	if len(mongoURI) == 0 {
 		mongoURI = "mongodb://localhost:27017" // use the default mongodb url
+	}
+
+	if len(mongoDataBase) == 0 || (*mongoDataBaseOverWrite != "wotnlclans" && *mongoDataBaseOverWrite != "") {
+		mongoDataBase = *mongoDataBaseOverWrite
+	}
+
+	if len(mongoDataBase) == 0 {
+		mongoDataBase = "wotnlclans" // use the default mongodb database
 	}
 
 	if len(*wgKeyOverWrite) > 0 {
@@ -54,7 +66,7 @@ func SetupFlags() {
 	}
 
 	if *dev && *maxIndexPages == 4000 {
-		*maxIndexPages = 120 // limit this to 120 to make it easier to devlop
+		*maxIndexPages = 30 // limit this to 30 to make it faster to debug
 	}
 
 	Flags = FlagsType{
@@ -65,6 +77,7 @@ func SetupFlags() {
 		MaxIndexPages:       *maxIndexPages,
 		SkipStartupIndexing: *skipStartupIndexing,
 		MongoUIR:            mongoURI,
+		MongoDataBase:       mongoDataBase,
 	}
 }
 

@@ -2,42 +2,42 @@ package db
 
 // ClanStats is what to be exepects to get back per clan from the database when requesting the current clan stats
 type ClanStats struct {
-	Tag         string
-	Name        string
-	Color       string
-	Members     int
-	Description string
-	Motto       string
-	ID          string
-	Emblems     map[string]string
-	Stats       HistoryClanStats
+	Tag         string            `json:"tag"`
+	Name        string            `json:"name"`
+	Color       string            `json:"color"`
+	Members     int               `json:"members"`
+	Description string            `json:"description"`
+	Motto       string            `json:"motto"`
+	ID          string            `json:"id"`
+	Emblems     map[string]string `json:"emblems"`
+	Stats       HistoryClanStats  `json:"stats"`
 }
 
 // HistoryClanStats this is what to be exepected to get back per clan from the database when requesting old clan data
 type HistoryClanStats struct {
-	Tag                string
-	Name               string
-	ID                 string
-	Members            int
-	Battles            float64
-	DailyBattles       float64
-	Efficiency         float64
-	FbElo10            float64
-	FbElo8             float64
-	FbElo6             float64
-	FbElo              float64
-	GmElo10            float64
-	GmElo8             float64
-	GmElo6             float64
-	GmElo              float64
-	GlobRating         float64
-	GlobRatingWeighted float64
-	WinRatio           float64
-	V10l               float64
+	Tag                string  `json:"tag"`
+	Name               string  `json:"name"`
+	ID                 string  `json:"id"`
+	Members            int     `json:"members"`
+	Battles            float64 `json:"battles"`
+	DailyBattles       float64 `json:"dailybattles"`
+	Efficiency         float64 `json:"efficiency"`
+	FbElo10            float64 `json:"fbelo10"`
+	FbElo8             float64 `json:"fbelo8"`
+	FbElo6             float64 `json:"fbelo6"`
+	FbElo              float64 `json:"fbelo"`
+	GmElo10            float64 `json:"gmelo10"`
+	GmElo8             float64 `json:"gmelo8"`
+	GmElo6             float64 `json:"gmelo6"`
+	GmElo              float64 `json:"gmelo"`
+	GlobRating         float64 `json:"globrating"`
+	GlobRatingWeighted float64 `json:"globRatingweighted"`
+	WinRatio           float64 `json:"winratio"`
+	V10l               float64 `json:"v10l"`
 }
 
 // HistoryCollectionItem is what the contens is of 1 hisotry colleciton item
 type HistoryCollectionItem struct {
-	Date  string
-	Stats []HistoryClanStats
+	Date  string             `json:"date"`
+	Stats []HistoryClanStats `json:"stats"`
 }

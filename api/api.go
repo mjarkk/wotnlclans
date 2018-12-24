@@ -28,11 +28,7 @@ func SetupAPI() error {
 
 // GetDataFromAPI fetches all data from the wargaming api
 func GetDataFromAPI(flags other.FlagsType) error {
-	err := SearchForClanIds(flags, true)
-	if err != nil {
-		return err
-	}
-	return nil
+	return SearchForClanIds(flags, true)
 }
 
 // SearchForClanIds searches through all clans for dutch clans and after that saves them in the database
@@ -48,7 +44,7 @@ func SearchForClanIds(flags other.FlagsType, isInit bool) error {
 
 	other.DevPrint("Fetched", len(clans), "clan ids")
 	clans = FilterOutClans(clans)
-	other.DevPrint("Filtered out all dutch clans, ", len(clans), "clans")
+	other.DevPrint("Filtered out all dutch clans,", len(clans), "clans")
 	// TODO: Remove blacklisted clans and add extra clans to the clans list
 	clans = RemovedDuplicates(clans)
 	other.DevPrint("Removed all duplicate clans")
@@ -62,27 +58,31 @@ func SearchForClanIds(flags other.FlagsType, isInit bool) error {
 
 // GetClanListData returns all needed information about clans
 // includedClans is not needed but if you have a database
-func GetClanListData(includedClans ...[]string) {
-	clans := db.GetClanIDs()
+func GetClanListData(includedClans ...[]string) error {
+	clans := []string{}
 	if len(includedClans) > 0 && len(includedClans[0]) > 0 {
 		clans = includedClans[0]
+	} else {
+		clans = db.GetClanIDs()
 	}
 	toSave := []db.ClanStats{}
 	toFetch := SplitToChucks(clans)
 	for _, chunk := range toFetch {
+		toInclude := map[string]string{"clanID": strings.Join(chunk, "%2C")}
+
 		var info ClanData
-		infoOut, err := CallRoute("clanData", map[string]string{"clanID": strings.Join(chunk, "%2C")})
+		infoOut, err := CallRoute("clanData", toInclude)
 		if err != nil {
 			continue
 		}
-		json.Unmarshal([]byte(infoOut), info)
+		json.Unmarshal([]byte(infoOut), &info)
 
 		var rating ClanRating
-		ratingOut, err := CallRoute("clanRating", map[string]string{"clanID": strings.Join(chunk, "%2C")})
+		ratingOut, err := CallRoute("clanRating", toInclude)
 		if err != nil {
 			continue
 		}
-		json.Unmarshal([]byte(ratingOut), rating)
+		json.Unmarshal([]byte(ratingOut), &rating)
 
 		if info.Status != "ok" || rating.Status != "ok" || len(info.Data) != len(rating.Data) {
 			continue
@@ -132,6 +132,7 @@ func GetClanListData(includedClans ...[]string) {
 		}
 	}
 	db.SetCurrentClansData(toSave)
+	return nil
 }
 
 // DutchWords is a list of words and small setences that are usualy in dutch clan discriptions

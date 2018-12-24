@@ -21,7 +21,7 @@ var Routes = map[string]string{
 	"clanDiscription":   "/wgn/clans/info/?application_id={{key}}&clan_id={{clanID}}&fields=description%2Ctag",
 	"clanTag":           "/wgn/clans/info/?application_id={{key}}&clan_id={{clanID}}&fields=tag",
 	"clanData":          "/wgn/clans/info/?application_id={{key}}&clan_id={{clanID}}&game=wot",
-	"clanRating":        "/wot/clanratings/clans/?application_id={{key}}&clan_id={{ClanID}}",
+	"clanRating":        "/wot/clanratings/clans/?application_id={{key}}&clan_id={{clanID}}",
 }
 
 // GetAPIRoute returns a route with the inputs parsed
