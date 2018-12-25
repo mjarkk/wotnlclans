@@ -17,10 +17,14 @@ type FlagsType struct {
 	SkipStartupIndexing bool
 	MongoUIR            string
 	MongoDataBase       string
+	CreateServiceFile   bool
+	WebServerLocation   string
 }
 
 // Flags have some global settings for the program
 var Flags FlagsType
+
+var defaultWebServerLocation = "localhost:8282"
 
 // SetupFlags sets up the Flags var
 func SetupFlags() {
@@ -29,6 +33,8 @@ func SetupFlags() {
 	skipBuild := fBool("skipBuild", false, "skip the web_static build process")
 	maxIndexPages := fInt("maxindexpages", 4000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
 	skipStartupIndexing := fBool("skipstartupindexing", false, "skip the indexing of clans on start")
+	createServiceFile := fBool("generateDotService", false, "Generate a .service file for linux")
+	webServerLocation := fString("webserverLocation", defaultWebServerLocation, "On with address and port to create a webserver")
 
 	mongoURI := os.Getenv("MONGOURI")
 	mongoURIOverWrite := fString("mongoURI", "mongodb://localhost:27017", "the mongodb connection uri (shell var: MONGOURI)")
@@ -78,6 +84,8 @@ func SetupFlags() {
 		SkipStartupIndexing: *skipStartupIndexing,
 		MongoUIR:            mongoURI,
 		MongoDataBase:       mongoDataBase,
+		CreateServiceFile:   *createServiceFile,
+		WebServerLocation:   *webServerLocation,
 	}
 }
 

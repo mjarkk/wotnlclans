@@ -15,6 +15,15 @@ func main() {
 
 	other.SetupFlags()
 
+	if other.Flags.CreateServiceFile {
+		err := other.MakeServiceFile()
+		if err != nil {
+			fmt.Println("The MakeServiceFile function got an error:", err.Error())
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
 	err := db.Setup()
 	if err != nil {
 		fmt.Println("Database error:" + err.Error())
@@ -33,5 +42,5 @@ func main() {
 
 	r := server.SetupRouter()
 	fmt.Println("Running server...")
-	r.Run("localhost:8282")
+	r.Run(other.Flags.WebServerLocation)
 }
