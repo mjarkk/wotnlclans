@@ -164,7 +164,6 @@ func IsDutch(input string) bool {
 			break
 		}
 	}
-	// TODO: check if it contians typical words from other languages to make the searsh more spesific
 	return returnStatus
 }
 
