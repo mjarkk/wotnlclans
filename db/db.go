@@ -49,6 +49,7 @@ func GetClanIDs() []string {
 
 	toReturn := []string{}
 
+	defer cur.Close(context.TODO())
 	for cur.Next(context.TODO()) {
 		raw, err := cur.DecodeBytes()
 		if err != nil {
@@ -84,10 +85,24 @@ func SetClanIDs(toSave []string) {
 }
 
 // GetCurrentClansData returns all clan data
-func GetCurrentClansData() []ClanStats {
-	// collection := DB.Collection("clanIDs")
-	// collection.Find(context.TODO(), nil)
-	return []ClanStats{}
+func GetCurrentClansData() ([]ClanStats, error) {
+	collection := DB.Collection("currentStats")
+	cur, err := collection.Find(context.TODO(), nil)
+	toReturn := []ClanStats{}
+	if err != nil {
+		return toReturn, err
+	}
+	defer cur.Close(context.TODO())
+	for cur.Next(context.TODO()) {
+		var toAdd ClanStats
+		err := cur.Decode(&toAdd)
+		if err != nil {
+			return toReturn, err
+		}
+		toReturn = append(toReturn, toAdd)
+	}
+
+	return toReturn, nil
 }
 
 // SetCurrentClansData saves the latest clan data in the database

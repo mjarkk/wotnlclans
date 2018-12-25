@@ -135,9 +135,14 @@ func GetClanListData(includedClans ...[]string) error {
 	return nil
 }
 
-// DutchWords is a list of words and small setences that are usualy in dutch clan discriptions
+// DutchWords is a list of words and small setences that are usualy in dutch clan descriptions
 var DutchWords = []string{
 	"verplicht", "menselijkheid", "pannenkoeken", "leeftijd", "minimale", "opzoek", "beginnende", "nederlandse", "spelers", "voldoen", "wij zijn", "gezelligheid", "ons op", "Kom erbij", "minimaal", "gemiddelde", "plezier", "samenwerking", "samenwerken", "aangezien", "toegelaten", "goedkeuring", "gebruik", "tijdens",
+}
+
+// BannedWords is a list of words that do usualy not exsits in a dutch clan descriptions
+var BannedWords = []string{
+	"équipe", "jeux", "ambiance", "rigolade",
 }
 
 // IsDutch detecst dutch words in setence
@@ -150,6 +155,12 @@ func IsDutch(input string) bool {
 	for _, word := range DutchWords {
 		if strings.Contains(input, word) {
 			returnStatus = true
+			break
+		}
+	}
+	for _, word := range BannedWords {
+		if strings.Contains(input, word) {
+			returnStatus = false
 			break
 		}
 	}

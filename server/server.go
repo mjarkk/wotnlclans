@@ -12,6 +12,7 @@ func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
+	serveDataRoutes(r)
 	serveStaticFiles(r)
 
 	return r
