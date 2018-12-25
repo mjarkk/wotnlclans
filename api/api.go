@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/mjarkk/wotnlclans/db"
 	"github.com/mjarkk/wotnlclans/other"
@@ -22,13 +23,40 @@ func SetupAPI() error {
 		return errors.New("No wargaming api key defined use `./wotnlclans -help` to get more info")
 	}
 	fmt.Println("Running api...")
-	GetDataFromAPI(flags)
+	clanIds := db.GetClanIDs()
+	if len(clanIds) == 0 {
+		SearchForClanIds(flags, true)
+	} else {
+		other.DevPrint("Skipping searching for clans")
+		GetClanData(clanIds)
+	}
+
+	RunSchedule()
+
 	return nil
 }
 
-// GetDataFromAPI fetches all data from the wargaming api
-func GetDataFromAPI(flags other.FlagsType) error {
-	return SearchForClanIds(flags, true)
+// RunSchedule runs GetClanData every view hours
+func RunSchedule() {
+	go func() {
+		count := 0
+		for {
+			time.Sleep(time.Hour * 4)
+			count++
+			if count == 12 {
+				count = 0
+				err := SearchForClanIds(other.Flags, false)
+				if err != nil {
+					other.DevPrint("ERROR: [SearchForClanIds]:", err.Error())
+				}
+			} else {
+				err := GetClanData()
+				if err != nil {
+					other.DevPrint("ERROR: [GetClanData]:", err.Error())
+				}
+			}
+		}
+	}()
 }
 
 // SearchForClanIds searches through all clans for dutch clans and after that saves them in the database
@@ -51,14 +79,14 @@ func SearchForClanIds(flags other.FlagsType, isInit bool) error {
 	db.SetClanIDs(clans)
 
 	// when this is ran for the first time make sure to get clan list
-	GetClanListData(clans)
+	GetClanData(clans)
 
 	return nil
 }
 
-// GetClanListData returns all needed information about clans
+// GetClanData returns all needed information about clans
 // includedClans is not needed but if you have a database
-func GetClanListData(includedClans ...[]string) error {
+func GetClanData(includedClans ...[]string) error {
 	clans := []string{}
 	if len(includedClans) > 0 && len(includedClans[0]) > 0 {
 		clans = includedClans[0]

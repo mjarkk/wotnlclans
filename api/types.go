@@ -1,5 +1,11 @@
 package api
 
+// IsAPIBuzzyType tells if the application is buzzy
+type IsAPIBuzzyType struct {
+	IsDoingThings bool
+	DuneChan      chan struct{}
+}
+
 // TopClans is a structure for the tops clans route
 type TopClans struct {
 	Status string `json:"status"`
