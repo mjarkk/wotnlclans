@@ -18,4 +18,5 @@ web_static/build/*
 *.out
 test/
 
+icons/*
 wotnlclans*
