@@ -25,11 +25,15 @@ func SetupAPI() error {
 	fmt.Println("Running api...")
 	clanIds := db.GetClanIDs()
 	if len(clanIds) == 0 {
-		SearchForClanIds(flags, true)
+		err := SearchForClanIds(flags, true)
+		if err != nil {
+			other.DevPrint("ERROR: [SearchForClanIds]:", err.Error())
+		}
 	} else {
 		other.DevPrint("Skipping searching for clans")
 		GetClanData(clanIds)
 	}
+	GetIcons()
 
 	RunSchedule()
 

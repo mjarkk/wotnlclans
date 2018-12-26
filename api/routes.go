@@ -42,18 +42,24 @@ func GetAPIRoute(what string, inputs map[string]string) (string, error) {
 	return routePrefix + selectedRoute, nil
 }
 
-// Get returns the response data of a url
+// Get returns the response data (string) of a url
 func Get(uri string) (string, error) {
-	req := HttpRequest.NewRequest()
-	res, err := req.Get(uri, nil)
-	if err != nil {
-		return "", nil
-	}
-	out, err := res.Body()
+	out, err := RawGet(uri)
 	if err != nil {
 		return "", err
 	}
 	return string(out), nil
+}
+
+// RawGet retruns the literal response data (byte data) of a response
+func RawGet(uri string) ([]byte, error) {
+	req := HttpRequest.NewRequest()
+	res, err := req.Get(uri, nil)
+	if err != nil {
+		return []byte{}, err
+	}
+	out, err := res.Body()
+	return out, err
 }
 
 // Post returns the data of a post request to a url
