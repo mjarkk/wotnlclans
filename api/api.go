@@ -59,6 +59,7 @@ func RunSchedule() {
 					other.DevPrint("ERROR: [GetClanData]:", err.Error())
 				}
 			}
+			GetIcons()
 		}
 	}()
 }
