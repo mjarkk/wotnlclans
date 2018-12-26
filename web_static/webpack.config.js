@@ -11,7 +11,7 @@ module.exports = {
     bundel: './dev/js/index.js'
   },
   output: {
-    filename: 'js/[name].js',
+    filename: 'js/[name].[hash].js',
     path: path.resolve(__dirname, './build/')
   },
   module: {
@@ -52,6 +52,11 @@ module.exports = {
       template: 'dev/index.html'
     })
   ],
+  optimization: {
+    splitChunks: {
+      chunks: 'all'
+    }
+  },
   stats: {
     colors: true
   },
