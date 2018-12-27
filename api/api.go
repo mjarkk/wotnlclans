@@ -203,9 +203,9 @@ func IsDutch(input string) bool {
 // SplitToChucks splits up a input list in arrays of 100
 // This makes it easy to request a lot of things at the same time from the wargaming api
 func SplitToChucks(list []string) [][]string {
-	toReturn := [][]string{}
+	toReturn := [][]string{[]string{}}
 	for _, item := range list {
-		if len(toReturn) == 0 || len(toReturn[len(toReturn)-1]) == 100 {
+		if len(toReturn[len(toReturn)-1]) == 100 {
 			toReturn = append(toReturn, []string{})
 		}
 		where := len(toReturn) - 1

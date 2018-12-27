@@ -1,14 +1,18 @@
 package api
 
 import (
+	"bufio"
 	"bytes"
+	"encoding/json"
 	"image"
-	_ "image/png" // This needs to be imported because otherwhise image.Decode won't work
+	"image/draw"
+	"image/png" // This needs to be imported because otherwhise image.Decode won't work with png images
 	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
 
+	"github.com/disintegration/imaging"
 	"github.com/mjarkk/wotnlclans/db"
 )
 
@@ -70,24 +74,65 @@ func GetIcons() error {
 
 	waitForImgs.Wait()
 
-	// if len(imgAndID) > 0 {
-	// 	// icons := [][]string{}
-	// 	for _, imageObj := range imgAndID {
-	// 		id := imageObj.ID
-	// 		img := imageObj.Image
+	if len(imgAndID) > 0 {
+		imgSize := 60
+		imgsInARow := 30
 
-	// 		offset := image.Point{img.Bounds().Dx(), 0}
-	// 		toInsert := image.Rectangle{offset, offset.Add(img.Bounds().Size())}
+		ids := [][]string{[]string{}}
+		outputImg := image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{0, 0}})
 
-	// 		canvas := image.NewRGBA(image.Rectangle{image.Point{0, 0}, toInsert.Max})
+		for _, imgObj := range imgAndID {
 
-	// 		draw.Draw(canvas, img.Bounds(), img, image.Point{0, 0}, draw.Src)
-	// 		draw.Draw(canvas, toInsert, img, image.Point{0, 0}, draw.Src)
+			id := imgObj.ID
+			if len(ids[len(ids)-1]) == imgsInARow {
+				ids = append(ids, []string{})
+			}
+			from := struct {
+				top  int
+				side int
+			}{
+				top:  len(ids),
+				side: len(ids[len(ids)-1]),
+			}
 
-	// 		// image := imageObj.Image
-	// 		fmt.Println(id)
-	// 	}
-	// }
+			insertImg := imaging.Resize(imgObj.Image, imgSize, imgSize, imaging.Lanczos)
+			offset := image.Point{imgSize * from.side, imgSize * (from.top - 1)}
+			whereToInsert := image.Rectangle{offset, offset.Add(insertImg.Bounds().Size())}
+			maxSize := image.Point{(len(ids[0]) + 1) * imgSize, len(ids) * imgSize}
+
+			canvas := image.NewRGBA(image.Rectangle{image.Point{0, 0}, maxSize})
+			draw.Draw(canvas, outputImg.Bounds(), outputImg, image.Point{0, 0}, draw.Src)
+			draw.Draw(canvas, whereToInsert, insertImg, image.Point{0, 0}, draw.Src)
+			outputImg = canvas
+
+			ids[len(ids)-1] = append(ids[len(ids)-1], id)
+		}
+
+		file, err := os.Create("./icons/allIcons.png")
+		if err != nil {
+			return err
+		}
+		png.Encode(file, outputImg)
+		file.Close()
+
+		file, err = os.Create("./icons/allIcons.json")
+		if err != nil {
+			return err
+		}
+		writer := bufio.NewWriter(file)
+
+		defer func() {
+			writer.Flush()
+			file.Close()
+		}()
+
+		jsonEncoder := json.NewEncoder(writer)
+		err = jsonEncoder.Encode(ids)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 
 	return nil
 }
