@@ -12,6 +12,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mjarkk/wotnlclans/other"
+
 	"github.com/disintegration/imaging"
 	"github.com/mjarkk/wotnlclans/db"
 )
@@ -23,6 +25,7 @@ type imageAndIDType struct {
 
 // GetIcons fetches all clan icons and creates a grid
 func GetIcons() error {
+	other.DevPrint("Getting clan icons...")
 	clans, err := db.GetCurrentClansData()
 	if err != nil {
 		return err

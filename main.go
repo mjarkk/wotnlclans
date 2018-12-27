@@ -41,6 +41,7 @@ func main() {
 	other.BuildWebStatic()
 
 	r := server.SetupRouter()
-	fmt.Println("Running server...")
-	r.Run(other.Flags.WebServerLocation)
+	webLoc := other.Flags.WebServerLocation
+	fmt.Println("Running server on", webLoc)
+	r.Run(webLoc)
 }
