@@ -1,3 +1,6 @@
+import sortBy from 'lodash.sortby'
+import reverse from 'lodash.reverse'
+
 export default {
   clanIconsToIndex(input) {
     let toReturn = {}
@@ -9,13 +12,14 @@ export default {
     return toReturn
   },
   sortList(what, list) {
-    if (list.length == 0) {
-      return list
+    switch (what) {
+      case 'globalRating':
+        return reverse(sortBy(list, [o => o.stats.globRatingweighted, o => o.stats.winratio]))
+      case 'winratio':
+        return reverse(sortBy(list, [o => o.stats.winratio, o => o.stats.globRatingweighted]))
+      default:
+        console.warn(`${what} is not a sort option the options are: globalRating or winratio`)
+        return list
     }
-    const selector = what.split('.')
-    return list.sort((a, b) => {
-      const out = selector.reduce((acc, cur) => acc.map(item => item[cur]), [a,b])
-      return out[0] - out[1]
-    })
   }
 }

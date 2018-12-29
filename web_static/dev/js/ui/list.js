@@ -18,7 +18,7 @@ export default class List extends React.Component {
     this.getNeededInfo()
   }
   async getNeededInfo() {
-    const list = funs.sortList('stats.globRatingweighted', await network.getClanList())
+    const list = funs.sortList('globalRating', await network.getClanList())
     this.setState({
       list
     })
@@ -64,7 +64,6 @@ export default class List extends React.Component {
             this.state.list.length != 0
             ? this.state.list.map((item, id) => {
                 const location = this.state.iconsLocation[item.id]
-                console.log(this.state.imgSize)
                 return (<div key={id} className="row">
                   <div className="icon">
                     <div className="holder" style={{
