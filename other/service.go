@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
 // MakeServiceFile creates the contents of a .service file and logs it plus tips to install it
@@ -15,6 +16,8 @@ func MakeServiceFile() error {
 	if _, err := os.Stat(wotnlclansBinary); os.IsNotExist(err) {
 		return errors.New("Wrong location to binary, " + wotnlclansBinary)
 	}
+	pathToBin := strings.Split(wotnlclansBinary, "/")
+	pathToBin = pathToBin[0 : len(wotnlclansBinary)-2]
 	if dev {
 		wotnlclansBinary = wotnlclansBinary + " -dev"
 	}
@@ -42,8 +45,13 @@ Wants=network-online.target systemd-networkd-wait-online.service
 [Service]
 ExecStart=` + wotnlclansBinary + `
 ExecReload=/bin/kill -USR1 $MAINPID
+WorkingDirectory=` + strings.Join(pathToBin, "/") + `
 KillMode=mixed
 KillSignal=SIGQUIT
+LimitAS=infinity
+LimitRSS=infinity
+LimitCORE=infinity
+LimitNOFILE=65536
 TimeoutStopSec=5s
 
 [Install]

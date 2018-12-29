@@ -48,7 +48,7 @@ steps:
     port: 22
     key_path: /root/ssh/drone_rsa
     script:
-    - pwd
+    - systemctl restart wotnlclans-dev.service
   when:
     branch:
     - v3
