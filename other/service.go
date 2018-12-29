@@ -31,7 +31,7 @@ func MakeServiceFile() error {
 		return errors.New("No wargaming key given")
 	}
 
-	wotnlclansBinary = wotnlclansBinary + "-wgkey " + wgKey
+	wotnlclansBinary = wotnlclansBinary + " -wgkey " + wgKey
 
 	service := `
 [Unit]
@@ -40,7 +40,6 @@ After=network-online.target
 Wants=network-online.target systemd-networkd-wait-online.service
 
 [Service]
-Environment=CADDYPATH=/etc/ssl/caddy
 ExecStart=` + wotnlclansBinary + `
 ExecReload=/bin/kill -USR1 $MAINPID
 KillMode=mixed
