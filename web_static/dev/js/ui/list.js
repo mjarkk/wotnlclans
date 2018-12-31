@@ -57,34 +57,48 @@ export default class List extends React.Component {
   render() {
     return(
       <div className="list">
-        <h1>List</h1>
-        <div className="filterRow"></div>
         <div className="actualData">
           { 
             this.state.list.length != 0
             ? this.state.list.map((item, id) => {
                 const location = this.state.iconsLocation[item.id]
                 return (<div key={id} className="row">
+                  <div className="position">{id}</div>
                   <div className="icon">
                     <div className="holder" style={{
-                      backgroundImage: `url(${this.state.iconsPicture})`,
-                      backgroundPosition: location ? `${location.x * 30}px ${location.y * 30}px` : '',
-                      backgroundSize: `${this.state.imgSize.width/2}px ${this.state.imgSize.height/2}px`
+                      backgroundImage: location ? `url(${this.state.iconsPicture})` : '',
+                      backgroundPosition: location ? `-${location.x * 60}px ${location.y * 60}px` : '',
                     }}></div>
                   </div>
-                  <div className="data">
-                    <div className="rating tag">[{item.tag}]</div>
-                    <div className="rating rating"><span>Rating</span>{item.stats.globRatingweighted}</div>
-                    <div className="rating winrate"><span>Winrate</span>{item.stats.winratio}%</div>
-                    <div className="rating global"><span>Global 8</span>{item.stats.gmelo8}</div>
-                    <div className="rating stronghold"><span>Stronghold</span>{item.stats.fbelo}</div>
-                    <div className="rating members"><span>Members</span>{item.members}</div>
-                    <div className="rating battles"><span>Battles</span>{item.stats.battles}</div>
+                  <div className="tag">[{item.tag}]</div>
+                  <div className="rating clanRating">
+                    <span>Rating</span>
+                    <span>{item.stats.globRatingweighted}</span>
+                  </div>
+                  <div className="rating winrate">
+                    <span>Winrate</span>
+                    <span>{item.stats.winratio}%</span>
+                  </div>
+                  <div className="rating global">
+                    <span>Global 8</span>
+                    <span>{item.stats.gmelo8}</span>
+                  </div>
+                  <div className="rating stronghold">
+                    <span>Stronghold</span>
+                    <span>{item.stats.fbelo}</span>
+                  </div>
+                  <div className="rating members">
+                    <span>Members</span>
+                    <span>{item.members}</span>
+                  </div>
+                  <div className="rating battles">
+                    <span>Battles</span>
+                    <span>{item.stats.battles}</span>
                   </div>
                 </div>)
               })
             : <div className="loading">
-              loading...
+                loading...
               </div>
           }
         </div>
