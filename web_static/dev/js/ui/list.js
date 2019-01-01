@@ -68,6 +68,7 @@ export default class List extends React.Component {
                     <div className="holder" style={{
                       backgroundImage: location ? `url(${this.state.iconsPicture})` : '',
                       backgroundPosition: location ? `-${location.x * 60}px ${location.y * 60}px` : '',
+                      backgroundPosition: location ? `-${location.x * 60}px -${location.y * 60}px` : '',
                     }}></div>
                   </div>
                   <div className="tag">[{item.tag}]</div>
