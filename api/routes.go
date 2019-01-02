@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/kirinlabs/HttpRequest"
+	"github.com/mjarkk/HttpRequest"
 	"github.com/mjarkk/wotnlclans/other"
 )
 
