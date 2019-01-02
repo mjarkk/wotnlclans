@@ -21,5 +21,12 @@ export default {
         console.warn(`${what} is not a sort option the options are: globalRating or winratio`)
         return list
     }
+  },
+  watchScreenSize(cb) {
+    const deskTopSize = 1200 
+    cb(document.body.offsetWidth < deskTopSize)
+    window.onresize = () => {
+      cb(document.body.offsetWidth < deskTopSize)
+    }
   }
 }

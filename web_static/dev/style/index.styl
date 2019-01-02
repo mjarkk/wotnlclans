@@ -16,15 +16,13 @@ body
     padding 30px 0px 50px 0px
     .row
       padding 10px 5px
-      max-width 670px
+      max-width 700px
       border-radius 13px
       display grid
-      grid-template-columns 50px 40px 40px 130px 130px 130px 130px
+      grid-template-columns 50px 40px 40px 130px 130px 130px 130px 40px
       grid-template-rows 25px 25px 25px 25px
       background-color #27214b
       transition 0.2s background-color
-      &:hover
-        background-color #1c032a
       .position
         grid-column 1 / 2
         grid-row 1 / 5
@@ -82,7 +80,24 @@ body
       .battles
         grid-column 6
         grid-row 3 / 5
-
+      .moreinfo
+        grid-column 8
+        grid-row 1 / 5
+        display flex
+        justify-content center
+        align-items center
+        span 
+          transition 0.2s opacity
+          opacity 0
+          height 40px
+          width 40px
+          cursor pointer
+          svg
+            fill white
+      &:hover
+        background-color #1c032a
+        .moreinfo span
+          opacity 0.7
 .header
   position fixed
   bottom 0px
@@ -92,21 +107,35 @@ body
   background-color #0d0222
   .top
     display flex
-    justify-content space-between
-    padding 10px 20px
+    justify-content center
+    align-items center
+    padding 10px 20px 20px 20px
+    .links, .selected
+      padding 0px 20px
     h2
       font-size 30px
       font-weight 800
+      padding 0px 5px
+      margin 0px 2px
+      border-bottom 2px solid rgba(255,255,255,0)
+      cursor pointer
+      user-select none
+      -moz-user-select none
+      -webkit-user-select: none
+      -webkit-touch-callout: none
+    .selected
+      border-bottom 2px solid rgba(255,255,255,0.77)
   .promo
-    height 75px
+    height 80px
     transition height 0.3s
     will-change height
     .promoInner
       box-sizing border-box
-      height 75px
+      height 80px
       padding 10px 20px
       h1
         min-height 60px
+        text-align center
   .promo.hidden
     height 0px
 
@@ -143,3 +172,25 @@ button.outline.dark
     max-width 400px
     text-align center
     
+.clanStatsContainer
+  position fixed
+  bottom 0px
+  left 0px
+  width 100vw
+  height 100vh
+  background-color white
+  transform scale(0.98) translate(0px, 100vh)
+  border-radius 10px
+  transition transform 0.2s
+  &.show
+    border-radius 0px
+    transform scale(1) translate(0px, 0vh)
+
+.clanDetials
+  height 100%
+  width 100%
+  overflow-y scroll
+  overflow-x hidden
+  display block
+  z-index 4
+  color black

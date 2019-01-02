@@ -14,6 +14,14 @@ module.exports = {
     filename: 'js/[name].[hash].js',
     path: path.resolve(__dirname, './build/')
   },
+  resolveLoader: {
+    extensions: [ 
+      '.js', 
+      '.json', 
+      '.styl',
+      '.svg'
+    ]
+  },
   module: {
     rules: [
       {
@@ -29,6 +37,9 @@ module.exports = {
       },{
         test: /\.styl$/,
         loader: 'style-loader!css-loader!stylus-loader' 
+      },{
+        test: /\.svg$/,
+        loader: 'svg-inline-loader'
       }
     ]
   },

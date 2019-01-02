@@ -1,11 +1,14 @@
 import React from 'react'
 import network from '../funs/networking'
 import funs from '../funs/functions'
+import SVG from 'react-inlinesvg'
+import ClanDetials from './clandetails'
+import arrow from './../../icons/arrow.svg'
 
 export default class List extends React.Component {
-  constructor() {
+  constructor(props) {
     super()
-    this.state = {
+    this.state = Object.assign({
       list: [],
       iconsLocation: {},
       iconsPicture: '',
@@ -14,7 +17,7 @@ export default class List extends React.Component {
         width: 0,
         oneItem: 0
       }
-    }
+    }, props)
     this.getNeededInfo()
   }
   async getNeededInfo() {
@@ -62,47 +65,60 @@ export default class List extends React.Component {
             this.state.list.length != 0
             ? this.state.list.map((item, id) => {
                 const location = this.state.iconsLocation[item.id]
-                return (<div key={id} className="row">
-                  <div className="position">{id}</div>
-                  <div className="icon">
-                    <div className="holder" style={{
-                      backgroundImage: location ? `url(${this.state.iconsPicture})` : '',
-                      backgroundPosition: location ? `-${location.x * 60}px ${location.y * 60}px` : '',
-                      backgroundPosition: location ? `-${location.x * 60}px -${location.y * 60}px` : '',
-                    }}></div>
+                return (
+                  <div 
+                    key={id} 
+                    className="row"
+                    onClick={() => this.props.setShowClan(item)}
+                  >
+                    <div className="position">{id}</div>
+                    <div className="icon">
+                      <div className="holder" style={{
+                        backgroundImage: location ? `url(${this.state.iconsPicture})` : '',
+                        backgroundPosition: location ? `-${location.x * 60}px -${location.y * 60}px` : '',
+                      }}></div>
+                    </div>
+                    <div className="tag">[{item.tag}]</div>
+                    <div className="rating clanRating">
+                      <span>Rating</span>
+                      <span>{item.stats.globRatingweighted}</span>
+                    </div>
+                    <div className="rating winrate">
+                      <span>Winrate</span>
+                      <span>{item.stats.winratio}%</span>
+                    </div>
+                    <div className="rating global">
+                      <span>Global 8</span>
+                      <span>{item.stats.gmelo8}</span>
+                    </div>
+                    <div className="rating stronghold">
+                      <span>Stronghold</span>
+                      <span>{item.stats.fbelo}</span>
+                    </div>
+                    <div className="rating members">
+                      <span>Members</span>
+                      <span>{item.members}</span>
+                    </div>
+                    <div className="rating battles">
+                      <span>Battles</span>
+                      <span>{item.stats.battles}</span>
+                    </div>
+                    <div className="moreinfo">
+                      <SVG src={`data:image/svg+xml,${arrow}`} />
+                    </div>
                   </div>
-                  <div className="tag">[{item.tag}]</div>
-                  <div className="rating clanRating">
-                    <span>Rating</span>
-                    <span>{item.stats.globRatingweighted}</span>
-                  </div>
-                  <div className="rating winrate">
-                    <span>Winrate</span>
-                    <span>{item.stats.winratio}%</span>
-                  </div>
-                  <div className="rating global">
-                    <span>Global 8</span>
-                    <span>{item.stats.gmelo8}</span>
-                  </div>
-                  <div className="rating stronghold">
-                    <span>Stronghold</span>
-                    <span>{item.stats.fbelo}</span>
-                  </div>
-                  <div className="rating members">
-                    <span>Members</span>
-                    <span>{item.members}</span>
-                  </div>
-                  <div className="rating battles">
-                    <span>Battles</span>
-                    <span>{item.stats.battles}</span>
-                  </div>
-                </div>)
+                )
               })
             : <div className="loading">
                 loading...
               </div>
           }
         </div>
+        { !this.props.isMobile
+          ? <div className={'graphAndStats'}>
+              <ClanDetials isMobile={this.props.isMobile} />
+            </div>
+        : ''}
       </div>
     )
   }

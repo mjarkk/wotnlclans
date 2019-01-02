@@ -1,6 +1,7 @@
 import React from 'react'
 import cn from 'classnames'
 import Button from '../els/button'
+import ClanDetials from './clandetails'
 
 export default class Header extends React.Component {
   constructor(props) {
@@ -37,9 +38,6 @@ export default class Header extends React.Component {
             )}
           </div>
           <div className="itemOptions">
-            <Button title={"Settings"} click={() => {
-              console.log("Clicked on idk")
-            }}/>
             <Button title={'Login'} click={() => {
               this.state.loginClicked()
             }}/>
@@ -50,6 +48,11 @@ export default class Header extends React.Component {
             <h1>Wot NL/BE clans</h1>
           </div>
         </div>
+        { this.props.isMobile
+          ? <div className={cn('clanStatsContainer', {show: this.props.showClan})}>
+              <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
+            </div>
+        : ''}
       </div>
     )
   }
