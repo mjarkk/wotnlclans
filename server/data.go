@@ -15,8 +15,11 @@ type dataRes struct {
 // serveDataRoutes serves the data routes
 func serveDataRoutes(r *gin.Engine) {
 	r.GET("/clanData", func(c *gin.Context) {
-		var res dataRes
-		res.hasError = true
+		res := dataRes{
+			hasError: true,
+			err:      "",
+			data:     map[string]string{},
+		}
 
 		data, err := db.GetCurrentClansData()
 		c.Request.Close = true
