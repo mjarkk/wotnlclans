@@ -5,32 +5,22 @@ import (
 	"github.com/mjarkk/wotnlclans/db"
 )
 
-// dataRes is the content type that will be send to a user
-type dataRes struct {
-	data     interface{}
-	hasError bool
-	err      string
-}
-
 // serveDataRoutes serves the data routes
 func serveDataRoutes(r *gin.Engine) {
 	r.GET("/clanData", func(c *gin.Context) {
-		res := dataRes{
-			hasError: true,
-			err:      "",
-			data:     map[string]string{},
-		}
 
 		data, err := db.GetCurrentClansData()
 		c.Request.Close = true
 		if err != nil {
-			res.err = err.Error()
-			c.JSON(400, res)
+			c.JSON(400, gin.H{
+				"hasError": true,
+				"err":      err.Error(),
+			})
 			return
 		}
-
-		res.hasError = false
-		res.data = data
-		c.JSON(200, res)
+		c.JSON(200, gin.H{
+			"hasError": false,
+			"data":     data,
+		})
 	})
 }

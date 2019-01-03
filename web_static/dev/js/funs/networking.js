@@ -3,6 +3,7 @@ import 'unfetch/polyfill'
 let clansList = {
   started: false,
   hasData: false,
+  hasError: false,
   data: false,
   isWaitingForData: []
 }
@@ -24,6 +25,9 @@ let clanIcons = {
 
 const getClanList = async() => {
   if (clansList.hasData) {
+    if (clansList.hasError) {
+      throw 'clandata has error'
+    }
     return clansList.data
   } else if (clansList.started) {
     return await new Promise(resolve => {
@@ -33,10 +37,17 @@ const getClanList = async() => {
     clansList.started = true
     const res = await fetch('/clanData')
     const data = await res.json()
-    clansList.data = data
+    clansList.data = data.data
+    clansList.hasError = data.hasError
     clansList.hasData = true
-    clansList.isWaitingForData.map(resolve => resolve(data))
-    return data
+    clansList.isWaitingForData.map((resolve, reject) => {
+      if (data.hasError) {
+        reject('clandata has error')
+      } else {
+        resolve(data.data)
+      }
+    })
+    return data.data
   }
 }
 const getIconsLocation = async() => {

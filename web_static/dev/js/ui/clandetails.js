@@ -26,20 +26,6 @@ export default class ClanDetials extends React.Component {
         {item: 'gmelo', name: '±'}
       ], name: 'global'},
     ]
-    const idk = {
-      "fbelo10": 1000,
-      "fbelo8": 1164,
-      "fbelo6": 1143,
-      "fbelo": 0,
-      "gmelo10": 1000,
-      "gmelo8": 1058,
-      "gmelo6": 1017,
-      "gmelo": 0,
-      "globrating": 7266.17,
-      "globRatingweighted": 6394.23,
-      "winratio": 54.41,
-      "v10l": 12.93
-    }
     
     return (
       <div className="stats">
