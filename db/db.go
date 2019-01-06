@@ -25,11 +25,11 @@ func Setup() error {
 	if len(mongoDataBase) == 0 {
 		return errors.New("Mongodb database not defined use `./wotnlclans -help` for more information")
 	}
-	client, err := mongo.Connect(context.TODO(), mongoUIR)
+	client, err := mongo.Connect(context.Background(), mongoUIR)
 	if err != nil {
 		return err
 	}
-	err = client.Ping(context.TODO(), nil)
+	err = client.Ping(context.Background(), nil)
 	if err != nil {
 		return err
 	}
@@ -42,20 +42,20 @@ func Setup() error {
 // GetClanIDs returns the clans ids that where found after searching for new clans
 func GetClanIDs() []string {
 	collection := DB.Collection("clanIDs")
-	cur, err := collection.Find(context.TODO(), nil)
+	cur, err := collection.Find(context.Background(), nil)
 	if err != nil {
 		return []string{}
 	}
 
 	toReturn := []string{}
 
-	defer cur.Close(context.TODO())
-	for cur.Next(context.TODO()) {
+	defer cur.Close(context.Background())
+	for cur.Next(context.Background()) {
 		raw, err := cur.DecodeBytes()
 		if err != nil {
 			log.Fatal(err)
 		}
-		// TODO: do something with output
+		// Background: do something with output
 		els, err := raw.Elements()
 		if err != nil {
 			continue
@@ -80,24 +80,24 @@ func SetClanIDs(toSave []string) {
 		}
 	}
 	collection := DB.Collection("clanIDs")
-	collection.Drop(context.TODO())
-	collection.InsertMany(context.TODO(), toInsert)
+	collection.Drop(context.Background())
+	collection.InsertMany(context.Background(), toInsert)
 }
 
 // GetCurrentClansData returns all clan data
 func GetCurrentClansData() ([]ClanStats, error) {
 	collection := DB.Collection("currentStats")
-	cur, err := collection.Find(context.TODO(), nil)
+	cur, err := collection.Find(context.Background(), nil)
 	toReturn := []ClanStats{}
 	if err != nil {
 		return toReturn, errors.New("log 1: " + err.Error())
 	}
-	defer cur.Close(context.TODO())
-	for cur.Next(context.TODO()) {
+	defer cur.Close(context.Background())
+	for cur.Next(context.Background()) {
 		var toAdd ClanStats
 		err := cur.Decode(&toAdd)
 		if err != nil {
-			return toReturn, errors.New("log 2: " + err.Error())
+			return toReturn, err
 		}
 		toReturn = append(toReturn, toAdd)
 	}
@@ -117,7 +117,7 @@ func SetCurrentClansData(stats []ClanStats) error {
 		toInsertHistory[i] = item.Stats
 	}
 	collection := DB.Collection("currentStats")
-	collection.Drop(context.TODO())
-	_, err := collection.InsertMany(context.TODO(), toInsert)
+	collection.Drop(context.Background())
+	_, err := collection.InsertMany(context.Background(), toInsert)
 	return err
 }
