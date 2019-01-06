@@ -41,17 +41,19 @@ export default class ClanDetials extends React.Component {
     const d = this.props.showClan && this.props.showClan.tag
     return (
       <div className="clanDetials">
-        <pre>{JSON.stringify(this.props.showClan, null, 2)}</pre>
-        <div className="icon">
-          <img src={d ? this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal'] : ''} />
+        <div className="clanDetialsInner">
+          <pre>{JSON.stringify(this.props.showClan, null, 2)}</pre>
+          <div className="icon">
+            <img src={d ? this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal'] : ''} />
+          </div>
+          <h1>{`[${d ? this.props.showClan.tag : ''}]`}</h1>
+          <h3>{d ? this.props.showClan.name : ''}</h3>
+          {d ? this.renderStats(this.props.showClan.stats) : ''}
+          <div 
+            className="Discription" 
+            dangerouslySetInnerHTML={{__html: d ? this.props.showClan.description : ''}} 
+          />
         </div>
-        <h1>{`[${d ? this.props.showClan.tag : ''}]`}</h1>
-        <h3>{d ? this.props.showClan.name : ''}</h3>
-        {d ? this.renderStats(this.props.showClan.stats) : ''}
-        <div 
-          className="Discription" 
-          dangerouslySetInnerHTML={{__html: d ? this.props.showClan.description : ''}} 
-        />
       </div>
     )
   }
