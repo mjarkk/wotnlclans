@@ -8,6 +8,7 @@ import (
 
 	"github.com/mjarkk/wotnlclans/other"
 
+	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
@@ -87,10 +88,9 @@ func SetClanIDs(toSave []string) {
 // GetCurrentClansData returns all clan data
 func GetCurrentClansData() ([]ClanStats, error) {
 	collection := DB.Collection("currentStats")
-	cur, err := collection.Find(context.Background(), nil)
+	cur, err := collection.Find(context.Background(), bson.M{"tag": bson.M{"$exists": true}})
 	toReturn := []ClanStats{}
 	if err != nil {
-		fmt.Println(err)
 		return toReturn, errors.New("log 1: " + err.Error())
 	}
 	defer cur.Close(context.Background())
