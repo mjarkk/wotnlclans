@@ -1,11 +1,14 @@
 import React from 'react'
+import cn from 'classnames'
+import SVG from 'react-inlinesvg'
+import close from './../../icons/close.svg'
 
 export default class ClanDetials extends React.Component {
   constructor(props) {
     super()
     this.state = {}
   }
-  renderStats() {
+  renderStats(clan) {
     const list = [
       {type: 'one', item: 'members', name: 'Members'},
       {type: 'one', item: 'battles', name: 'Total battles'},
@@ -30,9 +33,22 @@ export default class ClanDetials extends React.Component {
     return (
       <div className="stats">
         {list.map((item, key) => 
-          <div key={key} className="block">
-            {item.name}
-          </div>
+          item.type == 'one' 
+          ? <div key={key} className="block one">
+              <div className="propertyName">{item.name}</div>
+              <div className="value">{clan[item.item]}</div>
+            </div>
+          : <div key={key} className="block multiple">
+              <div className="propertyName">{item.name}</div>
+              <div className="values">
+                { item.items.map((el, key, arr) => 
+                  <div key={key} className={cn('stat', {first: key == 0, last: key == (arr.length - 1)})}>
+                    <span className="what">{ el.name }:</span>
+                    <span className="value">{ clan[el.item] }</span>
+                  </div>
+                )}
+              </div>
+            </div>
         )}
       </div>
     )
@@ -42,7 +58,11 @@ export default class ClanDetials extends React.Component {
     return (
       <div className="clanDetials">
         <div className="clanDetialsInner">
-          <pre>{JSON.stringify(this.props.showClan, null, 2)}</pre>
+          <div className="actionBar">
+            <div className="back" onClick={() => location.hash = '/'}>
+              <SVG src={`data:image/svg+xml,${close}`} />
+            </div>
+          </div>
           <div className="icon">
             <img src={d ? this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal'] : ''} />
           </div>

@@ -64,18 +64,20 @@ export default class List extends React.Component {
           { 
             this.state.list.length != 0
             ? this.state.list.map((item, id) => {
-                const location = this.state.iconsLocation[item.id]
+                const loc = this.state.iconsLocation[item.id]
                 return (
                   <div 
                     key={id} 
                     className="row"
-                    onClick={() => this.props.setShowClan(item)}
+                    onClick={() => {
+                      location.hash = `/clan/${item.id}`
+                    }}
                   >
                     <div className="position">{id}</div>
                     <div className="icon">
                       <div className="holder" style={{
-                        backgroundImage: location ? `url(${this.state.iconsPicture})` : '',
-                        backgroundPosition: location ? `-${location.x * 60}px -${location.y * 60}px` : '',
+                        backgroundImage: loc ? `url(${this.state.iconsPicture})` : '',
+                        backgroundPosition: loc ? `-${loc.x * 60}px -${loc.y * 60}px` : '',
                       }}></div>
                     </div>
                     <div className="tag">[{item.tag}]</div>

@@ -27,14 +27,25 @@ const route = rlite(async () => ns(), {
   'list': async () => ns(),
   '': async () => ns(),
   'clan/:clanID': async ({clanID}) => {
-    const clans = await net.getClanList()
-    const showClan = clans.reduce((acc, clan) => clan.id == clanID ? clan : acc ,undefined)
-    return ns({index: {showClan}})
+    return ns({
+      index: {
+        showClan: (await net.getClanList())
+          .reduce(
+            (acc, clan) => clan.id == clanID ? clan : acc 
+            ,undefined
+          )
+      }
+    })
   }
 })
 
+const getRoute = () => route((location.hash || '#').slice(1))
+
 export default {
   init() {
-    return route((location.hash || '#').slice(1))
+    return getRoute()
+  },
+  watchHash(callback) {
+    window.onhashchange = () => getRoute().then(newState => callback(newState)) 
   }
 }

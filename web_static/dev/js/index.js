@@ -22,6 +22,9 @@ class Site extends React.Component {
     r.init().then(state => {
       this.setState(state.index)
     })
+    r.watchHash(state => {
+      this.setState(state.index)
+    })
   }
   render() {
     return(

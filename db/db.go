@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/mjarkk/wotnlclans/other"
 
@@ -28,11 +27,11 @@ func Setup() error {
 	}
 	client, err := mongo.Connect(context.Background(), mongoUIR)
 	if err != nil {
-		return err
+		return other.NewErr("mongo.Connect", err)
 	}
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
-		return err
+		return other.NewErr("client.Ping", err)
 	}
 
 	DB = client.Database(mongoDataBase)
@@ -54,7 +53,7 @@ func GetClanIDs() []string {
 	for cur.Next(context.Background()) {
 		raw, err := cur.DecodeBytes()
 		if err != nil {
-			log.Fatal(err)
+			continue
 		}
 		// Background: do something with output
 		els, err := raw.Elements()
@@ -91,14 +90,14 @@ func GetCurrentClansData() ([]ClanStats, error) {
 	cur, err := collection.Find(context.Background(), bson.M{"tag": bson.M{"$exists": true}})
 	toReturn := []ClanStats{}
 	if err != nil {
-		return toReturn, errors.New("log 1: " + err.Error())
+		return toReturn, other.NewErr("log 1", err)
 	}
 	defer cur.Close(context.Background())
 	for cur.Next(context.Background()) {
 		var toAdd ClanStats
 		err := cur.Decode(&toAdd)
 		if err != nil {
-			return toReturn, errors.New("log 2: " + err.Error())
+			return toReturn, other.NewErr("log 2", err)
 		}
 		toReturn = append(toReturn, toAdd)
 	}
