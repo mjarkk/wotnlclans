@@ -90,6 +90,7 @@ func GetCurrentClansData() ([]ClanStats, error) {
 	cur, err := collection.Find(context.Background(), nil)
 	toReturn := []ClanStats{}
 	if err != nil {
+		fmt.Println(err)
 		return toReturn, errors.New("log 1: " + err.Error())
 	}
 	defer cur.Close(context.Background())
@@ -97,7 +98,7 @@ func GetCurrentClansData() ([]ClanStats, error) {
 		var toAdd ClanStats
 		err := cur.Decode(&toAdd)
 		if err != nil {
-			return toReturn, err
+			return toReturn, errors.New("log 2: " + err.Error())
 		}
 		toReturn = append(toReturn, toAdd)
 	}
