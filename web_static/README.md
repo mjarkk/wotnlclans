@@ -7,3 +7,7 @@ This folder contains the actual website
 - Networking: **[Unfetch](https://github.com/developit/unfetch)**
 - Code bundeler: **[Webpack](https://webpack.js.org/)**
 - Style: **[Stylus](http://stylus-lang.com/)**
+
+## How to work on this?
+1. Start the build using this flag: `./buildAndRun -skipBuild`
+2. Cd into `web-static` and run `yarn dev` or `npm run dev`

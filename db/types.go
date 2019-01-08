@@ -41,3 +41,16 @@ type HistoryCollectionItem struct {
 	Date  string             `json:"date"`
 	Stats []HistoryClanStats `json:"stats"`
 }
+
+// User defines what a user is
+type User struct {
+	Rights   string `json:"rights"`
+	UserID   int    `json:"userID"`
+	NickName string `json:"nickname"`
+
+	Tokens map[string]struct {
+		ValidTo  string
+		Key      string
+		LastUsed string
+	} `json:"tokens"`
+}

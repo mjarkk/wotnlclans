@@ -1,7 +1,6 @@
 import React from 'react'
 import cn from 'classnames'
-import SVG from 'react-inlinesvg'
-import close from './../../icons/close.svg'
+import Icon from '../els/svg'
 
 export default class ClanDetials extends React.Component {
   constructor(props) {
@@ -60,7 +59,7 @@ export default class ClanDetials extends React.Component {
         <div className="clanDetialsInner">
           <div className="actionBar">
             <div className="back" onClick={() => location.hash = '/'}>
-              <SVG src={`data:image/svg+xml,${close}`} />
+              <Icon icon="close"/>
             </div>
           </div>
           <div className="icon">

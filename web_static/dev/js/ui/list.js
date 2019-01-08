@@ -1,9 +1,8 @@
 import React from 'react'
 import network from '../funs/networking'
 import funs from '../funs/functions'
-import SVG from 'react-inlinesvg'
+import Icon from '../els/svg'
 import ClanDetials from './clandetails'
-import arrow from './../../icons/arrow.svg'
 
 export default class List extends React.Component {
   constructor(props) {
@@ -106,7 +105,7 @@ export default class List extends React.Component {
                       <span>{item.stats.battles}</span>
                     </div>
                     <div className="moreinfo">
-                      <SVG src={`data:image/svg+xml,${arrow}`} />
+                      <Icon icon="arrow"/>
                     </div>
                   </div>
                 )

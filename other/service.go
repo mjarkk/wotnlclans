@@ -43,7 +43,7 @@ After=network-online.target
 Wants=network-online.target systemd-networkd-wait-online.service
 
 [Service]
-ExecStart=` + wotnlclansBinary + `
+ExecStart=` + wotnlclansBinary + ` -skipBuild
 ExecReload=/bin/kill -USR1 $MAINPID
 WorkingDirectory=` + strings.Join(pathToBin, "/") + `
 KillMode=mixed
@@ -52,7 +52,7 @@ LimitAS=infinity
 LimitRSS=infinity
 LimitCORE=infinity
 LimitNOFILE=65536
-TimeoutStopSec=5s
+TimeoutStopSec=8s
 
 [Install]
 WantedBy=multi-user.target

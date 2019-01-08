@@ -29,6 +29,14 @@ func setupLogin(r *gin.Engine) {
 		c.Redirect(302, out.Data.Location)
 	})
 	r.GET("/logedIn", func(c *gin.Context) {
+		accountID := c.Query("account_id")
+		accessToken := c.Query("access_token")
+		nickName := c.Query("nickname")
+		// expiresAt := c.Query("expires_at")
+		status := c.Query("status")
+
+		api.CheckToken(status, accountID, nickName, accessToken)
+
 		c.Data(200, "text/html", []byte(`<!DOCTYPE html>
 		<html>
 			<body>

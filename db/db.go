@@ -121,3 +121,32 @@ func SetCurrentClansData(stats []ClanStats) error {
 	_, err := collection.InsertMany(context.Background(), toInsert)
 	return err
 }
+
+// GetUser returns the data of a spesific user or creates one
+func GetUser(id int, canCreateNew bool) (User, error) {
+	collection := DB.Collection("users")
+	res := collection.FindOne(context.Background(), bson.M{"userID": id})
+	err := res.Err()
+	if err != nil {
+		fmt.Println("FindOne error:", err.Error())
+		return User{}, err
+	}
+
+	var toReturn User
+	err = res.Decode(&toReturn)
+
+	if err != nil && canCreateNew {
+		toInsert := User{
+			UserID: id,
+		}
+		collection.InsertOne(context.Background(), toInsert)
+		return toInsert, nil
+	}
+	if err != nil {
+		fmt.Println("DecodeBytes error:", err.Error())
+		return User{}, err
+	}
+
+	fmt.Println(toReturn)
+	return User{}, nil
+}
