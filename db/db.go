@@ -4,11 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/mjarkk/wotnlclans/other"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
+
+	sr "github.com/tuvistavie/securerandom"
 )
 
 // DB is the mongodb database
@@ -123,9 +126,12 @@ func SetCurrentClansData(stats []ClanStats) error {
 }
 
 // GetUser returns the data of a spesific user or creates one
-func GetUser(id int, canCreateNew bool) (User, error) {
+func GetUser(id int, canCreateNew bool, newUser ...User) (User, error) {
+	if canCreateNew && len(newUser) != 1 {
+		return User{}, errors.New("newUser must be defined as 1 argument")
+	}
 	collection := DB.Collection("users")
-	res := collection.FindOne(context.Background(), bson.M{"userID": id})
+	res := collection.FindOne(context.Background(), bson.M{"userid": id})
 	err := res.Err()
 	if err != nil {
 		fmt.Println("FindOne error:", err.Error())
@@ -136,17 +142,65 @@ func GetUser(id int, canCreateNew bool) (User, error) {
 	err = res.Decode(&toReturn)
 
 	if err != nil && canCreateNew {
-		toInsert := User{
-			UserID: id,
+		_, err = collection.InsertOne(context.Background(), newUser[0])
+		if err != nil {
+			return User{}, err
 		}
-		collection.InsertOne(context.Background(), toInsert)
-		return toInsert, nil
+		return newUser[0], nil
 	}
 	if err != nil {
 		fmt.Println("DecodeBytes error:", err.Error())
 		return User{}, err
 	}
 
-	fmt.Println(toReturn)
-	return User{}, nil
+	return toReturn, nil
+}
+
+// UpdateInDB can update a user in the database
+func (u *User) UpdateInDB() error {
+	if u.UserID < 1000 {
+		return errors.New("A user id cannot be less than 1000")
+	}
+	collection := DB.Collection("users")
+	collection.FindOneAndReplace(context.Background(), bson.M{"userid": u.UserID}, u)
+	return nil
+}
+
+// GetToken returns a valid token to use for a user
+func (u *User) GetToken(nois ...string) (WGToken string, err error) {
+	toReturn := ""
+	currentTime := time.Now()
+
+	for key, tokenItem := range u.Tokens {
+		parsedTime, err := time.Parse(time.RFC3339, tokenItem.ValidTo)
+		if err != nil {
+			delete(u.Tokens, key)
+			continue
+		}
+		if parsedTime.UnixNano() < currentTime.UnixNano() {
+			delete(u.Tokens, key)
+			continue
+		}
+		if parsedTime.UnixNano() > currentTime.Add(time.Hour*24*3).UnixNano() {
+			toReturn = key
+			tokenItem.LastUsed = currentTime.Format(time.RFC3339)
+			u.Tokens[key] = tokenItem
+			break
+		}
+	}
+
+	if len(toReturn) == 0 {
+		token, err := sr.UrlSafeBase64(30, true)
+		if err != nil {
+			return "", other.NewErr("Base64 random string error", err)
+		}
+		u.Tokens[token] = UserToken{
+			Key:      token,
+			LastUsed: currentTime.Format(time.RFC3339),
+			ValidTo:  currentTime.Add(time.Hour * 24 * 7).Format(time.RFC3339), // max 1 week
+		}
+		toReturn = token
+	}
+	err = u.UpdateInDB()
+	return toReturn, err
 }

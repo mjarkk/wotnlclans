@@ -44,13 +44,15 @@ type HistoryCollectionItem struct {
 
 // User defines what a user is
 type User struct {
-	Rights   string `json:"rights"`
-	UserID   int    `json:"userID"`
-	NickName string `json:"nickname"`
+	Rights   string               `json:"rights"`
+	UserID   int                  `json:"userid"`
+	NickName string               `json:"nickname"`
+	Tokens   map[string]UserToken `json:"tokens"`
+}
 
-	Tokens map[string]struct {
-		ValidTo  string
-		Key      string
-		LastUsed string
-	} `json:"tokens"`
+// UserToken is a user to that someone can use to login
+type UserToken struct {
+	ValidTo  string `json:"validto"`
+	Key      string `json:"key"`
+	LastUsed string `json:"lastused"`
 }

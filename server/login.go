@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 
 	"github.com/gin-gonic/gin"
@@ -35,19 +36,27 @@ func setupLogin(r *gin.Engine) {
 		// expiresAt := c.Query("expires_at")
 		status := c.Query("status")
 
-		api.CheckToken(status, accountID, nickName, accessToken)
+		user, token, err := api.CheckToken(status, accountID, nickName, accessToken)
+		sucess := "true"
+		if err != nil {
+			sucess = "false"
+		}
 
-		c.Data(200, "text/html", []byte(`<!DOCTYPE html>
+		fmt.Println("\n", user.UserID, token, err, "\n")
+
+		toReturn := fmt.Sprintf(`<!DOCTYPE html>
 		<html>
 			<body>
 				<title>Close popup</title>
 			</body>
 			<html>
 				<script>
-					window.opener.closeLoginPopup(location.search, function() {window.close()})
+					window.opener.closeLoginPopup("%v", "%v", "%v", function() {window.close()})
 				</script>
 			</html>
 		</html>
-		`))
+		`, token, user.UserID, sucess)
+
+		c.Data(200, "text/html", []byte(toReturn))
 	})
 }
