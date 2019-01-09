@@ -86,7 +86,23 @@ const getIconsPicture = async() => {
   }
 }
 
+const checkKey = async(userKey, userID) => {
+  const res = await fetch('/checkUser', {
+    method: 'post',
+    body: JSON.stringify({
+      userKey,
+      userID
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  })
+  const data = await res.json()
+  return data.sucess
+}
+
 export default {
+  checkKey,
   getClanList,
   getIconsLocation,
   getIconsPicture

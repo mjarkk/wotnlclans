@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mjarkk/wotnlclans/api"
+	"github.com/mjarkk/wotnlclans/other"
 )
 
 // setupLogin sets all routes for the login part and for logged in users
@@ -37,26 +38,31 @@ func setupLogin(r *gin.Engine) {
 		status := c.Query("status")
 
 		user, token, err := api.CheckToken(status, accountID, nickName, accessToken)
-		sucess := "true"
-		if err != nil {
-			sucess = "false"
+		userid := fmt.Sprintf("%v", user.UserID)
+		sucess := "false"
+		if err == nil {
+			sucess = "true"
+			c.SetCookie("wotnlclansUserId", userid, 3600*24*30, "/", other.GetDomain(c.GetHeader("Origin")), false, false)
 		}
 
-		fmt.Println("\n", user.UserID, token, err, "\n")
-
 		toReturn := fmt.Sprintf(`<!DOCTYPE html>
-		<html>
-			<body>
-				<title>Close popup</title>
-			</body>
 			<html>
-				<script>
-					window.opener.closeLoginPopup("%v", "%v", "%v", function() {window.close()})
-				</script>
+				<body>
+					<title>Close popup</title>
+				</body>
+				<html>
+					<script>
+						window.opener.closeLoginPopup("%v", "%v", "%v", function() {window.close()})
+					</script>
+				</html>
 			</html>
-		</html>
-		`, token, user.UserID, sucess)
+		`, token, userid, sucess)
 
 		c.Data(200, "text/html", []byte(toReturn))
+	})
+	r.POST("/checkUser", func(c *gin.Context) {
+		c.JSON(200, map[string]interface{}{
+			"status": true,
+		})
 	})
 }
