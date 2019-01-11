@@ -98,7 +98,7 @@ const checkKey = async(userKey, userID) => {
     },
   })
   const data = await res.json()
-  return data.status
+  return data
 }
 
 export default {

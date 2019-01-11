@@ -15,7 +15,7 @@ export default class Login extends React.Component {
       'wotnlclansLogin',
       'toolbar=no,scrollbars=no,width=800,height=600,top=70,left=70'
     )
-    window.closeLoginPopup = (key, userID, status, cb) => this.waitForPopupClose(key, userID, status, cb)
+    window.closeLoginPopup = (...args) => this.waitForPopupClose(...args)
     this.watchClose()
   }
   watchClose() {
@@ -30,11 +30,12 @@ export default class Login extends React.Component {
       this.state.hideMe(false)
     }
   }
-  waitForPopupClose(key, userID, status, cb) {
+  waitForPopupClose(key, userID, rights, status, cb) {
     const data = {
       key,
       userID,
-      status
+      status,
+      rights
     }
     cb()
     this.props.hideMe(data)

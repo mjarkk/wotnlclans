@@ -13,13 +13,13 @@ import (
 )
 
 // IsLogedIN returns true if the user is logged in
-func IsLogedIN(userID, key string) bool {
+func IsLogedIN(userID, key string) (bool, User) {
 	if len(userID) == 0 || len(key) == 0 {
-		return false
+		return false, User{}
 	}
 	user, err := GetUserString(userID, false)
 	if err != nil {
-		return false
+		return false, User{}
 	}
 
 	currentTime := time.Now()
@@ -33,13 +33,13 @@ func IsLogedIN(userID, key string) bool {
 			if parsedTime.UnixNano() < currentTime.UnixNano() {
 				delete(user.Tokens, token)
 				user.UpdateInDB()
-				return false
+				return false, User{}
 			}
-			return true
+			return true, user
 		}
 	}
 
-	return false
+	return false, User{}
 }
 
 // GetToken returns a valid token to use for a user
@@ -129,4 +129,9 @@ func (u *User) UpdateInDB() error {
 	collection := DB.Collection("users")
 	collection.FindOneAndReplace(context.Background(), bson.M{"userid": u.UserID}, u)
 	return nil
+}
+
+// IsAdmin returns true if the user has admin rights
+func (u *User) IsAdmin() bool {
+	return u.Rights == "admin"
 }

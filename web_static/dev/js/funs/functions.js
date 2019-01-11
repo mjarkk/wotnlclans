@@ -1,6 +1,9 @@
 import sortBy from 'lodash.sortby'
 import reverse from 'lodash.reverse'
 
+const deskTopSize = 1200 
+let screenPosition = document.body.offsetWidth < deskTopSize
+
 export default {
   clanIconsToIndex(input) {
     let toReturn = {}
@@ -23,10 +26,13 @@ export default {
     }
   },
   watchScreenSize(cb) {
-    const deskTopSize = 1200 
-    cb(document.body.offsetWidth < deskTopSize)
+    cb(screenPosition)
     window.onresize = () => {
-      cb(document.body.offsetWidth < deskTopSize)
+      const newPos = document.body.offsetWidth < deskTopSize
+      if (newPos != screenPosition) {
+        screenPosition = newPos
+        cb(newPos)
+      }
     }
   }
 }

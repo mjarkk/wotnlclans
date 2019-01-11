@@ -19,7 +19,8 @@ class Site extends React.Component {
       user: {
         logedIn: false,
         userID: '',
-        key: ''
+        key: '',
+        rights: 'user',
       }
     }
   }
@@ -28,13 +29,14 @@ class Site extends React.Component {
     const userID = localStorage.getItem('wotnlclans-api-userid')
     if (key && userID) {
       n.checkKey(key, userID)
-        .then(status => {
-          if (status) {
+        .then(output => {
+          if (output && output.status) {
             this.setState({
               user: {
+                rights: output.rights,
                 logedIn: true,
                 userID,
-                key
+                key,
               }
             })
           }
@@ -62,7 +64,8 @@ class Site extends React.Component {
               user: {
                 logedIn: data.status == 'true',
                 userID: data.userID,
-                key: data.key
+                key: data.key,
+                rights: data.rights
               }
             })
             if (data.status == 'true') {

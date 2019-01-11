@@ -44,6 +44,10 @@ func setupLogin(r *gin.Engine) {
 		if err == nil {
 			sucess = "true"
 			c.SetCookie("wotnlclansUserId", userid, 3600*24*30, "/", other.GetDomain(c.GetHeader("Origin")), false, false)
+		} else {
+			token = ""
+			userid = ""
+			user.Rights = "user"
 		}
 
 		toReturn := fmt.Sprintf(`<!DOCTYPE html>
@@ -53,11 +57,11 @@ func setupLogin(r *gin.Engine) {
 				</body>
 				<html>
 					<script>
-						window.opener.closeLoginPopup("%v", "%v", "%v", function() {window.close()})
+						window.opener.closeLoginPopup("%v", "%v", "%v", "%v", function() {window.close()})
 					</script>
 				</html>
 			</html>
-		`, token, userid, sucess)
+		`, token, userid, user.Rights, sucess)
 
 		c.Data(200, "text/html", []byte(toReturn))
 	})
@@ -68,8 +72,12 @@ func setupLogin(r *gin.Engine) {
 			UserKey string `json:"userKey"`
 		}
 		_ = c.ShouldBind(&postData)
+
+		check, user := db.IsLogedIN(postData.UserID, postData.UserKey)
+
 		c.JSON(200, map[string]interface{}{
-			"status": db.IsLogedIN(postData.UserID, postData.UserKey),
+			"status": check,
+			"rights": user.Rights,
 		})
 	})
 }

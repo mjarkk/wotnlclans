@@ -10,22 +10,57 @@ export default class Header extends React.Component {
       selector: [
         {
           name: 'List',
-          onClick: () => {
-
-          }
+          onClick: () => this.clickedListLink()
         }
       ],
       current: 0,
       promoHidden: false
     }
+    this.addedAdminLink = false
     this.watchScroll()
+  }
+  componentDidUpdate() {
+    if (this.addedAdminLink) {
+      if (!this.props.user.logedIn || this.props.user.rights != 'admin') {
+        this.addedAdminLink = false
+        const currentSelector = this.state.selector
+        const toRemove = currentSelector.reduce((acc, curr) => curr.name == 'Admin' ? curr : acc, undefined)
+        if (toRemove) {
+          currentSelector.splice(toRemove, 1)
+        }
+        this.setState({
+          selector: currentSelector
+        })
+      }
+    } else {
+      if (this.props.user.logedIn && this.props.user.rights == 'admin') {
+        this.addedAdminLink = true
+        const currentSelector = this.state.selector
+        currentSelector.push({
+          name: 'Admin',
+          onClick: () => this.clickedAdminLink()
+        })
+        this.setState({
+          selector: currentSelector
+        })
+      }
+    }
+  }
+  clickedAdminLink() {
+
+  }
+  clickedListLink() {
+
   }
   watchScroll() {
     const body = document.querySelector('body')
-    body.onscroll = e => {
-      this.setState({
-        promoHidden: document.documentElement.scrollTop > 10
-      })
+    body.onscroll = () => {
+      const out = document.documentElement.scrollTop > 10
+      if (this.state.promoHidden != out) {
+        this.setState({
+          promoHidden: out
+        })
+      }
     }
   }
   render() {
@@ -34,7 +69,16 @@ export default class Header extends React.Component {
         <div className="top">
           <div className="links"> 
             {this.state.selector.map((select, id) => 
-                <h2 key={id} className={this.state.current == id ? 'selected' : ''} onClick={select.onClick}>{ select.name }</h2>  
+                <h2 
+                  key={id} 
+                  className={cn({selected: this.state.current == id})} 
+                  onClick={() => {
+                    this.setState({
+                      current: id
+                    })
+                    select.onClick()
+                  }}
+                >{ select.name }</h2>  
             )}
           </div>
           <div className="itemOptions">
