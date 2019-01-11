@@ -55,7 +55,7 @@ export default class ClanDetials extends React.Component {
   render() {
     const d = this.props.showClan && this.props.showClan.tag
     return (
-      <div className="clanDetials">
+      <div className={cn('clanDetials', {show: d})}>
         <div className="clanDetialsInner">
           <div className="actionBar">
             <div className="back" onClick={() => location.hash = '/'}>

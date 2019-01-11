@@ -59,5 +59,3 @@ export default class Login extends React.Component {
     )
   }
 }
-
-// window.open("", "", "width=200,height=100")

@@ -12,15 +12,6 @@ body
 
 .list
   padding 20px
-  .graphAndStats 
-    position fixed
-    top 50px
-    right 50px
-    width calc(100vw - 800px)
-    height calc(100vh - 250px)
-    background-color white
-    overflow hidden
-    border-radius 13px
   .actualData
     padding 30px 0px 50px 0px
     .row
@@ -270,3 +261,21 @@ button.outline.dark
           background-color #e2dfdf
   .discription
     padding 20px
+
+.graphAndStats 
+  position fixed
+  top 50px
+  right 50px
+  width calc(100vw - 800px)
+  height calc(100vh - 250px)
+  background-color white
+  overflow hidden
+  border-radius 13px
+  .clanDetials
+    position relative
+    left 100%
+    transform translateX(0%)
+    transition transform 0.3s
+  .show
+    transform translateX(-100%)
+    

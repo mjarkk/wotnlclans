@@ -72,7 +72,7 @@ export default class List extends React.Component {
                       location.hash = `/clan/${item.id}`
                     }}
                   >
-                    <div className="position">{id}</div>
+                    <div className="position">{id + 1}</div>
                     <div className="icon">
                       <div className="holder" style={{
                         backgroundImage: loc ? `url(${this.state.iconsPicture})` : '',
@@ -117,6 +117,7 @@ export default class List extends React.Component {
         </div>
         { !this.props.isMobile
           ? <div className={'graphAndStats'}>
+              <div className="graph"></div>
               <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
             </div>
         : ''}
