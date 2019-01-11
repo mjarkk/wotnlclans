@@ -4,8 +4,6 @@ import net from './networking'
 const defaultState = {
   index: {
     currentPage: 'list',
-    showLogin: false,
-    isMobile: true,
     showClan: undefined
   }
 }

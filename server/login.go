@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mjarkk/wotnlclans/api"
+	"github.com/mjarkk/wotnlclans/db"
 	"github.com/mjarkk/wotnlclans/other"
 )
 
@@ -60,9 +61,15 @@ func setupLogin(r *gin.Engine) {
 
 		c.Data(200, "text/html", []byte(toReturn))
 	})
+
 	r.POST("/checkUser", func(c *gin.Context) {
+		var postData struct {
+			UserID  string `json:"userID"`
+			UserKey string `json:"userKey"`
+		}
+		_ = c.ShouldBind(&postData)
 		c.JSON(200, map[string]interface{}{
-			"status": true,
+			"status": db.IsLogedIN(postData.UserID, postData.UserKey),
 		})
 	})
 }

@@ -69,7 +69,7 @@ export default class ClanDetials extends React.Component {
           <h3>{d ? this.props.showClan.name : ''}</h3>
           {d ? this.renderStats(this.props.showClan.stats) : ''}
           <div 
-            className="Discription" 
+            className="discription" 
             dangerouslySetInnerHTML={{__html: d ? this.props.showClan.description : ''}} 
           />
         </div>

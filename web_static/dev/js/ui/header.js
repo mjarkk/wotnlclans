@@ -6,7 +6,7 @@ import ClanDetials from './clandetails'
 export default class Header extends React.Component {
   constructor(props) {
     super()
-    this.state = Object.assign({
+    this.state = {
       selector: [
         {
           name: 'List',
@@ -17,7 +17,7 @@ export default class Header extends React.Component {
       ],
       current: 0,
       promoHidden: false
-    }, props)
+    }
     this.watchScroll()
   }
   watchScroll() {
@@ -38,9 +38,11 @@ export default class Header extends React.Component {
             )}
           </div>
           <div className="itemOptions">
-            <Button title={'Login'} click={() => {
-              this.state.loginClicked()
-            }}/>
+            <Button title={this.props.user.logedIn ? 'Logout' : 'Login'} click={() =>
+              this.props.user.logedIn 
+                ? this.props.logoutClicked() 
+                : this.props.loginClicked()
+            }/>
           </div>
         </div>
         <div className={cn('promo', {hidden: this.state.promoHidden})}>

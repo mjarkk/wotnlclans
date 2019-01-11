@@ -12,6 +12,15 @@ body
 
 .list
   padding 20px
+  .graphAndStats 
+    position fixed
+    top 50px
+    right 50px
+    width calc(100vw - 800px)
+    height calc(100vh - 250px)
+    background-color white
+    overflow hidden
+    border-radius 13px
   .actualData
     padding 30px 0px 50px 0px
     .row
@@ -198,3 +207,66 @@ button.outline.dark
     width 100%
     overflow-y scroll
     overflow-x hidden
+  .actionBar
+    display flex
+    justify-content space-between
+    align-items center
+    height 70px
+    border-bottom 2px solid #eee
+    .back
+      padding 10px
+      height 50px
+      width 50px
+      cursor pointer
+  .icon
+    display flex
+    justify-content center
+    align-items center
+    padding 10px
+    img
+      padding 5px
+      background-color #1c032a
+      height 200px
+      width 200px
+      border-radius 35px
+      box-shadow 0px 12px 77px -20px rgba(0,0,0,0.53)
+  h1, h3
+    text-align center
+  .stats
+    display flex
+    justify-content center
+    align-items center
+    flex-wrap wrap
+    padding 20px
+    .block
+      padding 5px
+      display flex
+      justify-content center
+      align-items center
+      flex-direction column
+      .propertyName
+        color #161616
+    .one
+      .value
+        background-color #eee
+        display inline-block
+        padding 0px 12px
+        border-radius 4px
+        font-weight 600
+    .multiple
+      .values
+        background-color #eee
+        display flex
+        flex-wrap nowrap
+        border-radius 4px
+        overflow hidden
+        .value, .what
+          display inline-block
+        .value
+          padding 0px 9px 0px 3px
+          font-weight 600
+        .what
+          padding 0px 3px 0px 9px
+          background-color #e2dfdf
+  .discription
+    padding 20px

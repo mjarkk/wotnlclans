@@ -75,12 +75,24 @@ class Site extends React.Component {
           isMobile={this.state.isMobile} 
           showClan={this.state.showClan}
           setShowClan={showClan => this.setState({showClan})}
-          loginClicked={() => this.setState({showLogin: true})
-          }
+          loginClicked={() => this.setState({showLogin: true})}
+          logoutClicked={() => {
+            localStorage.removeItem('wotnlclans-api-key')
+            localStorage.removeItem('wotnlclans-api-userid')
+            this.setState({
+              user: {
+                logedIn: false,
+                userID: '',
+                key: ''
+              }
+            })
+          }}
+          user={this.state.user}
         />
         {
           this.state.currentPage == 'list'
           ? <List
+              user={this.state.user}
               isMobile={this.state.isMobile} 
               showClan={this.state.showClan}
               setShowClan={showClan => this.setState({showClan})}

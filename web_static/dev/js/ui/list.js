@@ -117,7 +117,7 @@ export default class List extends React.Component {
         </div>
         { !this.props.isMobile
           ? <div className={'graphAndStats'}>
-              <ClanDetials isMobile={this.props.isMobile} />
+              <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
             </div>
         : ''}
       </div>
