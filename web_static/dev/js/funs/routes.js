@@ -35,7 +35,12 @@ const route = rlite(async () => ns(), {
           )
       }
     })
-  }
+  },
+  'settings': async () => ns({
+    index: {
+      currentPage: 'settings'
+    }
+  })
 })
 
 const getRoute = () => route((location.hash || '#').slice(1))

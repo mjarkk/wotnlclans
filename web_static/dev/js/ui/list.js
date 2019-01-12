@@ -19,10 +19,20 @@ export default class List extends React.Component {
       },
       filter: '',
     }, props)
+    this.canSetState = true
     this.getNeededInfo()
+  }
+  componentDidMount() {
+    this.canSetState = true
+  }
+  componentWillUnmount() {
+    this.canSetState = false
   }
   async getNeededInfo() {
     const list = funs.sortList('globalRating', await network.getClanList())
+    if (!this.canSetState) {
+      return
+    }
     this.setState({
       list
     })

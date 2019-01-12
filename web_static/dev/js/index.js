@@ -3,6 +3,7 @@ import ReactDOM  from 'react-dom'
 import List from './ui/list'
 import Header from './ui/header'
 import Login from './ui/login'
+import Settings from './ui/settings'
 import f from './funs/functions'
 import n from './funs/networking'
 import r from './funs/routes'
@@ -75,6 +76,7 @@ class Site extends React.Component {
           }}
         />
         <Header
+          currentPage={this.state.currentPage}
           isMobile={this.state.isMobile} 
           showClan={this.state.showClan}
           setShowClan={showClan => this.setState({showClan})}
@@ -100,7 +102,11 @@ class Site extends React.Component {
               showClan={this.state.showClan}
               setShowClan={showClan => this.setState({showClan})}
             />
-          : ''      
+          : this.state.currentPage == 'settings'
+          ? <Settings
+              user={this.state.user}
+            />
+          : ''
         }
       </div>
     )

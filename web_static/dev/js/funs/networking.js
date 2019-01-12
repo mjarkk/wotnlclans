@@ -101,9 +101,22 @@ const checkKey = async(userKey, userID) => {
   return data
 }
 
+const getSettings = async(userKey, userID) =>
+  await (await fetch('/settings/allData', {
+    method: 'post',
+    body: JSON.stringify({
+      userKey,
+      userID
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  })).json()
+
 export default {
   checkKey,
   getClanList,
   getIconsLocation,
-  getIconsPicture
+  getIconsPicture,
+  getSettings
 }

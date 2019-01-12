@@ -9,12 +9,13 @@ export default class Header extends React.Component {
     this.state = {
       selector: [
         {
+          selectedWhen: 'list',
           name: 'List',
           onClick: () => this.clickedListLink()
         }
       ],
-      current: 0,
-      promoHidden: false
+      promoHidden: false,
+      currentPage: 'list'
     }
     this.addedAdminLink = false
     this.watchScroll()
@@ -37,20 +38,26 @@ export default class Header extends React.Component {
         this.addedAdminLink = true
         const currentSelector = this.state.selector
         currentSelector.push({
+          selectedWhen: 'settings',
           name: 'Admin',
-          onClick: () => this.clickedAdminLink()
+          onClick: () => this.clickedAdminLink(),
         })
         this.setState({
           selector: currentSelector
         })
       }
     }
+    if (this.state.currentPage != this.props.currentPage) {
+      this.setState({
+        currentPage: this.props.currentPage
+      })
+    }
   }
   clickedAdminLink() {
-
+    location.hash = '/settings'
   }
   clickedListLink() {
-
+    location.hash = '/'
   }
   watchScroll() {
     const body = document.querySelector('body')
@@ -71,10 +78,10 @@ export default class Header extends React.Component {
             {this.state.selector.map((select, id) => 
                 <h2 
                   key={id} 
-                  className={cn({selected: this.state.current == id})} 
+                  className={cn({selected: this.state.currentPage == select.selectedWhen})} 
                   onClick={() => {
                     this.setState({
-                      current: id
+                      currentPage: select.selectedWhen
                     })
                     select.onClick()
                   }}
@@ -94,7 +101,7 @@ export default class Header extends React.Component {
             <h1>Wot NL/BE clans</h1>
           </div>
         </div>
-        { this.props.isMobile
+        { this.props.isMobile && this.props.currentPage == 'list'
           ? <div className={cn('clanStatsContainer', {show: this.props.showClan})}>
               <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
             </div>

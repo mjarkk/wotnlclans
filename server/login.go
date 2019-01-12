@@ -71,7 +71,7 @@ func setupLogin(r *gin.Engine) {
 			UserID  string `json:"userID"`
 			UserKey string `json:"userKey"`
 		}
-		_ = c.ShouldBind(&postData)
+		_ = c.ShouldBindJSON(&postData)
 
 		check, user := db.IsLogedIN(postData.UserID, postData.UserKey)
 

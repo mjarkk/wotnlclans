@@ -15,6 +15,7 @@ func SetupRouter() *gin.Engine {
 	setupLogin(r)
 	serveDataRoutes(r)
 	serveStaticFiles(r)
+	serveSettings(r)
 
 	return r
 }
