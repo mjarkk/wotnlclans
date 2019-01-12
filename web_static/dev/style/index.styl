@@ -12,8 +12,15 @@ body
 
 .list
   padding 20px
+  .title
+    padding 30px 0px 20px 0px
+    h2
+      font-size 50px
+      font-weight 700
+  .filters
+    padding 0px 0px 20px 0px
   .actualData
-    padding 30px 0px 50px 0px
+    padding 0px 0px 50px 0px
     .row
       padding 10px 5px
       max-width 700px
@@ -24,6 +31,7 @@ body
       background-color #27214b
       transition 0.2s background-color
       .position
+        font-weight bold
         grid-column 1 / 2
         grid-row 1 / 5
         justify-self center
@@ -103,6 +111,7 @@ body
   bottom 0px
   left 0px
   width 100%
+  z-index 3
   border-radius 17px 17px 0px 0px
   background-color #0d0222
   .top
@@ -265,18 +274,58 @@ button.outline.dark
 
 .graphAndStats 
   position fixed
-  top 50px
-  right 50px
-  width calc(100vw - 800px)
-  height calc(100vh - 250px)
+  top 20px
+  right 20px
+  width calc(100vw - 780px)
+  height calc(100vh - 200px)
   background-color white
   overflow hidden
   border-radius 13px
+  .graph
+    height 100%
+    width 100%
+    color rgba(0,0,0,0.3)
+    display flex
+    justify-content center
+    align-items center
   .clanDetials
+    height 100%
+    width 100%
     position relative
     left 100%
-    transform translateX(0%)
+    transform translateX(0%) translateY(-100%)
     transition transform 0.3s
   .show
-    transform translateX(-100%)
+    transform translateX(-100%) translateY(-100%)
     
+.inputWrapper
+  color white
+  background-color rgba(95,10,204,0)
+  border-radius 12px
+  transition background-color 0.2s
+  cursor text
+  border 2px solid #5f0acc
+  max-width 200px
+  display flex
+  justify-content flex-start
+  align-items center
+  flex-direction row
+  box-sizing border-box
+  input
+    background-color rgba(0,0,0,0)
+    font-size 19px
+    min-width 100%
+    color white
+    padding 5px 35px 5px 12px
+    border-radius 12px
+    box-sizing border-box
+  .isvg
+    width 20px
+    height 20px
+  svg
+    position relative
+    left -30px
+    width 20px
+    height 20px
+    fill white
+    box-sizing border-box

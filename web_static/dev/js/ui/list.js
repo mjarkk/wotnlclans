@@ -3,6 +3,7 @@ import network from '../funs/networking'
 import funs from '../funs/functions'
 import Icon from '../els/svg'
 import ClanDetials from './clandetails'
+import Search from '../els/search'
 
 export default class List extends React.Component {
   constructor(props) {
@@ -15,7 +16,8 @@ export default class List extends React.Component {
         height: 0,
         width: 0,
         oneItem: 0
-      }
+      },
+      filter: '',
     }, props)
     this.getNeededInfo()
   }
@@ -59,14 +61,31 @@ export default class List extends React.Component {
   render() {
     return(
       <div className="list">
+        <div className="title">
+          <h2>Topclans</h2>
+        </div>
+        <div className="filters">
+          <Search
+            placeholder="Search for clans"
+            onChange={filter => this.setState({filter})}
+          />
+        </div>
         <div className="actualData">
           { 
             this.state.list.length != 0
             ? this.state.list.map((item, id) => {
                 const loc = this.state.iconsLocation[item.id]
                 return (
-                  <div 
-                    key={id} 
+                  <div
+                    style={{
+                      display: 
+                        this.state.filter == '' 
+                        || item.tag.toUpperCase().indexOf(this.state.filter.toUpperCase()) != -1 
+                        || item.name.toUpperCase().indexOf(this.state.filter.toUpperCase()) != -1 
+                          ? 'grid'
+                          : 'none'
+                    }} 
+                    key={id}
                     className="row"
                     onClick={() => {
                       location.hash = `/clan/${item.id}`
@@ -117,7 +136,9 @@ export default class List extends React.Component {
         </div>
         { !this.props.isMobile
           ? <div className={'graphAndStats'}>
-              <div className="graph"></div>
+              <div className="graph">
+                Click a clan to get more details
+              </div>
               <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
             </div>
         : ''}

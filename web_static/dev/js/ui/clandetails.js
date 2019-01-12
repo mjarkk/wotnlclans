@@ -5,7 +5,9 @@ import Icon from '../els/svg'
 export default class ClanDetials extends React.Component {
   constructor(props) {
     super()
-    this.state = {}
+    this.state = {
+      showIcon: ''
+    }
   }
   renderStats(clan) {
     const list = [
@@ -52,6 +54,22 @@ export default class ClanDetials extends React.Component {
       </div>
     )
   }
+  componentDidUpdate(prevProps) {
+    if (!prevProps.showClan && this.props.showClan) {
+      this.setState({
+        showIcon: (this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal']).replace(/http(s)?/, 'https')
+      })
+    } else if (prevProps.showClan && this.props.showClan && prevProps.showClan.tag != this.props.showClan.tag) {
+      this.setState({
+        showIcon: ''
+      }, () => {
+        this.setState({
+          showIcon: (this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal']).replace(/http(s)?/, 'https')
+        })
+      })
+      
+    }
+  }
   render() {
     const d = this.props.showClan && this.props.showClan.tag
     return (
@@ -63,7 +81,7 @@ export default class ClanDetials extends React.Component {
             </div>
           </div>
           <div className="icon">
-            <img src={d ? this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal'] : ''} />
+            <img src={this.state.showIcon} />
           </div>
           <h1>{`[${d ? this.props.showClan.tag : ''}]`}</h1>
           <h3>{d ? this.props.showClan.name : ''}</h3>
