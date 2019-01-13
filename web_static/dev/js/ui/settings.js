@@ -35,7 +35,8 @@ export default class Settings extends React.Component {
           : field
         , {
           blocked: false,
-          error: undefined
+          error: undefined,
+          doingThings: false
         })
       )
       this.setState({
@@ -45,7 +46,7 @@ export default class Settings extends React.Component {
     } else {
       this.setState({
         hasData: true,
-        globaErr: data.error
+        globaErr: data.error,
       })
     }
   }
@@ -87,20 +88,45 @@ export default class Settings extends React.Component {
                   {((field, key) => {
                     const value = typeof field.clansTmp == 'string' ? field.clansTmp : JSON.stringify(field.clansTmp, null, 2)
                     const matched = value.match(/\n/g)
-                    return (<textarea 
-                      rows={matched ? matched.length + 1 : 1}
-                      cols="50"
-                      value={value}
-                      onChange={e => {
-                        const value = e.target.value
-                        try {
-                          const jsonValue = JSON.parse(value)
-                          this.updateMoreSettings([jsonValue, undefined], ['clansTmp', 'error'], key)
-                        } catch (error) {
-                          this.updateMoreSettings([value, 'Can\'t parse json'], ['clansTmp', 'error'], key)
-                        }
-                      }}
-                    ></textarea>)
+                    return (
+                      <textarea 
+                        rows={matched ? matched.length + 1 : 1}
+                        cols="40"
+                        value={value}
+                        onChange={e => {
+                          const value = e.target.value
+                          try {
+                            const jsonValue = JSON.parse(value)
+                            let hasErr = undefined
+                            if (!(jsonValue instanceof Array)) {
+                              hasErr = 'Data must be an array'
+                            } else if (jsonValue.reduce((acc, curr) => 
+                              !(
+                                typeof curr == 'string' 
+                                && curr.length == 9
+                                && curr.split('').reduce((out, letter) => /[0-9]/.test(letter) ? out : false, true)
+                              )
+                                ? acc 
+                                : false
+                              , true
+                            )) {
+                              hasErr = 'Items must be clan id\'s'
+                            }
+                            this.updateMoreSettings(
+                              [jsonValue, hasErr, jsonValue], 
+                              ['clansTmp', 'error', 'clans'], 
+                              key
+                            )
+                          } catch (error) {
+                            this.updateMoreSettings(
+                              [value, 'Can\'t parse json'], 
+                              ['clansTmp', 'error'], 
+                              key
+                            )
+                          }
+                        }}
+                      ></textarea>
+                    )
                   })(field, key)}
                 </div>
               : <div className="listEdit">
@@ -110,14 +136,20 @@ export default class Settings extends React.Component {
           </div> 
         : <div className="actualSettings"></div>
         }
+        {field.error ?
+          <div className="error">
+            {field.error}
+          </div>
+        :''}
         <div className="buttonsRow">
           <Button
             disabled={!!field.error}
-            click={() => {console.log('idk')}}
+            click={() => {
+              console.log(field)
+            }}
             title="Update"
           />
         </div>
-        <pre>{JSON.stringify(field, null, 2)}</pre>
       </div>
     )
   }

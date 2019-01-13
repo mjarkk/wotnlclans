@@ -153,19 +153,30 @@ body
   .promo.hidden
     height 0px
 
-button.outline.dark
-  color white
-  background-color rgba(95,10,204,0)
+button
+  cursor pointer
   padding 4px 15px
   margin 0px 5px
   font-size 18px
   font-weight bold
   border 2px solid #5f0acc
   border-radius 12px
-  cursor pointer
   transition background-color 0.2s
-  &:hover
-    background-color rgba(95,10,204,0.6)
+  &.dark
+    color white
+  &.outline
+    background-color rgba(95,10,204,0)
+    &:hover
+      background-color rgba(95,10,204,0.6)
+  &.selected
+    background-color rgba(95,10,204,0.7)
+    &:hover
+      background-color rgba(95,10,204,1)
+  &.dark:disabled
+    background-color rgba(0,0,0,1)
+    cursor not-allowed
+    color rgb(138, 138, 138)
+    border 2px solid #4c1c8a
 
 .login
   position fixed
@@ -335,3 +346,20 @@ button.outline.dark
     height 20px
     fill white
     box-sizing border-box
+
+.settings
+  .fields
+    display flex
+    justify-content flex-start
+    flex-wrap wrap
+
+.settingsBlock
+  max-width 500px
+  padding 10px
+  .listEdit, .rawEdit
+    padding 10px 0px
+    textarea
+      padding 7px
+      border-radius 6px
+      font-size 14px
+      resize horizontal
