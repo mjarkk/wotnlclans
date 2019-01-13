@@ -6,7 +6,8 @@ export default class ClanDetials extends React.Component {
   constructor(props) {
     super()
     this.state = {
-      showIcon: ''
+      showIcon: '',
+      showClan: undefined,
     }
   }
   renderStats(clan) {
@@ -55,25 +56,21 @@ export default class ClanDetials extends React.Component {
     )
   }
   componentDidUpdate(prevProps) {
-    if (!prevProps.showClan && this.props.showClan) {
+    if (!prevProps.showClan && this.props.showClan || (prevProps.showClan && this.props.showClan && prevProps.showClan.tag != this.props.showClan.tag)) {
       this.setState({
-        showIcon: (this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal']).replace(/http(s)?/, 'https')
-      })
-    } else if (prevProps.showClan && this.props.showClan && prevProps.showClan.tag != this.props.showClan.tag) {
-      this.setState({
-        showIcon: ''
-      }, () => {
-        this.setState({
-          showIcon: (this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal']).replace(/http(s)?/, 'https')
-        })
-      })
-      
+        showIcon: '',
+        showClan: this.props.showClan || this.state.showClan
+      }, () => this.setState({
+        showIcon: this.props.showClan 
+          ? (this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal']).replace(/http(s)?/, 'https') 
+          : this.state.showIcon
+      }))
     }
   }
   render() {
-    const d = this.props.showClan && this.props.showClan.tag
+    const d = this.state.showClan && this.state.showClan.tag
     return (
-      <div className={cn('clanDetials', {show: d})}>
+      <div className={cn('clanDetials', {show: this.props.showClan && this.props.showClan.tag})}>
         <div className="clanDetialsInner">
           <div className="actionBar">
             <div className="back" onClick={() => location.hash = '/'}>
@@ -83,12 +80,12 @@ export default class ClanDetials extends React.Component {
           <div className="icon">
             <img src={this.state.showIcon} />
           </div>
-          <h1>{`[${d ? this.props.showClan.tag : ''}]`}</h1>
-          <h3>{d ? this.props.showClan.name : ''}</h3>
-          {d ? this.renderStats(this.props.showClan.stats) : ''}
+          <h1>{`[${d ? this.state.showClan.tag : ''}]`}</h1>
+          <h3>{d ? this.state.showClan.name : ''}</h3>
+          {d ? this.renderStats(this.state.showClan.stats) : ''}
           <div 
             className="discription" 
-            dangerouslySetInnerHTML={{__html: d ? this.props.showClan.description : ''}} 
+            dangerouslySetInnerHTML={{__html: d ? this.state.showClan.description : ''}} 
           />
         </div>
       </div>

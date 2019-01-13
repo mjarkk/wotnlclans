@@ -1,5 +1,6 @@
 import React from 'react'
 import n from '../funs/networking'
+import Button from '../els/button'
 
 export default class Settings extends React.Component {
   constructor() {
@@ -23,8 +24,20 @@ export default class Settings extends React.Component {
   }
   async fetchAllSettings(user) {
     this.startedFetchingAllData = true
-    const data = await n.getSettings(user.key, user.userID)
+    let data = await n.getSettings(user.key, user.userID)
     if (data.status) {
+      data.fields = data.fields.map(field => 
+        Object.assign({}, field.type == 'array' 
+          ? Object.assign({}, field, {
+              view: 'easy',
+              clansTmp: field.clans
+            }) 
+          : field
+        , {
+          blocked: false,
+          error: undefined
+        })
+      )
       this.setState({
         hasData: true,
         fields: data.fields
@@ -43,10 +56,67 @@ export default class Settings extends React.Component {
       globaErr: undefined
     })
   }
+  updateSetting(toWhat, whatToUpdate, key) {
+    let fields = this.state.fields
+    fields[key][whatToUpdate] = toWhat
+    this.setState({
+      fields
+    })
+  }
+  updateMoreSettings(toWhat, whatToUpdate, key) {
+    let fields = this.state.fields
+    toWhat.map((_, id) => {
+      fields[key][whatToUpdate[id]] = toWhat[id]
+    })
+    this.setState({
+      fields
+    })
+  }
   settingsBlock(field, key) {
     return (
       <div key={key} className="settingsBlock">
         <h3>{field.screenname}</h3>
+        {field.type == 'array' 
+        ? <div className="actualSettings array">
+            <div className="viewOptions">
+              <Button style={field.view == 'easy' ? 'selected' : 'outline' } title="easy" click={() => this.updateSetting('easy', 'view', key)}/>
+              <Button style={field.view == 'raw' ? 'selected' : 'outline'} title="raw" click={() => this.updateSetting('raw', 'view', key)}/>
+            </div>
+            {field.view == 'raw'
+              ? <div className="rawEdit">
+                  {((field, key) => {
+                    const value = typeof field.clansTmp == 'string' ? field.clansTmp : JSON.stringify(field.clansTmp, null, 2)
+                    const matched = value.match(/\n/g)
+                    return (<textarea 
+                      rows={matched ? matched.length + 1 : 1}
+                      cols="50"
+                      value={value}
+                      onChange={e => {
+                        const value = e.target.value
+                        try {
+                          const jsonValue = JSON.parse(value)
+                          this.updateMoreSettings([jsonValue, undefined], ['clansTmp', 'error'], key)
+                        } catch (error) {
+                          this.updateMoreSettings([value, 'Can\'t parse json'], ['clansTmp', 'error'], key)
+                        }
+                      }}
+                    ></textarea>)
+                  })(field, key)}
+                </div>
+              : <div className="listEdit">
+
+                </div>
+            }
+          </div> 
+        : <div className="actualSettings"></div>
+        }
+        <div className="buttonsRow">
+          <Button
+            disabled={!!field.error}
+            click={() => {console.log('idk')}}
+            title="Update"
+          />
+        </div>
         <pre>{JSON.stringify(field, null, 2)}</pre>
       </div>
     )
