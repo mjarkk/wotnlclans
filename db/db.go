@@ -25,11 +25,11 @@ func Setup() error {
 	if len(mongoDataBase) == 0 {
 		return errors.New("Mongodb database not defined use `./wotnlclans -help` for more information")
 	}
-	client, err := mongo.Connect(context.Background(), mongoUIR)
+	client, err := mongo.Connect(C(), mongoUIR)
 	if err != nil {
 		return other.NewErr("mongo.Connect", err)
 	}
-	err = client.Ping(context.Background(), nil)
+	err = client.Ping(C(), nil)
 	if err != nil {
 		return other.NewErr("client.Ping", err)
 	}
@@ -39,18 +39,23 @@ func Setup() error {
 	return nil
 }
 
+// C returns a context
+func C() context.Context {
+	return context.Background()
+}
+
 // GetClanIDs returns the clans ids that where found after searching for new clans
 func GetClanIDs() []string {
 	collection := DB.Collection("clanIDs")
-	cur, err := collection.Find(context.Background(), nil)
+	cur, err := collection.Find(C(), nil)
 	if err != nil {
 		return []string{}
 	}
 
 	toReturn := []string{}
 
-	defer cur.Close(context.Background())
-	for cur.Next(context.Background()) {
+	defer cur.Close(C())
+	for cur.Next(C()) {
 		raw, err := cur.DecodeBytes()
 		if err != nil {
 			continue
@@ -80,20 +85,20 @@ func SetClanIDs(toSave []string) {
 		}
 	}
 	collection := DB.Collection("clanIDs")
-	collection.Drop(context.Background())
-	collection.InsertMany(context.Background(), toInsert)
+	collection.Drop(C())
+	collection.InsertMany(C(), toInsert)
 }
 
 // GetCurrentClansData returns all clan data
 func GetCurrentClansData() ([]ClanStats, error) {
 	collection := DB.Collection("currentStats")
-	cur, err := collection.Find(context.Background(), bson.M{"tag": bson.M{"$exists": true}})
+	cur, err := collection.Find(C(), bson.M{"tag": bson.M{"$exists": true}})
 	toReturn := []ClanStats{}
 	if err != nil {
 		return toReturn, other.NewErr("log 1", err)
 	}
-	defer cur.Close(context.Background())
-	for cur.Next(context.Background()) {
+	defer cur.Close(C())
+	for cur.Next(C()) {
 		var toAdd ClanStats
 		err := cur.Decode(&toAdd)
 		if err != nil {
@@ -117,7 +122,7 @@ func SetCurrentClansData(stats []ClanStats) error {
 		toInsertHistory[i] = item.Stats
 	}
 	collection := DB.Collection("currentStats")
-	collection.Drop(context.Background())
-	_, err := collection.InsertMany(context.Background(), toInsert)
+	collection.Drop(C())
+	_, err := collection.InsertMany(C(), toInsert)
 	return err
 }

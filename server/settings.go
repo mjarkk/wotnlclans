@@ -100,6 +100,11 @@ func serveSettings(r *gin.Engine) {
 			return
 		}
 
+		err := postData.Clans.UpdateInDB()
+		if returnIfErr(c, err, "Can't insert clan ids") {
+			return
+		}
+
 		c.JSON(200, map[string]interface{}{
 			"status": true,
 		})
@@ -111,6 +116,11 @@ func serveSettings(r *gin.Engine) {
 			_ = c.ShouldBindJSON(&postData)
 			return postData.UserID, postData.UserKey
 		}) {
+			return
+		}
+
+		err := postData.Clans.UpdateInDB()
+		if returnIfErr(c, err, "Can't insert clan ids") {
 			return
 		}
 
