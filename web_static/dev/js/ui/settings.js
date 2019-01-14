@@ -1,6 +1,9 @@
 import React from 'react'
+import cn from 'classnames'
 import n from '../funs/networking'
 import Button from '../els/button'
+import SVG from '../els/svg'
+import f from '../funs/functions'
 
 export default class Settings extends React.Component {
   constructor() {
@@ -77,19 +80,32 @@ export default class Settings extends React.Component {
     return (
       <div key={key} className="settingsBlock">
         <h3>{field.screenname}</h3>
+        <p className="discription">{field.discription}</p>
         {field.type == 'array' 
         ? <div className="actualSettings array">
             <div className="viewOptions">
-              <Button style={field.view == 'easy' ? 'selected' : 'outline' } title="easy" click={() => this.updateSetting('easy', 'view', key)}/>
-              <Button style={field.view == 'raw' ? 'selected' : 'outline'} title="raw" click={() => this.updateSetting('raw', 'view', key)}/>
+              <Button 
+                disabled={!!field.error} 
+                style={field.view == 'easy' ? 'selected' : 'outline' } 
+                title="easy" 
+                click={() => this.updateSetting('easy', 'view', key)}
+              />
+              <Button 
+                style={field.view == 'raw' ? 'selected' : 'outline'} 
+                title="raw" 
+                click={() => this.updateSetting('raw', 'view', key)}
+              />
             </div>
             {field.view == 'raw'
               ? <div className="rawEdit">
                   {((field, key) => {
-                    const value = typeof field.clansTmp == 'string' ? field.clansTmp : JSON.stringify(field.clansTmp, null, 2)
+                    const value = typeof field.clansTmp == 'string' 
+                      ? field.clansTmp 
+                      : JSON.stringify(field.clansTmp, null, 2)
                     const matched = value.match(/\n/g)
                     return (
                       <textarea 
+                        disabled={field.doingThings}
                         rows={matched ? matched.length + 1 : 1}
                         cols="40"
                         value={value}
@@ -100,16 +116,7 @@ export default class Settings extends React.Component {
                             let hasErr = undefined
                             if (!(jsonValue instanceof Array)) {
                               hasErr = 'Data must be an array'
-                            } else if (jsonValue.reduce((acc, curr) => 
-                              !(
-                                typeof curr == 'string' 
-                                && curr.length == 9
-                                && curr.split('').reduce((out, letter) => /[0-9]/.test(letter) ? out : false, true)
-                              )
-                                ? acc 
-                                : false
-                              , true
-                            )) {
+                            } else if (jsonValue.reduce((acc, curr) => f.isClanId(curr) ? acc : true, false)) {
                               hasErr = 'Items must be clan id\'s'
                             }
                             this.updateMoreSettings(
@@ -130,7 +137,31 @@ export default class Settings extends React.Component {
                   })(field, key)}
                 </div>
               : <div className="listEdit">
-
+                  {field.clansTmp.map((_, fieldItem) => 
+                    this.inputBox(
+                      fieldItem, 
+                      false, 
+                      field.clansTmp, 
+                      field.doingThings,
+                      clans => this.updateMoreSettings(
+                        [clans, clans, clans.every(clanID => f.isClanId(clanID)) ? undefined : 'not all items are clan id\'s'], 
+                        ['clansTmp', 'clans', 'error'], 
+                        key
+                      ), error => this.updateSetting(error, 'error', key)
+                    )
+                  )}
+                  {this.inputBox(
+                    field.clansTmp.length, 
+                    true, 
+                    field.clansTmp, 
+                    field.doingThings,
+                    clans => this.updateMoreSettings(
+                      [clans, clans, clans.every(clanID => f.isClanId(clanID)) ? undefined : 'not all items are clan id\'s'], 
+                      ['clansTmp', 'clans', 'error'], 
+                      key
+                    ), 
+                    error => this.updateSetting(error, 'error', key)
+                  )}
                 </div>
             }
           </div> 
@@ -143,12 +174,70 @@ export default class Settings extends React.Component {
         :''}
         <div className="buttonsRow">
           <Button
-            disabled={!!field.error}
-            click={() => {
-              console.log(field)
+            disabled={!!field.error || field.doingThings}
+            click={async () => {
+              this.updateSetting(true, 'doingThings', key)
+              const user = this.props.user
+              const out = await n.updateClanIDsList(user.key, user.userID, field.updateurl, field.clans)
+              this.updateMoreSettings([false, out.error], ['doingThings', 'error'], key)
             }}
             title="Update"
           />
+        </div>
+      </div>
+    )
+  }
+  inputBox(key, isAddNew, clans, buzzy, newClansCB, errorCB) {
+    let inputelement = undefined
+    const setInputVar = element => inputelement = element
+    return (
+      <div key={isAddNew ? false : key} className="textItem">
+        <textarea
+          ref={setInputVar}
+          rows="1"
+          cols="9"
+          value={clans[key]}
+          disabled={buzzy}
+          onChange={e => {
+            if (!isAddNew) {
+              const val = e.target.value
+              const out = [].concat.apply([],val.split(',').map(arr => arr.split(' ')))
+              clans[key] = out[0]
+              clans.push(...out.splice(1))
+              newClansCB(clans)
+            }
+          }}
+        ></textarea>
+        {isAddNew ? '' :
+          <div 
+            disabled={buzzy}
+            className={cn('remove', 'icon', {disabled: buzzy})}
+            onClick={() => {
+              if (!buzzy) {
+                clans.splice(key, 1)
+                newClansCB(clans)
+              }
+            }}
+          >
+            <SVG icon="removeBlock"/>
+          </div>
+        }
+        <div 
+          className={cn('add', 'icon', {disabled: buzzy})}
+          onClick={() => {
+            if (!buzzy) {
+              if (inputelement) {
+                const out = [].concat.apply([],inputelement.value.split(',').map(arr => arr.split(' ')))
+                clans.push(...out)
+                newClansCB(clans)
+                inputelement.value = ''
+              } else {
+                errorCB('Can\'t find element')
+              }
+            }
+          }}
+        >
+          <SVG icon="plusBlock"/>
         </div>
       </div>
     )

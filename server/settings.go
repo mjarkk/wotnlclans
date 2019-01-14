@@ -13,14 +13,25 @@ type typeArrayField struct {
 	UpdateURL   string      `json:"updateurl"`
 }
 
-func isNotAdmin(c *gin.Context) bool {
+// isNotAdmin checks returns false if there are no valid keys for a admin found in the post data
+// Use selfGetUser if you want to use the post data
+func isNotAdmin(c *gin.Context, selfGetUser ...func() (userID, userKEY string)) bool {
 	var postData struct {
 		UserID  string `json:"userID"`
 		UserKey string `json:"userKey"`
 	}
-	_ = c.ShouldBindJSON(&postData)
+	userID := ""
+	userKEY := ""
 
-	check, user := db.IsLogedIN(postData.UserID, postData.UserKey)
+	if len(selfGetUser) > 0 {
+		userID, userKEY = selfGetUser[0]()
+	} else {
+		_ = c.ShouldBindJSON(&postData)
+		userID = postData.UserID
+		userKEY = postData.UserKey
+	}
+
+	check, user := db.IsLogedIN(userID, userKEY)
 	if !check || !user.IsAdmin() {
 		c.JSON(200, map[string]interface{}{
 			"status": false,
@@ -80,37 +91,31 @@ func serveSettings(r *gin.Engine) {
 		})
 	})
 	r.POST("/settings/update/blockedClans", func(c *gin.Context) {
-		if isNotAdmin(c) {
+		var postData db.PostBlockedClans
+
+		if isNotAdmin(c, func() (string, string) {
+			_ = c.ShouldBindJSON(&postData)
+			return postData.UserID, postData.UserKey
+		}) {
 			return
 		}
 
-		var postData struct {
-			Clans db.BlockedClans `json:"clans"`
-		}
-		if c.ShouldBindJSON(&postData) != nil {
-			c.JSON(200, map[string]interface{}{
-				"status": false,
-				"error":  "Post data wrong",
-			})
-			return
-		}
-
+		c.JSON(200, map[string]interface{}{
+			"status": true,
+		})
 	})
 	r.POST("/settings/update/extraClans", func(c *gin.Context) {
-		if isNotAdmin(c) {
+		var postData db.PostExtraClans
+
+		if isNotAdmin(c, func() (string, string) {
+			_ = c.ShouldBindJSON(&postData)
+			return postData.UserID, postData.UserKey
+		}) {
 			return
 		}
 
-		var postData struct {
-			Clans db.ExtraClans `json:"clans"`
-		}
-		if c.ShouldBindJSON(&postData) != nil {
-			c.JSON(200, map[string]interface{}{
-				"status": false,
-				"error":  "Post data wrong",
-			})
-			return
-		}
-
+		c.JSON(200, map[string]interface{}{
+			"status": true,
+		})
 	})
 }

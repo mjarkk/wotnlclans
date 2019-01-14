@@ -348,6 +348,7 @@ button
     box-sizing border-box
 
 .settings
+  padding-bottom: 60px
   .fields
     display flex
     justify-content flex-start
@@ -355,11 +356,41 @@ button
 
 .settingsBlock
   max-width 500px
+  width 100%
   padding 10px
+  .discription
+    padding-bottom 10px
+  .error
+    color #ef5350
+    padding 7px
+  .listEdit
+    display flex
+    flex-wrap wrap
   .listEdit, .rawEdit
-    padding 10px 0px
+    padding 20px 7px
     textarea
       padding 7px
       border-radius 6px
       font-size 14px
       resize horizontal
+    .textItem
+      width 178px
+      padding 5px 5px 5px 0px
+      display flex
+      flex-wrap nowrap      
+      .icon
+        padding-left 3px
+        height 30px
+        svg
+          height 30px
+          fill #ffffff
+          transition fill 0.2s
+          cursor pointer
+      .add:hover svg
+        fill #43ff7e
+      .remove:hover svg
+        fill #fe5b5b
+      .disabled svg
+        fill gray
+      textarea
+        resize none

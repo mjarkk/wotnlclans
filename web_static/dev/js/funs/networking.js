@@ -113,8 +113,22 @@ const getSettings = async(userKey, userID) =>
     },
   })).json()
 
+const updateClanIDsList = async(userKey, userID, route, clans) => 
+  await (await fetch(route, {
+    method: 'post',
+    body: JSON.stringify({
+      userKey,
+      userID,
+      clans
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  })).json()
+
 export default {
   checkKey,
+  updateClanIDsList,
   getClanList,
   getIconsLocation,
   getIconsPicture,

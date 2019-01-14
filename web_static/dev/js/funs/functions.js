@@ -34,5 +34,15 @@ export default {
         cb(newPos)
       }
     }
-  }
+  },
+  isNumbers(input) {
+    return input.split('').reduce((acc, curr) => !/[0-9]/.test(curr) ? false : acc, true)
+  },
+  isClanId(input) {
+    return (
+      typeof input == 'string' 
+      && input.length == 9 
+      && this.isNumbers(input)
+    )
+  } 
 }
