@@ -7,7 +7,6 @@ import (
 	"image"
 	"image/draw"
 	"image/png" // This needs to be imported because otherwhise image.Decode won't work with png images
-	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -30,9 +29,9 @@ func GetIcons() error {
 	if err != nil {
 		return err
 	}
-	toSavePath := "./icons/clanIcons"
-	os.RemoveAll(toSavePath)
-	os.Mkdir(toSavePath, os.ModePerm)
+	// toSavePath := "./icons/clanIcons"
+	// os.RemoveAll(toSavePath)
+	// os.Mkdir(toSavePath, os.ModePerm)
 	imgAndID := []imageAndIDType{}
 
 	var waitForImgs sync.WaitGroup
@@ -54,13 +53,13 @@ func GetIcons() error {
 			if err != nil {
 				return
 			}
-			uriDots := strings.Split(iconToGet, ".")
-			fileExt := uriDots[len(uriDots)-1]
-			imgPath := toSavePath + "/" + clan.ID + "." + fileExt
-			err = ioutil.WriteFile(imgPath, out, 0644)
-			if err != nil {
-				return
-			}
+			// uriDots := strings.Split(iconToGet, ".")
+			// fileExt := uriDots[len(uriDots)-1]
+			// imgPath := toSavePath + "/" + clan.ID + "." + fileExt
+			// err = ioutil.WriteFile(imgPath, out, 0644)
+			// if err != nil {
+			// 	return
+			// }
 
 			img, _, err := image.Decode(bytes.NewReader(out))
 			if err != nil {
