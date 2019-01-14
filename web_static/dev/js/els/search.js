@@ -7,13 +7,13 @@ export default class Search extends React.Component {
     this.state = {
       input: ''
     }
-    this.input = React.createRef()
+    this.input = undefined
   }
   render() {
     return (
       <div className="inputWrapper">
         <input
-          ref={this.input}
+          ref={element => this.input = element}
           onChange={e => {
             const value = e.target.value
             this.setState({input: value})
