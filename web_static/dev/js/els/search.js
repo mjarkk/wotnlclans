@@ -26,7 +26,7 @@ export default class Search extends React.Component {
         { typeof this.props.showIcon == 'undefined' || this.props.showIcon
           ? <div className="isvg"
               onClick={() => {
-                this.input.current.focus()
+                this.input.focus()
               }}
             >
               <SVG icon="search"/>
