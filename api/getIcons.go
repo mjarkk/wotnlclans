@@ -118,7 +118,7 @@ func GetIcons() error {
 		file.Close()
 
 		err = webpbin.NewCWebP().
-			Quality(80).
+			Quality(50).
 			InputFile("./icons/allIcons.png").
 			OutputFile("./icons/allIcons.webp").
 			Run()
