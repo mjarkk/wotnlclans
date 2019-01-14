@@ -18,5 +18,6 @@ web_static/build
 *.out
 test/
 
+# added extra for this project
 icons/*
 wotnlclans*

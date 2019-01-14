@@ -11,10 +11,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mjarkk/wotnlclans/other"
-
 	"github.com/disintegration/imaging"
+	webpbin "github.com/mjarkk/go-webpbin"
 	"github.com/mjarkk/wotnlclans/db"
+	"github.com/mjarkk/wotnlclans/other"
 )
 
 type imageAndIDType struct {
@@ -116,6 +116,16 @@ func GetIcons() error {
 		}
 		png.Encode(file, outputImg)
 		file.Close()
+
+		err = webpbin.NewCWebP().
+			Quality(80).
+			InputFile("./icons/allIcons.png").
+			OutputFile("./icons/allIcons.webp").
+			Run()
+
+		if err != nil {
+			return err
+		}
 
 		file, err = os.Create("./icons/allIcons.json")
 		if err != nil {
