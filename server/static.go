@@ -2,6 +2,7 @@ package server
 
 import (
 	"io/ioutil"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mjarkk/wotnlclans/other"
@@ -13,10 +14,12 @@ func serveStaticFile(r *gin.Engine, route, file string, contentType string) {
 		if err != nil {
 			c.Error(err)
 		}
-		clientHash := c.GetHeader("If-None-Match")
+		clientHash := strings.Replace(strings.Replace(c.GetHeader("If-None-Match"), "\"", "", -1), "W/", "", -1)
 		fileHash := other.GetHash(data)
-		c.Header("ETag", fileHash)
+		c.Header("ETag", "\""+fileHash+"\"")
 		resCode := 200
+
+		// fmt.Println(clientHash, fileHash)
 		if clientHash == fileHash {
 			resCode = 304
 		}
