@@ -57,11 +57,13 @@ func RunSchedule() {
 				count = 0
 				err := SearchForClanIds(other.Flags, false)
 				if err != nil {
+					apiErr("RunSchedule", err, "error check SearchForClanIds")
 					other.DevPrint("ERROR: [SearchForClanIds]:", err.Error())
 				}
 			} else {
 				err := GetClanData()
 				if err != nil {
+					apiErr("RunSchedule", err, "error check GetClanData")
 					other.DevPrint("ERROR: [GetClanData]:", err.Error())
 				}
 			}
@@ -69,6 +71,22 @@ func RunSchedule() {
 			Buzzy = false
 		}
 	}()
+}
+
+func apiErr(functionName string, err error, meta ...string) {
+	if err == nil {
+		return
+	}
+	insertMeta := ""
+	if len(meta) > 0 {
+		insertMeta = meta[0]
+	}
+	db.AddErr(db.ErrDB{
+		From:    functionName,
+		Message: err.Error(),
+		Meta:    insertMeta,
+		Package: "api",
+	})
 }
 
 // UpdateIfPossible updates the clan data if there is nothing going on
@@ -202,6 +220,7 @@ func GetClanData(includedClans ...[]string) error {
 
 		info, rating, clansToRemoveFromIDs, err := GetClanDataTry(chunk, []string{})
 		if err != nil {
+			apiErr("GetClanData", err, "error check GetClanDataTry")
 			continue
 		}
 		db.RemoveClanIDs(clansToRemoveFromIDs)
@@ -315,11 +334,13 @@ func FilterOutClans(clanList []string) []string {
 	for _, ids := range tofetch {
 		rawOut, err := CallRoute("clanDiscription", map[string]string{"clanID": strings.Join(ids, "%2C")}) // %2C = ,
 		if err != nil {
+			apiErr("FilterOutClans", err, "error check CallRoute")
 			continue
 		}
 		var out ClanDiscription
 		json.Unmarshal([]byte(rawOut), &out)
 		if out.Status != "ok" {
+			apiErr("FilterOutClans", errors.New(out.Error.Message), "api status is not OK json.Unmarshal")
 			continue
 		}
 		for clanID, clan := range out.Data {
