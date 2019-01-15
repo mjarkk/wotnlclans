@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mjarkk/wotnlclans/api"
 	"github.com/mjarkk/wotnlclans/db"
 )
 
@@ -53,6 +54,20 @@ func returnIfErr(c *gin.Context, err error, message string) bool {
 	return false
 }
 
+// SendAndUpdateList sends a json true status to the client and updates the clan list
+func SendAndUpdateList(c *gin.Context) {
+	res := map[string]interface{}{
+		"status": true,
+	}
+
+	if !api.UpdateIfPossible() {
+		res["humanMeta"] = "Api is currently buzzy"
+		res["meta"] = "API_BUZZY"
+	}
+
+	c.JSON(200, res)
+}
+
 // serverSettings serves all the routes for the settings section in the website
 func serveSettings(r *gin.Engine) {
 	r.POST("/settings/allData", func(c *gin.Context) {
@@ -100,14 +115,11 @@ func serveSettings(r *gin.Engine) {
 			return
 		}
 
-		err := postData.Clans.UpdateInDB()
-		if returnIfErr(c, err, "Can't insert clan ids") {
+		if returnIfErr(c, postData.Clans.UpdateInDB(), "Can't insert clan ids") {
 			return
 		}
 
-		c.JSON(200, map[string]interface{}{
-			"status": true,
-		})
+		SendAndUpdateList(c)
 	})
 	r.POST("/settings/update/extraClans", func(c *gin.Context) {
 		var postData db.PostExtraClans
@@ -119,13 +131,10 @@ func serveSettings(r *gin.Engine) {
 			return
 		}
 
-		err := postData.Clans.UpdateInDB()
-		if returnIfErr(c, err, "Can't insert clan ids") {
+		if returnIfErr(c, postData.Clans.UpdateInDB(), "Can't insert clan ids") {
 			return
 		}
 
-		c.JSON(200, map[string]interface{}{
-			"status": true,
-		})
+		SendAndUpdateList(c)
 	})
 }

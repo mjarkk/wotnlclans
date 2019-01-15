@@ -71,6 +71,16 @@ func RunSchedule() {
 	}()
 }
 
+// UpdateIfPossible updates the clan data if there is nothing going on
+func UpdateIfPossible() bool {
+	if Buzzy {
+		return false
+	}
+	GetClanData()
+	GetIcons()
+	return true
+}
+
 // SearchForClanIds searches through all clans for dutch clans and after that saves them in the database
 func SearchForClanIds(flags other.FlagsType, isInit bool) error {
 	if isInit && flags.SkipStartupIndexing {

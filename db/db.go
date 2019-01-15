@@ -106,7 +106,10 @@ func SetClanIDs(toSave []string) {
 // GetCurrentClansData returns all clan data
 func GetCurrentClansData() ([]ClanStats, error) {
 	collection := DB.Collection("currentStats")
-	cur, err := collection.Find(C(), bson.M{"tag": bson.M{"$exists": true}})
+	cur, err := collection.Find(C(), bson.M{
+		"tag":     bson.M{"$exists": true},
+		"blocked": bson.M{"$eq": false},
+	})
 	toReturn := []ClanStats{}
 	if err != nil {
 		return toReturn, other.NewErr("log 1", err)
