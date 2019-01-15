@@ -11,6 +11,9 @@ import (
 	"github.com/mjarkk/wotnlclans/other"
 )
 
+// Buzzy tells other parts of the application if the api is buzzy doing things
+var Buzzy = false
+
 // SetupAPI sets up the api for fetching data from the wargaming api
 func SetupAPI() error {
 	err := CheckAPI()
@@ -23,6 +26,7 @@ func SetupAPI() error {
 		return errors.New("No wargaming api key defined use `./wotnlclans -help` to get more info")
 	}
 	fmt.Println("Running api...")
+	Buzzy = true
 	clanIds := db.GetClanIDs()
 	if len(clanIds) == 0 {
 		err := SearchForClanIds(flags, true)
@@ -34,6 +38,7 @@ func SetupAPI() error {
 		GetClanData(clanIds)
 	}
 	GetIcons()
+	Buzzy = false
 
 	RunSchedule()
 
@@ -47,6 +52,7 @@ func RunSchedule() {
 		for {
 			time.Sleep(time.Hour * 4)
 			count++
+			Buzzy = true
 			if count == 12 {
 				count = 0
 				err := SearchForClanIds(other.Flags, false)
@@ -60,6 +66,7 @@ func RunSchedule() {
 				}
 			}
 			GetIcons()
+			Buzzy = false
 		}
 	}()
 }
