@@ -1,4 +1,5 @@
 import 'unfetch/polyfill'
+import f from './functions'
 
 let clansList = {
   started: false,
@@ -75,8 +76,11 @@ const getIconsPicture = async() => {
       clanIcons.png.isWaitingForData.push(resolve)
     })
   } else {
+    
     clanIcons.png.started = true
-    const res = await fetch('/icons/png')
+    const res = f.supportsWebp() 
+      ? await fetch('/icons/webp')
+      : await fetch('/icons/png')
     const blob = await res.blob()
     const uri = URL.createObjectURL(blob)
     clanIcons.png.data = uri

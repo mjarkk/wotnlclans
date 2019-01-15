@@ -5,8 +5,6 @@ import bowser from 'bowser'
 const deskTopSize = 1200 
 let screenPosition = document.body.offsetWidth < deskTopSize
 
-console.log(bowser.getParser(window.navigator.userAgent).parsedResult.browser)
-
 export default {
   clanIconsToIndex(input) {
     let toReturn = {}
@@ -50,13 +48,13 @@ export default {
   },
   supportsWebp() {
     const browser = bowser.getParser(window.navigator.userAgent) .parsedResult.browser
-    const name = browser.name
-    const version = browser.version
+    const name = browser.name || ''
+    const version = browser.version || ''
     return (
-      browser.name == 'Chrome' && Number(version.split('.')[0]) >= 23
-      || browser.name == 'Edge' && Number(version.split('.')[0]) >= 18
-      || browser.name == 'Opera' && Number(version.split('.')[0]) >= 13
-      || browser.name == 'Firefox' && Number(version.split('.')[0]) >= 65
+      name == 'Chrome' && Number(version.split('.')[0]) >= 23
+      || name == 'Edge' && Number(version.split('.')[0]) >= 18
+      || name == 'Opera' && Number(version.split('.')[0]) >= 13
+      || name == 'Firefox' && Number(version.split('.')[0]) >= 65
     )
   }
 }

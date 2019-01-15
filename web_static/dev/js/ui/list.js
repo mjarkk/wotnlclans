@@ -1,6 +1,6 @@
 import React from 'react'
-import network from '../funs/networking'
-import funs from '../funs/functions'
+import n from '../funs/networking'
+import f from '../funs/functions'
 import Icon from '../els/svg'
 import ClanDetials from './clandetails'
 import Search from '../els/search'
@@ -29,15 +29,15 @@ export default class List extends React.Component {
     this.canSetState = false
   }
   async getNeededInfo() {
-    const list = funs.sortList('globalRating', await network.getClanList())
+    const list = f.sortList('globalRating', await n.getClanList())
     if (!this.canSetState) {
       return
     }
     this.setState({
       list
     })
-    const iconsLocation = funs.clanIconsToIndex(await network.getIconsLocation())
-    const iconsPicture = await network.getIconsPicture()
+    const iconsLocation = f.clanIconsToIndex(await n.getIconsLocation())
+    const iconsPicture = await n.getIconsPicture()
     this.setState({
       iconsLocation,
       iconsPicture
