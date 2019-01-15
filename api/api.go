@@ -198,6 +198,7 @@ func GetClanData(includedClans ...[]string) error {
 	for i := range extraAddClans {
 		extraAddClans[i] = true
 	}
+
 	for _, clan := range clans {
 	extraClansLoop:
 		for id, extraItem := range extraClans {
@@ -207,6 +208,7 @@ func GetClanData(includedClans ...[]string) error {
 			}
 		}
 	}
+
 	for i, pass := range extraAddClans {
 		if pass {
 			clans = append(clans, extraClans[i])
@@ -217,14 +219,15 @@ func GetClanData(includedClans ...[]string) error {
 	toFetch := SplitToChucks(clans)
 
 	for _, chunk := range toFetch {
-
 		info, rating, clansToRemoveFromIDs, err := GetClanDataTry(chunk, []string{})
+
 		if err != nil {
 			apiErr("GetClanData", err, "error check GetClanDataTry")
 			continue
 		}
 		db.RemoveClanIDs(clansToRemoveFromIDs)
 
+	intoDBLoop:
 		for i := range info.Data {
 			cInfo := info.Data[i]
 			cRating := rating.Data[i]
@@ -235,6 +238,9 @@ func GetClanData(includedClans ...[]string) error {
 					isBlocked = true
 					break blockedClansForLoop
 				}
+			}
+			if len(cInfo.Tag) < 2 {
+				continue intoDBLoop
 			}
 			toSave = append(toSave, db.ClanStats{
 				Blocked:     isBlocked,
