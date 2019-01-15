@@ -10,6 +10,7 @@ type ClanStats struct {
 	Motto       string            `json:"motto"`
 	ID          string            `json:"id"`
 	Emblems     map[string]string `json:"emblems"`
+	Blocked     bool              `json:"blocked"`
 	Stats       HistoryClanStats  `json:"stats"`
 }
 

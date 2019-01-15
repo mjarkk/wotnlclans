@@ -44,6 +44,20 @@ func C() context.Context {
 	return context.Background()
 }
 
+// RemoveClanIDs removes the "toRemove" from the clan IDs collection
+func RemoveClanIDs(toRemove []string) {
+	if len(toRemove) == 0 {
+		return
+	}
+	toRemovedParsed := other.RemoveQuotes(toRemove)
+
+	collection := DB.Collection("clanIDs")
+	collection.DeleteMany(C(), bson.M{"id": bson.M{"$in": toRemovedParsed}})
+
+	collection = DB.Collection("extraClans")
+	collection.DeleteMany(C(), bson.M{"id": bson.M{"$in": toRemovedParsed}})
+}
+
 // GetClanIDs returns the clans ids that where found after searching for new clans
 func GetClanIDs() []string {
 	collection := DB.Collection("clanIDs")
@@ -73,7 +87,7 @@ func GetClanIDs() []string {
 		}
 	}
 
-	return toReturn
+	return other.RemoveQuotes(toReturn)
 }
 
 // SetClanIDs saves a list of clan id's in the database

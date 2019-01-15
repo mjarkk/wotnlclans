@@ -53,6 +53,7 @@ func GetIcons() error {
 			if err != nil {
 				return
 			}
+
 			// uriDots := strings.Split(iconToGet, ".")
 			// fileExt := uriDots[len(uriDots)-1]
 			// imgPath := toSavePath + "/" + clan.ID + "." + fileExt

@@ -89,42 +89,119 @@ func SearchForClanIds(flags other.FlagsType, isInit bool) error {
 	return nil
 }
 
+// GetClanDataTry is a helper function that retries when the api reports on invalid clan IDs
+func GetClanDataTry(chunk []string, toExclude []string) (ClanData, ClanRating, []string, error) {
+	chunk = other.RemoveQuotes(chunk)
+	toInclude := map[string]string{"clanID": strings.Join(chunk, "%2C")}
+
+	var info ClanData
+	infoOut, err := CallRoute("clanData", toInclude)
+	if err != nil {
+		return ClanData{}, ClanRating{}, []string{}, err
+	}
+	json.Unmarshal([]byte(infoOut), &info)
+
+	var rating ClanRating
+	ratingOut, err := CallRoute("clanRating", toInclude)
+	if err != nil {
+		return ClanData{}, ClanRating{}, []string{}, err
+	}
+	json.Unmarshal([]byte(ratingOut), &rating)
+
+	if info.Status != "ok" || rating.Status != "ok" {
+		if info.Error.Field == "clan_id" && info.Error.Message == "INVALID_CLAN_ID" {
+			newChunk := []string{}
+			toExclude := append(toExclude, strings.Split(info.Error.Value, ",")...)
+			for _, clanID := range chunk {
+				canAdd := true
+				for _, item := range toExclude {
+					if item == clanID {
+						canAdd = false
+					}
+				}
+				if canAdd {
+					newChunk = append(newChunk, clanID)
+				}
+			}
+			return GetClanDataTry(newChunk, toExclude)
+		}
+		toReturnError := errors.New("Clans info message: " + info.Error.Message + ", Clans rating message: " + rating.Error.Message)
+		return ClanData{}, ClanRating{}, []string{}, toReturnError
+	}
+
+	if len(info.Data) != len(rating.Data) {
+		return ClanData{}, ClanRating{}, []string{}, errors.New("No clans in response")
+	}
+
+	return info, rating, toExclude, nil
+}
+
 // GetClanData returns all needed information about clans
 // includedClans is not needed but if you have a database
 func GetClanData(includedClans ...[]string) error {
+
+	blockedClans, err := db.GetBlockedClans()
+	if err != nil {
+		return other.NewErr("can't get blocked clans", err)
+	}
+	blockedClans = other.RemoveQuotes(blockedClans)
+
+	extraClans, err := db.GetExtraClans()
+	if err != nil {
+		return other.NewErr("can't get extra clans", err)
+	}
+	extraClans = other.RemoveQuotes(extraClans)
+
 	clans := []string{}
 	if len(includedClans) > 0 && len(includedClans[0]) > 0 {
 		clans = includedClans[0]
 	} else {
 		clans = db.GetClanIDs()
 	}
+
+	extraAddClans := make([]bool, len(extraClans))
+	for i := range extraAddClans {
+		extraAddClans[i] = true
+	}
+	for _, clan := range clans {
+	extraClansLoop:
+		for id, extraItem := range extraClans {
+			if extraAddClans[id] && extraItem == clan {
+				extraAddClans[id] = false
+				break extraClansLoop
+			}
+		}
+	}
+	for i, pass := range extraAddClans {
+		if pass {
+			clans = append(clans, extraClans[i])
+		}
+	}
+
 	toSave := []db.ClanStats{}
 	toFetch := SplitToChucks(clans)
+
 	for _, chunk := range toFetch {
-		toInclude := map[string]string{"clanID": strings.Join(chunk, "%2C")}
 
-		var info ClanData
-		infoOut, err := CallRoute("clanData", toInclude)
+		info, rating, clansToRemoveFromIDs, err := GetClanDataTry(chunk, []string{})
 		if err != nil {
 			continue
 		}
-		json.Unmarshal([]byte(infoOut), &info)
-
-		var rating ClanRating
-		ratingOut, err := CallRoute("clanRating", toInclude)
-		if err != nil {
-			continue
-		}
-		json.Unmarshal([]byte(ratingOut), &rating)
-
-		if info.Status != "ok" || rating.Status != "ok" || len(info.Data) != len(rating.Data) {
-			continue
-		}
+		db.RemoveClanIDs(clansToRemoveFromIDs)
 
 		for i := range info.Data {
 			cInfo := info.Data[i]
 			cRating := rating.Data[i]
+			isBlocked := false
+		blockedClansForLoop:
+			for _, blockedClanID := range blockedClans {
+				if blockedClanID == i {
+					isBlocked = true
+					break blockedClansForLoop
+				}
+			}
 			toSave = append(toSave, db.ClanStats{
+				Blocked:     isBlocked,
 				Tag:         cInfo.Tag,
 				Name:        cInfo.Name,
 				Color:       cInfo.Color,

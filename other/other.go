@@ -22,3 +22,13 @@ func GetDomain(input string) string {
 func GetHash(input []byte) string {
 	return fmt.Sprintf("%x", sha1.Sum(input))
 }
+
+// RemoveQuotes removes quotes from all strings in a list
+// for some reason the database sometimes returns "" arounds clan ID strings
+func RemoveQuotes(input []string) []string {
+	toReturn := []string{}
+	for _, item := range input {
+		toReturn = append(toReturn, strings.Replace(item, "\"", "", -1))
+	}
+	return toReturn
+}
