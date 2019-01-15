@@ -40,6 +40,7 @@ func GetIcons() error {
 
 	for _, clan := range clans {
 		go func(clan db.ClanStats) {
+			defer waitForImgs.Done()
 			iconToGet, ok := clan.Emblems["X195.Portal"]
 			if !ok || len(iconToGet) == 0 {
 				iconToGet, ok = clan.Emblems["X256.Wowp"]
@@ -76,7 +77,6 @@ func GetIcons() error {
 				ID:    clan.ID,
 				Image: img,
 			})
-			waitForImgs.Done()
 		}(clan)
 	}
 
@@ -129,6 +129,7 @@ func GetIcons() error {
 			InputFile("./icons/allIcons.png").
 			OutputFile("./icons/allIcons.webp").
 			Run()
+
 		if err != nil {
 			apiErr("GetIcons", err, "Can't create allIcons.webp")
 			return err
