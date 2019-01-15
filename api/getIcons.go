@@ -41,9 +41,9 @@ func GetIcons() error {
 	for _, clan := range clans {
 		go func(clan db.ClanStats) {
 			iconToGet, ok := clan.Emblems["X195.Portal"]
-			if !ok {
+			if !ok || len(iconToGet) == 0 {
 				iconToGet, ok = clan.Emblems["X256.Wowp"]
-				if !ok {
+				if !ok || len(iconToGet) == 0 {
 					apiErr("GetIcons", errors.New("no X195.Portal and/or X256.Wowp"), "Check if clan has a clan icon")
 					return
 				}
