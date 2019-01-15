@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"image"
 	"image/draw"
 	"image/png" // This needs to be imported because otherwhise image.Decode won't work with png images
@@ -43,14 +44,17 @@ func GetIcons() error {
 			if !ok {
 				iconToGet, ok = clan.Emblems["X256.Wowp"]
 				if !ok {
+					apiErr("GetIcons", errors.New("no X195.Portal and/or X256.Wowp"), "Check if clan has a clan icon")
 					return
 				}
 			}
 			if !strings.Contains(iconToGet, "http://") && !strings.Contains(iconToGet, "https://") {
+				apiErr("GetIcons", errors.New("image is not a valid url"), "Check if the image url contains http(s)// : "+iconToGet)
 				return
 			}
 			out, err := RawGet(iconToGet)
 			if err != nil {
+				apiErr("GetIcons", err, "Can't fetch image: "+iconToGet)
 				return
 			}
 
@@ -64,6 +68,7 @@ func GetIcons() error {
 
 			img, _, err := image.Decode(bytes.NewReader(out))
 			if err != nil {
+				apiErr("GetIcons", err, "Can't decode image: "+iconToGet)
 				return
 			}
 
@@ -113,6 +118,7 @@ func GetIcons() error {
 
 		file, err := os.Create("./icons/allIcons.png")
 		if err != nil {
+			apiErr("GetIcons", err, "Can't create allIcons.png")
 			return err
 		}
 		png.Encode(file, outputImg)
@@ -123,13 +129,14 @@ func GetIcons() error {
 			InputFile("./icons/allIcons.png").
 			OutputFile("./icons/allIcons.webp").
 			Run()
-
 		if err != nil {
+			apiErr("GetIcons", err, "Can't create allIcons.webp")
 			return err
 		}
 
 		file, err = os.Create("./icons/allIcons.json")
 		if err != nil {
+			apiErr("GetIcons", err, "Can't create allIcons.json")
 			return err
 		}
 		writer := bufio.NewWriter(file)
@@ -142,9 +149,9 @@ func GetIcons() error {
 		jsonEncoder := json.NewEncoder(writer)
 		err = jsonEncoder.Encode(ids)
 		if err != nil {
+			apiErr("GetIcons", err, "Can't encode config into json")
 			return err
 		}
-		return nil
 	}
 
 	return nil
