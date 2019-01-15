@@ -1,14 +1,34 @@
 package server
 
 import (
+	"io/ioutil"
+
 	"github.com/gin-gonic/gin"
+	"github.com/mjarkk/wotnlclans/other"
 )
+
+func serveStaticFile(r *gin.Engine, route, file string, contentType string) {
+	r.GET(route, func(c *gin.Context) {
+		data, err := ioutil.ReadFile(file)
+		if err != nil {
+			c.Error(err)
+		}
+		clientHash := c.GetHeader("If-None-Match")
+		fileHash := other.GetHash(data)
+		c.Header("ETag", fileHash)
+		resCode := 200
+		if clientHash == fileHash {
+			resCode = 304
+		}
+		c.Data(resCode, contentType, data)
+	})
+}
 
 // serveStaticFiles simply servs static files
 func serveStaticFiles(r *gin.Engine) {
 	r.StaticFile("/", "./web_static/build/index.html")
-	r.StaticFile("/icons/json", "./icons/allIcons.json")
-	r.StaticFile("/icons/png", "./icons/allIcons.png")
-	r.StaticFile("/icons/webp", "./icons/allIcons.webp")
+	serveStaticFile(r, "/icons/webp", "./icons/allIcons.webp", "image/webp")
+	serveStaticFile(r, "/icons/json", "./icons/allIcons.json", "image/png")
+	serveStaticFile(r, "/icons/png", "./icons/allIcons.png", "application/json")
 	r.Static("/js", "./web_static/build/js")
 }
