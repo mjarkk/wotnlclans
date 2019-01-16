@@ -31,7 +31,7 @@ func serveStaticFile(r *gin.Engine, route, file string, contentType string) {
 func serveStaticFiles(r *gin.Engine) {
 	r.StaticFile("/", "./web_static/build/index.html")
 	serveStaticFile(r, "/icons/webp", "./icons/allIcons.webp", "image/webp")
-	serveStaticFile(r, "/icons/json", "./icons/allIcons.json", "image/png")
-	serveStaticFile(r, "/icons/png", "./icons/allIcons.png", "application/json")
+	serveStaticFile(r, "/icons/json", "./icons/allIcons.json", "application/json")
+	serveStaticFile(r, "/icons/png", "./icons/allIcons.png", "image/png")
 	r.Static("/js", "./web_static/build/js")
 }
