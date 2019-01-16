@@ -111,7 +111,7 @@ export default class List extends React.Component {
                     <div className="tag">[{item.tag}]</div>
                     <div className="rating clanRating">
                       <span>Rating</span>
-                      <span>{item.stats.globRatingweighted}</span>
+                      <span>{item.stats.globrating}</span>
                     </div>
                     <div className="rating winrate">
                       <span>Winrate</span>
