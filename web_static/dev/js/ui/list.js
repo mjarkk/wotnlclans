@@ -18,18 +18,34 @@ export default class List extends React.Component {
         oneItem: 0
       },
       filter: '',
+      isFetchingData: false
     }, props)
     this.canSetState = true
-    this.getNeededInfo()
+    this.lastListItem = undefined
   }
   componentDidMount() {
+    this.getNeededInfo()
     this.canSetState = true
   }
   componentWillUnmount() {
     this.canSetState = false
   }
+  watchScroll() {
+    window.addEventListener('scroll', () => {
+      this.watchScrollEvent()
+    })
+  }
+  watchScrollEvent() {
+    const fromTop = document.documentElement.scrollTop
+    if (fromTop + window.innerHeight + 300 > this.lastListItem.offsetTop && !this.state.isFetchingData) {
+      this.state.isFetchingData = true
+      this.setState({
+        isFetchingData: true
+      })
+    }
+  }
   async getNeededInfo() {
-    const list = f.sortList('globalRating', await n.getClanList())
+    const list = await n.getClanList()
     if (!this.canSetState) {
       return
     }
@@ -67,6 +83,7 @@ export default class List extends React.Component {
       })
     }
     img.src = iconsPicture
+    this.watchScroll()
   }
   render() {
     return(
@@ -99,6 +116,11 @@ export default class List extends React.Component {
                     className="row"
                     onClick={() => {
                       location.hash = `/clan/${item.id}`
+                    }}
+                    ref={htmlEl => {
+                      if (id == (this.state.list.length - 1)) {
+                        this.lastListItem = htmlEl
+                      }
                     }}
                   >
                     <div className="position">{id + 1}</div>
@@ -143,6 +165,9 @@ export default class List extends React.Component {
                 loading...
               </div>
           }
+          { this.state.isFetchingData ?
+            <div className="loading">loading...</div>
+          :''}
         </div>
         { !this.props.isMobile
           ? <div className={'graphAndStats'}>

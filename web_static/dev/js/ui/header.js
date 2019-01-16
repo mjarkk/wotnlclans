@@ -60,15 +60,14 @@ export default class Header extends React.Component {
     location.hash = '/'
   }
   watchScroll() {
-    const body = document.querySelector('body')
-    body.onscroll = () => {
+    window.addEventListener('scroll', () => {
       const out = document.documentElement.scrollTop > 10
       if (this.state.promoHidden != out) {
         this.setState({
           promoHidden: out
         })
       }
-    }
+    })
   }
   render() {
     return (

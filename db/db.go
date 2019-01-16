@@ -36,6 +36,9 @@ func Setup() error {
 
 	DB = client.Database(mongoDataBase)
 	fmt.Println("Connected to MongoDB!")
+
+	go sortClanIds()
+
 	return nil
 }
 
@@ -101,45 +104,4 @@ func SetClanIDs(toSave []string) {
 	collection := DB.Collection("clanIDs")
 	collection.Drop(C())
 	collection.InsertMany(C(), toInsert)
-}
-
-// GetCurrentClansData returns all clan data
-func GetCurrentClansData() ([]ClanStats, error) {
-	collection := DB.Collection("currentStats")
-	cur, err := collection.Find(C(), bson.M{
-		"tag":     bson.M{"$exists": true},
-		"blocked": bson.M{"$eq": false},
-	})
-	toReturn := []ClanStats{}
-	if err != nil {
-		return toReturn, other.NewErr("log 1", err)
-	}
-	defer cur.Close(C())
-	for cur.Next(C()) {
-		var toAdd ClanStats
-		err := cur.Decode(&toAdd)
-		if err != nil {
-			return toReturn, other.NewErr("log 2", err)
-		}
-		toReturn = append(toReturn, toAdd)
-	}
-
-	return toReturn, nil
-}
-
-// SetCurrentClansData saves the latest clan data in the database
-func SetCurrentClansData(stats []ClanStats) error {
-	if len(stats) == 0 {
-		return errors.New("SetCurrentClansData got a empty array")
-	}
-	toInsert := make([]interface{}, len(stats))
-	toInsertHistory := make([]interface{}, len(stats))
-	for i, item := range stats {
-		toInsert[i] = item
-		toInsertHistory[i] = item.Stats
-	}
-	collection := DB.Collection("currentStats")
-	collection.Drop(C())
-	_, err := collection.InsertMany(C(), toInsert)
-	return err
 }

@@ -4,7 +4,7 @@ import f from './functions'
 let clansList = {
   started: false,
   hasData: false,
-  hasError: false,
+  status: true,
   data: false,
   isWaitingForData: []
 }
@@ -26,7 +26,7 @@ let clanIcons = {
 
 const getClanList = async() => {
   if (clansList.hasData) {
-    if (clansList.hasError) {
+    if (!clansList.status) {
       throw 'clandata has error'
     }
     return clansList.data
@@ -39,13 +39,13 @@ const getClanList = async() => {
     const res = await fetch('/clanData')
     const data = await res.json()
     clansList.data = data.data
-    clansList.hasError = data.hasError
+    clansList.status = data.status
     clansList.hasData = true
     clansList.isWaitingForData.map((resolve, reject) => {
-      if (data.hasError) {
-        reject('clandata has error')
-      } else {
+      if (data.status) {
         resolve(data.data)
+      } else {
+        reject('clandata has error')
       }
     })
     return data.data
