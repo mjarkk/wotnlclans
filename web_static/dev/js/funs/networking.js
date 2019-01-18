@@ -1,94 +1,67 @@
-import 'unfetch/polyfill'
 import f from './functions'
 
-let clansList = {
-  started: false,
-  hasData: false,
-  status: true,
-  data: false,
-  isWaitingForData: []
-}
+let fetchEdUrls = {}
 
-let clanIcons = {
-  png: {
-    started: false,
-    hasData: false,
-    data: false,
-    isWaitingForData: []
-  },
-  json: {
-    started: false,
-    hasData: false,
-    data: false,
-    isWaitingForData: []
-  }
-}
-
-const getClanList = async() => {
-  if (clansList.hasData) {
-    if (!clansList.status) {
-      throw 'clandata has error'
-    }
-    return clansList.data
-  } else if (clansList.started) {
-    return await new Promise(resolve => {
-      clansList.isWaitingForData.push(resolve)
-    })
-  } else {
-    clansList.started = true
-    const res = await fetch('/clanData')
-    const data = await res.json()
-    clansList.data = data.data
-    clansList.status = data.status
-    clansList.hasData = true
-    clansList.isWaitingForData.map((resolve, reject) => {
-      if (data.status) {
-        resolve(data.data)
-      } else {
-        reject('clandata has error')
+// fetchWCache is short for "fetch with cache" this function makes sure to not fetch something 2 times
+const fetchWCache = (url, toBlog) => {
+  const item = fetchEdUrls[url]
+  return new Promise((resolve, reject) => {
+    if (!item) {
+      fetchEdUrls[url] = {
+        hasData: false,
+        data: false,
+        status: true,
+        isWaitingForData: []
       }
-    })
-    return data.data
-  }
+      const reqUrl = toBlog 
+        ? new Request(url) 
+        : url
+      fetch(reqUrl).then(r => {
+        if (toBlog) {
+          return r.blob()
+        } else {
+          return r.json()
+        }
+      })
+      .then(data => {
+        fetchEdUrls[url].hasData = true
+        if (toBlog) {
+          fetchEdUrls[url].data = URL.createObjectURL(data)
+        } else {
+          fetchEdUrls[url].data = data
+        }
+        fetchEdUrls[url].status = true
+        const resolveData = fetchEdUrls[url].data
+        fetchEdUrls[url].isWaitingForData.map(waitItem => {
+          waitItem.resolve(resolveData)
+        })
+        resolve(resolveData)
+      })
+      .catch(err => {
+        fetchEdUrls[url].hasData = true
+        fetchEdUrls[url].data = err
+        fetchEdUrls[url].status = false
+        fetchEdUrls[url].isWaitingForData.map(waitItem => {
+          waitItem.reject(err)
+        })
+        reject(err)
+      })
+    } else if (item && item.hasData === false) {
+      fetchEdUrls[url].isWaitingForData.push({resolve, reject})
+    } else {
+      if (item.status) {
+        resolve(item.data)
+      } else {
+        reject(item.data)
+      }
+    }
+  })
 }
-const getIconsLocation = async() => {
-  if (clanIcons.json.hasData) {
-    return clanIcons.json.data
-  } else if (clanIcons.json.started) {
-    return await new Promise(resolve => {
-      clanIcons.json.isWaitingForData.push(resolve)
-    })
-  } else {
-    clanIcons.json.started = true
-    const res = await fetch('/icons/json')
-    const data = await res.json()
-    clanIcons.json.data = data
-    clanIcons.json.hasData = true
-    clanIcons.json.isWaitingForData.map(resolve => resolve(data))
-    return data
-  }
-}
-const getIconsPicture = async() => {
-  if (clanIcons.png.hasData) {
-    return clanIcons.png.data
-  } else if (clanIcons.png.started) {
-    return await new Promise(resolve => {
-      clanIcons.png.isWaitingForData.push(resolve)
-    })
-  } else {
-    
-    clanIcons.png.started = true
-    const res = f.supportsWebp() 
-      ? await fetch('/icons/webp')
-      : await fetch('/icons/png')
-    const blob = await res.blob()
-    const uri = URL.createObjectURL(blob)
-    clanIcons.png.data = uri
-    clanIcons.png.hasData = true
-    clanIcons.png.isWaitingForData.map(resolve => resolve(uri))
-    return uri
-  }
-}
+
+const getClanList = async () => (await fetchWCache('/clanData')).data
+const getIconsLocation = () => fetchWCache('/icons/json')
+const getIconsPicture = () => fetchWCache(f.supportsWebp() ? '/icons/webp' : '/icons/png', true)
+const getFilteredList = () => fetchWCache('/clanIDs/all')
 
 const checkKey = async(userKey, userID) => {
   const res = await fetch('/checkUser', {
@@ -131,10 +104,12 @@ const updateClanIDsList = async(userKey, userID, route, clans) =>
   })).json()
 
 export default {
-  checkKey,
   updateClanIDsList,
-  getClanList,
   getIconsLocation,
+  getFilteredList,
   getIconsPicture,
-  getSettings
+  getClanList,
+  getSettings,
+  checkKey, 
 }
+  

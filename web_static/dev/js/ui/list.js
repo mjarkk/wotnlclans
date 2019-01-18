@@ -83,6 +83,8 @@ export default class List extends React.Component {
       })
     }
     img.src = iconsPicture
+    const out = await n.getFilteredList('default')
+    console.log(out)
     this.watchScroll()
   }
   render() {
