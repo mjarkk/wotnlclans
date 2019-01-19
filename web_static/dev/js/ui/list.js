@@ -10,6 +10,7 @@ export default class List extends React.Component {
   constructor(props) {
     super()
     this.state = Object.assign({
+      fetchedClans: 50,
       list: [],
       iconsLocation: {},
       iconsPicture: '',
@@ -66,10 +67,13 @@ export default class List extends React.Component {
               toFetch.map(id => {
                 haveClanIds[id] = true
               })
-              this.setState({list}, () => {
+              this.setState({
+                fetchedClans: this.state.fetchedClans + 50,
+                list, 
+                haveClanIds
+              }, () => {
                 this.setState({
                   isFetchingData: false,
-                  haveClanIds
                 })
               })
               f.setCurrentClans(list)
@@ -126,7 +130,7 @@ export default class List extends React.Component {
       })
     }
     img.src = iconsPicture
-    const out = await n.getFilteredList('default')
+    const out = await n.getFilteredList()
     if (out.status) {
       const sortOn =  out.default
       const sortedList = f.clanPos(out.data)
@@ -142,8 +146,51 @@ export default class List extends React.Component {
     }
     f.setCurrentClans(list)
   }
-  async filterOn() {
-    console.log('idk')
+  async filterOn(sortOn) {
+    this.setState({
+      sortOn,
+      list: f.sortList(sortOn, this.state.list)
+    }, () => {
+      let toFetch = [[]]
+      const sortedList = this.state.sortedList[sortOn]
+      for (let i = 0; i < sortedList.length; i++) {
+        if (i < this.state.fetchedClans) {
+          const id = sortedList[i]
+          const isTrue = this.state.haveClanIds[id]
+          if (!isTrue) {
+            if (toFetch[toFetch.length - 1].length == 50) {
+              toFetch.push([])
+            }
+            toFetch[toFetch.length - 1].push(id)
+          }
+        } else {
+          break
+        }
+      }
+
+      const haveClanIds = this.state.haveClanIds
+      let canSetState = false
+      toFetch.reduce((acc, curr) => {acc.push(...curr); return acc}, []).map(id => {
+        canSetState = true
+        haveClanIds[id] = true
+      })
+      if (canSetState) {
+        this.setState({
+          haveClanIds
+        })
+      }
+
+      toFetch.map(async (toFetchSubArr) => {
+        if (toFetchSubArr.length > 0) {
+          const clans = await n.getClansByID(toFetchSubArr)
+          if (clans.status) {
+            this.setState({
+              list: f.sortList(this.state.sortOn, [...this.state.list, ...clans.data]),
+            })
+          }
+        }
+      })
+    })
   }
   render() {
     return(
@@ -160,7 +207,7 @@ export default class List extends React.Component {
             {([
               ['efficiency', 'Effiency'], 
               ['globrating', 'Rating'], 
-              ['winrate', 'Winrate'], 
+              ['winratio', 'Winrate'], 
               ['fbelo', 'Strongholds'], 
               ['battles', 'Battles'], 
               ['gmelo8', 'Global']
