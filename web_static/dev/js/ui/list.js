@@ -37,7 +37,7 @@ export default class List extends React.Component {
   watchScroll() {
     window.addEventListener('scroll', async () => {
       const fromTop = document.documentElement.scrollTop
-      if (fromTop + window.innerHeight + 300 > this.lastListItem.offsetTop && !this.state.isFetchingData && !this.state.haveAllClans) {
+      if (fromTop + window.innerHeight + 600 > this.lastListItem.offsetTop && !this.state.isFetchingData && !this.state.haveAllClans) {
         this.state.isFetchingData = true
         this.setState({
           isFetchingData: true
@@ -71,6 +71,7 @@ export default class List extends React.Component {
                   haveClanIds
                 })
               })
+              f.setCurrentClans(list)
             } else {
               // something whend wrong on the fetch side
             }
@@ -138,6 +139,7 @@ export default class List extends React.Component {
     } else {
       // show error
     }
+    f.setCurrentClans(list)
   }
   render() {
     return(

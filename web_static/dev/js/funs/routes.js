@@ -1,6 +1,5 @@
 import rlite from 'rlite-router'
-import net from './networking'
-import funs from './functions'
+import f from './functions'
 
 const defaultState = {
   index: {
@@ -28,11 +27,7 @@ const route = rlite(async () => ns(), {
   'clan/:clanID': async ({clanID}) => {
     return ns({
       index: {
-        showClan: funs.sortList('globalRating', await net.getClanList())
-          .reduce(
-            (acc, clan, id) => clan.id == clanID ? Object.assign({}, clan, {clanPosition: id + 1}) : acc
-            ,undefined
-          )
+        showClan: await f.getSpesificClan(clanID)
       }
     })
   },

@@ -1,11 +1,32 @@
 import sortBy from 'lodash.sortby'
 import reverse from 'lodash.reverse'
+import n from './networking'
 import bowser from 'bowser'
+
+let currentClans = {}
 
 const deskTopSize = 1200 
 let screenPosition = document.body.offsetWidth < deskTopSize
 
 export default {
+  setCurrentClans(newList) {
+    currentClans = newList.reduce((acc, curr) => {
+      acc[curr.id] = curr
+      return acc
+    }, {})
+  },
+  async getSpesificClan(id) {
+    if (currentClans[id]) {
+      return currentClans[id]
+    } else {
+      const out = await n.getClansByID([id])
+      if (out.status && out.data.length > 0) {
+        return out.data[0]
+      } else {
+        return undefined
+      }
+    }
+  },
   clanIconsToIndex(input) {
     let toReturn = {}
     input.map((yline, y) => {
