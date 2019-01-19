@@ -6,8 +6,8 @@ export default class ClanDetials extends React.Component {
   constructor(props) {
     super()
     this.state = {
-      showIcon: '',
-      showClan: undefined,
+      showIcon: props.showClan && props.showClan.emblems ? this.getIcon(props.showClan.emblems) : '',
+      showClan: props.showClan,
     }
   }
   renderStats(clan) {
@@ -64,10 +64,13 @@ export default class ClanDetials extends React.Component {
         showClan: this.props.showClan || this.state.showClan
       }, () => this.setState({
         showIcon: this.props.showClan 
-          ? (this.props.showClan.emblems['X195.Portal'] || this.props.showClan.emblems['X64.Portal']).replace(/http(s)?/, 'https') 
+          ? this.getIcon(this.props.showClan.emblems)
           : this.state.showIcon
       }))
     }
+  }
+  getIcon(emblems) {
+    return (emblems['X195.Portal'] || emblems['X64.Portal'] || '').replace(/http(s)?/, 'https')
   }
   render() {
     const d = this.state.showClan && this.state.showClan.tag

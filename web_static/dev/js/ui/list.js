@@ -4,6 +4,7 @@ import f from '../funs/functions'
 import Icon from '../els/svg'
 import ClanDetials from './clandetails'
 import Search from '../els/search'
+import Button from '../els/button'
 
 export default class List extends React.Component {
   constructor(props) {
@@ -141,6 +142,9 @@ export default class List extends React.Component {
     }
     f.setCurrentClans(list)
   }
+  async filterOn() {
+    console.log('idk')
+  }
   render() {
     return(
       <div className="list">
@@ -152,6 +156,23 @@ export default class List extends React.Component {
             placeholder="Search for clans"
             onChange={filter => this.setState({filter})}
           />
+          <div className="filterOnList">
+            {([
+              ['efficiency', 'Effiency'], 
+              ['globrating', 'Rating'], 
+              ['winrate', 'Winrate'], 
+              ['fbelo', 'Strongholds'], 
+              ['battles', 'Battles'], 
+              ['gmelo8', 'Global']
+            ]).map((filter, key) =>
+              <Button 
+                key={key}
+                style={this.state.sortOn == filter[0] || (this.state.sortOn == '' && key == 0) ? 'selected' : 'outline'} 
+                click={() => this.filterOn(filter[0])} 
+                title={filter[1]}
+              />
+            )}
+          </div>
         </div>
         <div className="actualData">
           { 
