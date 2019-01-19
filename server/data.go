@@ -1,6 +1,8 @@
 package server
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mjarkk/wotnlclans/db"
 )
@@ -23,8 +25,13 @@ func serveDataRoutes(r *gin.Engine) {
 		})
 	})
 	r.GET("/clanData/:ids", func(c *gin.Context) {
+		stats, err := db.GetCurrentClansByID(strings.Split(c.Param("ids"), "+")...)
+		if returnIfErr(c, err, "Failed to get clans by ID") {
+			return
+		}
 		c.JSON(200, gin.H{
 			"status": true,
+			"data":   stats,
 		})
 	})
 	r.GET("/clanIDs/:toGet", func(c *gin.Context) {
@@ -121,9 +128,10 @@ func serveDataRoutes(r *gin.Engine) {
 		}
 
 		c.JSON(200, gin.H{
-			"status": status,
-			"data":   toReturn,
-			"err":    hasErr,
+			"status":  status,
+			"data":    toReturn,
+			"default": db.CurrentDefaultFiltered(),
+			"err":     hasErr,
 		})
 	})
 }

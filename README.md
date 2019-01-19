@@ -1,6 +1,14 @@
 # WotNlClans site
 [![Site version](https://img.shields.io/badge/Site%20version-V3-blue.svg)](https://wotnlclans.unknownclouds.com/)
 
+## About
+This is the code for [wotnlbeclans.eu](https://wotnlbeclans.eu/).  
+| Item | Made in | Why |
+|---|---|---|---|---|
+| Backend | Golang | Mostly because go is a typed language and i'm a fan of go |
+| Frondend | Javascript (React/Preact) | because React is nowadays more of a standard and preact in production because it's less without anny costs  |
+| Database | Mongodb | This is more because i know the most about this database |
+
 ## Dev Setup
 1. Make sure you have installed [golang](https://golang.org/doc/install), [mongodb](https://docs.mongodb.com/manual/installation/) and [nodejs](https://nodejs.org/en/) also Make sure that golang is setted up correctly with a working gopath
 2. `mkdir -p $GOPATH/src/github.com/mjarkk && cd $GOPATH/src/github.com/mjarkk`

@@ -56,6 +56,11 @@ func GetCurrentClansByID(ids ...string) ([]ClanStats, error) {
 	return toReturn, nil
 }
 
+// CurrentDefaultFiltered returnes the default filtered item
+func CurrentDefaultFiltered() string {
+	return "globrating"
+}
+
 // GetCurrentClansTop returns the top of some amound of clans
 func GetCurrentClansTop(maxAmound int) ([]ClanStats, error) {
 	toReturn := make([]ClanStats, len(SortedRating))

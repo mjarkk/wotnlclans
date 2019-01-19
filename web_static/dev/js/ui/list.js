@@ -17,8 +17,12 @@ export default class List extends React.Component {
         width: 0,
         oneItem: 0
       },
+      haveClanIds: {},
+      sortedList: undefined,
       filter: '',
-      isFetchingData: false
+      sortOn: '',
+      isFetchingData: false,
+      haveAllClans: false
     }, props)
     this.canSetState = true
     this.lastListItem = undefined
@@ -31,18 +35,55 @@ export default class List extends React.Component {
     this.canSetState = false
   }
   watchScroll() {
-    window.addEventListener('scroll', () => {
-      this.watchScrollEvent()
+    window.addEventListener('scroll', async () => {
+      const fromTop = document.documentElement.scrollTop
+      if (fromTop + window.innerHeight + 300 > this.lastListItem.offsetTop && !this.state.isFetchingData && !this.state.haveAllClans) {
+        this.state.isFetchingData = true
+        this.setState({
+          isFetchingData: true
+        })
+        const sortedList = this.state.sortedList[this.state.sortOn]
+        if (sortedList) {
+          const toFetch = []
+          for (let i = 0; i < sortedList.length; i++) {
+            const clanID = sortedList[i]
+            if (!this.state.haveClanIds[clanID]) {
+              if (toFetch.length < 50) {
+                toFetch.push(clanID)
+              } else {
+                break
+              }
+            }
+          }
+          if (toFetch.length != 0) {
+            const out = await n.getClansByID(toFetch)
+            if (out.status) {
+              let list = this.state.list
+              list.push(...out.data)
+              list = f.sortList(this.state.sortOn, list)
+              const haveClanIds = this.state.haveClanIds
+              toFetch.map(id => {
+                haveClanIds[id] = true
+              })
+              this.setState({list}, () => {
+                this.setState({
+                  isFetchingData: false,
+                  haveClanIds
+                })
+              })
+            } else {
+              // something whend wrong on the fetch side
+            }
+          } else {
+            this.setState({
+              haveAllClans: true,
+              isFetchingData: false
+            })
+            // show there are not more clans to fetch
+          }
+        }
+      }
     })
-  }
-  watchScrollEvent() {
-    const fromTop = document.documentElement.scrollTop
-    if (fromTop + window.innerHeight + 300 > this.lastListItem.offsetTop && !this.state.isFetchingData) {
-      this.state.isFetchingData = true
-      this.setState({
-        isFetchingData: true
-      })
-    }
   }
   async getNeededInfo() {
     const list = await n.getClanList()
@@ -84,8 +125,19 @@ export default class List extends React.Component {
     }
     img.src = iconsPicture
     const out = await n.getFilteredList('default')
-    console.log(out)
-    this.watchScroll()
+    if (out.status) {
+      const sortOn =  out.default
+      const sortedList = f.clanPos(out.data)
+      const haveClanIds = f.haveClanIds(sortedList, sortOn)
+      this.setState({
+        haveClanIds,
+        sortedList, 
+        sortOn
+      })
+      this.watchScroll()
+    } else {
+      // show error
+    }
   }
   render() {
     return(
@@ -170,6 +222,9 @@ export default class List extends React.Component {
           { this.state.isFetchingData ?
             <div className="loading">loading...</div>
           :''}
+          { this.state.haveAllClans ?
+            <div className="loading">End of the list :(</div>
+          : ''}
         </div>
         { !this.props.isMobile
           ? <div className={'graphAndStats'}>

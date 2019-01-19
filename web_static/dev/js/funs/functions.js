@@ -16,15 +16,7 @@ export default {
     return toReturn
   },
   sortList(what, list) {
-    switch (what) {
-      case 'globalRating':
-        return reverse(sortBy(list, [o => o.stats.globrating, o => o.stats.winratio]))
-      case 'winratio':
-        return reverse(sortBy(list, [o => o.stats.winratio, o => o.stats.globrating]))
-      default:
-        console.warn(`${what} is not a sort option the options are: globalRating or winratio`)
-        return list
-    }
+    return reverse(sortBy(list, [o => o.stats[what], o => o.stats.winratio]))
   },
   watchScreenSize(cb) {
     cb(screenPosition)
@@ -56,5 +48,25 @@ export default {
       || name == 'Opera' && Number(version.split('.')[0]) >= 13
       || name == 'Firefox' && Number(version.split('.')[0]) >= 65
     )
+  },
+  clanPos(data) {
+    let toReturn = {}
+    let actualDataKeys = Object.keys(data.actualData)
+    let arrLen = actualDataKeys.length
+    data.dataMapping.map(item => {
+      toReturn[item] = Array.from(new Array(arrLen))
+    })
+    actualDataKeys.map(clanID => {
+      data.actualData[clanID].map((pos, i) => {
+        toReturn[data.dataMapping[i]][pos] = clanID
+      })
+    })
+    return toReturn
+  },
+  haveClanIds(data, sortOn) {
+    return data[sortOn].reduce((acc, curr, id) => {
+      acc[curr] = id < 50
+      return acc
+    }, {})
   }
 }
