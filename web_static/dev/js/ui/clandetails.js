@@ -12,12 +12,14 @@ export default class ClanDetials extends React.Component {
   }
   renderStats(clan) {
     const list = [
+      {type: 'one',item: 'efficiency', name: 'Efficiency'},
+      {type: 'one', item: 'globrating', name: 'Global'},
+      {type: 'one', item: 'globRatingweighted', name: 'Global weighted'},
       {type: 'one', item: 'members', name: 'Members'},
       {type: 'one', item: 'battles', name: 'Total battles'},
       {type: 'one',item: 'dailybattles', name: 'Daily battles'},
       {type: 'one',item: 'winratio', name: 'Win rate'},
       {type: 'one',item: 'v10l', name: 'v10l'},
-      {type: 'one',item: 'efficiency', name: 'Efficiency'},
       {type: 'multiple', items: [
         {item: 'fbelo10', name: '10'},
         {item: 'fbelo8', name: '8'},

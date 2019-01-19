@@ -58,7 +58,7 @@ func GetCurrentClansByID(ids ...string) ([]ClanStats, error) {
 
 // CurrentDefaultFiltered returnes the default filtered item
 func CurrentDefaultFiltered() string {
-	return "globrating"
+	return "efficiency"
 }
 
 // GetCurrentClansTop returns the top of some amound of clans
@@ -76,7 +76,7 @@ func GetCurrentClansTop(maxAmound int) ([]ClanStats, error) {
 	}
 
 	for clanID, positions := range SortedRating {
-		toReturn[positions.Global] = clansMapped[clanID]
+		toReturn[positions.Efficiency] = clansMapped[clanID]
 	}
 
 	toReturnWithMax := []ClanStats{}
