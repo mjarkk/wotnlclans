@@ -30,6 +30,7 @@ func GetIcons() error {
 	if err != nil {
 		return err
 	}
+
 	// toSavePath := "./icons/clanIcons"
 	// os.RemoveAll(toSavePath)
 	// os.Mkdir(toSavePath, os.ModePerm)
@@ -45,7 +46,7 @@ func GetIcons() error {
 			if !ok || len(iconToGet) == 0 {
 				iconToGet, ok = clan.Emblems["X256.Wowp"]
 				if !ok || len(iconToGet) == 0 {
-					apiErr("GetIcons", errors.New("no X195.Portal and/or X256.Wowp"), "Check if clan has a clan icon")
+					// No error reporting here because this happends to often
 					return
 				}
 			}
