@@ -98,6 +98,7 @@ export default class Header extends React.Component {
         <div className={cn('promo', {hidden: this.state.promoHidden})}>
           <div className="promoInner">
             <h1>Wot NL/BE clans</h1>
+            <p>This side is made possible by <a href="https://www.dpg-hq.eu/">DPG</a> (clan)</p>
           </div>
         </div>
         { this.props.isMobile && this.props.currentPage == 'list'

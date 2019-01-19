@@ -81,6 +81,9 @@ export default class ClanDetials extends React.Component {
             <div className="back" onClick={() => location.hash = '/'}>
               <Icon icon="close"/>
             </div>
+            { d && this.state.showClan.id == '500059739' ?
+              <div className="isSponsor">Sponsor!</div>
+            : ''}
           </div>
           <div className="icon">
             <img src={this.state.showIcon} />
