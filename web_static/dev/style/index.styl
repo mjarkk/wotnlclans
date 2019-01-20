@@ -11,9 +11,6 @@ body
   overflow-x hidden
   overflow-y scroll
 
-.settings
-  padding 20px
-
 .list
   padding 20px
   .title
@@ -128,6 +125,44 @@ body
         background-color #1c032a
         .moreinfo span
           opacity 0.7
+    @media screen and (max-width: 750px)
+      .row
+        grid-template-columns 50px 40px 40px 110px 110px 110px 110px
+        .moreinfo
+          display: none
+          grid-column 1
+          grid-row 1
+    @media screen and (max-width: 625px)
+      .row
+        grid-template-columns 30px 40px 40px 110px 110px 110px
+        .battles, .members
+          display none
+          grid-column 1
+          grid-row 1
+        .winrate
+          grid-column 5
+          grid-row 3 / 5
+        .global
+          grid-column 6
+          grid-row 3 / 5
+    @media screen and (max-width: 470px)
+      .row
+        grid-template-columns 30px 40px 40px 90px 90px 90px
+        .tag
+          font-size 20px
+          place-self center start
+    @media screen and (max-width: 400px)
+      .row
+        grid-template-columns 30px 0px 0px 90px 90px 90px
+        .icon
+          display none
+          grid-column 1
+          grid-row 1
+
+@media screen and (max-width: 470px)
+  .list
+    padding: 5px;
+
 .header
   position fixed
   bottom 0px
@@ -174,11 +209,16 @@ body
         font-size 40px
       p
         min-height 10px
-        font-weight 18px
+        font-size 18px
       a
         font-weight bold
         text-decoration none
         color #a30acc
+      @media screen and (max-width: 410px)
+        h1
+          font-size 31px
+        p
+          font-size 15px
   .promo.hidden
     height 0px
 
@@ -265,9 +305,13 @@ button
       cursor pointer
     .isSponsor
       margin-right 24px
-      font-size 24px
+      font-size 20px
       font-weight bold
-      color #d012a9
+      background-color #d012a9
+      color white
+      border-radius 40px
+      box-shadow 0px 3px 33px -6px rgba(0,0,0,0.3)
+      padding 3px 20px 5px 20px
   .icon
     display flex
     justify-content center
@@ -382,6 +426,7 @@ button
     box-sizing border-box
 
 .settings
+  padding 20px
   padding-bottom: 60px
   .fields
     display flex

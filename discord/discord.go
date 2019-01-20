@@ -1,0 +1,5 @@
+package discord
+
+func setup() {
+
+}
