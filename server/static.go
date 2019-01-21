@@ -33,5 +33,7 @@ func serveStaticFiles(r *gin.Engine) {
 	serveStaticFile(r, "/icons/webp", "./icons/allIcons.webp", "image/webp")
 	serveStaticFile(r, "/icons/json", "./icons/allIcons.json", "application/json")
 	serveStaticFile(r, "/icons/png", "./icons/allIcons.png", "image/png")
+	serveStaticFile(r, "/manifest.json", "./web_static/manifest.json", "application/json")
 	r.Static("/js", "./web_static/build/js")
+	r.Static("/logos", "./icons/logos")
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/mjarkk/wotnlclans/api"
 	"github.com/mjarkk/wotnlclans/db"
+	"github.com/mjarkk/wotnlclans/discord"
 	"github.com/mjarkk/wotnlclans/other"
 	"github.com/mjarkk/wotnlclans/server"
 )
@@ -29,6 +30,10 @@ func main() {
 		fmt.Println("Database error:" + err.Error())
 		os.Exit(1)
 	}
+
+	go func() {
+		discord.Setup()
+	}()
 
 	go func() {
 		err := api.SetupAPI()

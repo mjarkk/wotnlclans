@@ -19,6 +19,7 @@ type FlagsType struct {
 	MongoDataBase       string
 	CreateServiceFile   bool
 	WebServerLocation   string
+	DiscordAuthToken    string
 }
 
 // Flags have some global settings for the program
@@ -35,6 +36,7 @@ func SetupFlags() {
 	skipStartupIndexing := fBool("skipstartupindexing", false, "skip the indexing of clans on start")
 	createServiceFile := fBool("generateDotService", false, "Generate a .service file for linux")
 	webServerLocation := fString("webserverLocation", defaultWebServerLocation, "On with address and port to create a webserver")
+	discordAuthToken := fString("discordAuthToken", "", "Spesifi the discord api authentication token")
 
 	mongoURI := os.Getenv("MONGOURI")
 	mongoURIOverWrite := fString("mongoURI", "mongodb://localhost:27017", "the mongodb connection uri (shell var: MONGOURI)")
@@ -46,6 +48,11 @@ func SetupFlags() {
 	wgKeyOverWrite := fString("wgkey", "", "select the wargaming api key (shell var: WARGAMINGAPIKEY)")
 
 	flag.Parse()
+
+	discordAuthTokenOverwrite := *discordAuthToken
+	if len(discordAuthTokenOverwrite) == 0 {
+		discordAuthTokenOverwrite = os.Getenv("DISCORDAUTHTOKEN")
+	}
 
 	if len(mongoURI) == 0 || (*mongoURIOverWrite != "mongodb://localhost:27017" && *mongoURIOverWrite != "") {
 		mongoURI = *mongoURIOverWrite
@@ -86,6 +93,7 @@ func SetupFlags() {
 		MongoDataBase:       mongoDataBase,
 		CreateServiceFile:   *createServiceFile,
 		WebServerLocation:   *webServerLocation,
+		DiscordAuthToken:    discordAuthTokenOverwrite,
 	}
 }
 
