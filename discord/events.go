@@ -1,7 +1,6 @@
 package discord
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -18,7 +17,6 @@ func onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	hasPrefix := false
 	prefixIs := ""
 	if len(msg) > 0 {
-		fmt.Println("test1", msg)
 		hasPrefix = msg[0] == "w" || msg[0] == "!" || msg[0] == "?"
 		prefixIs = msg[0]
 		if len(msg) > 1 {
@@ -26,8 +24,6 @@ func onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		} else {
 			msg = []string{}
 		}
-	} else {
-
 	}
 
 	if !hasPrefix {
@@ -37,6 +33,6 @@ func onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if len(msg) == 0 {
 		s.ChannelMessageSend(m.ChannelID, "Did you mean `"+prefixIs+" help`")
 	} else {
-		s.ChannelMessageSend(m.ChannelID, strings.Join(msg, ","))
+		s.ChannelMessageSend(m.ChannelID, parse(prefixIs, msg))
 	}
 }
