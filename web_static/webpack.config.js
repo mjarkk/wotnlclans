@@ -60,7 +60,8 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       production: production,
-      template: 'dev/index.html'
+      template: 'dev/index.html',
+      inject: false
     })
   ],
   optimization: {
