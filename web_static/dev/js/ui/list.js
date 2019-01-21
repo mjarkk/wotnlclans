@@ -205,12 +205,12 @@ export default class List extends React.Component {
           />
           <div className="filterOnList">
             {([
-              ['efficiency', 'Effiency'], 
-              ['globrating', 'Rating'], 
+              ['efficiency', 'Rating'], 
+              ['globrating', 'Global'], 
               ['winratio', 'Winrate'], 
               ['fbelo', 'Strongholds'], 
               ['battles', 'Battles'], 
-              ['gmelo8', 'Global']
+              ['gmelo10', 'Global 10']
             ]).map((filter, key) =>
               <Button 
                 key={key}
@@ -256,11 +256,11 @@ export default class List extends React.Component {
                     </div>
                     <div className="tag">[{item.tag}]</div>
                     <div className="rating clanEfficiency">
-                      <span>Efficiency</span>
+                      <span>Rating</span>
                       <span>{item.stats.efficiency}</span>
                     </div>
                     <div className="rating clanRating">
-                      <span>Rating</span>
+                      <span>Global</span>
                       <span>{item.stats.globrating}</span>
                     </div>
                     <div className="rating winrate">
@@ -268,8 +268,8 @@ export default class List extends React.Component {
                       <span>{item.stats.winratio}%</span>
                     </div>
                     <div className="rating global">
-                      <span>Global 8</span>
-                      <span>{item.stats.gmelo8}</span>
+                      <span>Global 10</span>
+                      <span>{item.stats.gmelo10}</span>
                     </div>
                     <div className="rating stronghold">
                       <span>Stronghold</span>
