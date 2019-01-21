@@ -30,7 +30,9 @@ steps:
   - mkdir -p /var/wotnlclans/web_static/build
   - rm -rf /var/wotnlclans/web_static/build/*
   - cp -r ./web_static/build/* /var/wotnlclans/web_static/build/
-  - mkdir -p /var/wotnlclans/icons
+  - cp -r ./web_static/mainifest.json /var/wotnlclans/web_static/mainifest.json
+  - mkdir -p /var/wotnlclans/icons/logos
+  - cp -r ./icons/logos/* /var/wotnlclans/icons/logos/
   when:
     branch:
     - v3
