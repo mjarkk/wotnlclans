@@ -11,7 +11,13 @@ export default class Header extends React.Component {
         {
           selectedWhen: 'list',
           name: 'List',
+          color: 'blue',
           onClick: () => this.clickedListLink()
+        },{
+          selectedWhen: 'comunity',
+          name: 'Comunity',
+          color: 'green',
+          onClick: () => this.clickedComunityLink()
         }
       ],
       promoHidden: false,
@@ -25,7 +31,7 @@ export default class Header extends React.Component {
       if (!this.props.user.logedIn || this.props.user.rights != 'admin') {
         this.addedAdminLink = false
         const currentSelector = this.state.selector
-        const toRemove = currentSelector.reduce((acc, curr) => curr.name == 'Admin' ? curr : acc, undefined)
+        const toRemove = currentSelector.reduce((acc, curr, id) => curr.name == 'Admin' ? id : acc, undefined)
         if (toRemove) {
           currentSelector.splice(toRemove, 1)
         }
@@ -40,6 +46,7 @@ export default class Header extends React.Component {
         currentSelector.push({
           selectedWhen: 'settings',
           name: 'Admin',
+          color: 'red',
           onClick: () => this.clickedAdminLink(),
         })
         this.setState({
@@ -55,6 +62,9 @@ export default class Header extends React.Component {
   }
   clickedAdminLink() {
     location.hash = '/settings'
+  }
+  clickedComunityLink() {
+    location.hash = '/comunity'
   }
   clickedListLink() {
     location.hash = '/'
@@ -73,26 +83,38 @@ export default class Header extends React.Component {
     return (
       <div className="header">
         <div className="top">
-          <div className="links"> 
+          <div 
+            className="fullscreenCenter"
+            style={{
+              minWidth: `${(this.state.selector.length + 1) * 160}px`,
+              maxWidth: `${(this.state.selector.length + 1) * 160}px`
+            }}
+          >
             {this.state.selector.map((select, id) => 
-                <h2 
-                  key={id} 
-                  className={cn({selected: this.state.currentPage == select.selectedWhen})} 
-                  onClick={() => {
-                    this.setState({
-                      currentPage: select.selectedWhen
-                    })
-                    select.onClick()
-                  }}
-                >{ select.name }</h2>  
+              <button
+                key={id} 
+                className={cn(
+                  select.color,
+                  {
+                    selected: this.state.currentPage == select.selectedWhen
+                  }
+                )} 
+                onClick={() => {
+                  this.setState({
+                    currentPage: select.selectedWhen
+                  })
+                  select.onClick()
+                }}
+              >{select.name}</button>  
             )}
-          </div>
-          <div className="itemOptions">
-            <Button title={this.props.user.logedIn ? 'Logout' : 'Login'} click={() =>
-              this.props.user.logedIn 
-                ? this.props.logoutClicked() 
-                : this.props.loginClicked()
-            }/>
+            <button 
+              className="yellow"
+              onClick={() =>
+                this.props.user.logedIn 
+                  ? this.props.logoutClicked() 
+                  : this.props.loginClicked()
+              }
+            >{this.props.user.logedIn ? 'Logout' : 'Login'}</button>
           </div>
         </div>
         <div className={cn('promo', {hidden: this.state.promoHidden})}>

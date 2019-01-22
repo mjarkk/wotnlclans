@@ -28,16 +28,7 @@ export default class List extends React.Component {
     }, props)
     this.canSetState = true
     this.lastListItem = undefined
-  }
-  componentDidMount() {
-    this.getNeededInfo()
-    this.canSetState = true
-  }
-  componentWillUnmount() {
-    this.canSetState = false
-  }
-  watchScroll() {
-    window.addEventListener('scroll', async () => {
+    this.scrollEvHandeler = async () => {
       const fromTop = document.documentElement.scrollTop
       if (fromTop + window.innerHeight + 600 > this.lastListItem.offsetTop && !this.state.isFetchingData && !this.state.haveAllClans) {
         this.state.isFetchingData = true
@@ -89,7 +80,18 @@ export default class List extends React.Component {
           }
         }
       }
-    })
+    }
+  }
+  componentDidMount() {
+    this.getNeededInfo()
+    this.canSetState = true
+  }
+  componentWillUnmount() {
+    this.canSetState = false
+    window.removeEventListener('scroll', this.scrollEvHandeler)
+  }
+  watchScroll() {
+    window.addEventListener('scroll', this.scrollEvHandeler)
   }
   async getNeededInfo() {
     const list = await n.getClanList()

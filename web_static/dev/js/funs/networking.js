@@ -3,7 +3,7 @@ import f from './functions'
 let fetchEdUrls = {}
 
 // fetchWCache is short for "fetch with cache" this function makes sure to not fetch something 2 times
-const fetchWCache = (url, toBlog) => {
+const fetchWCache = (url, toBlob) => {
   const item = fetchEdUrls[url]
   return new Promise((resolve, reject) => {
     if (!item) {
@@ -13,11 +13,11 @@ const fetchWCache = (url, toBlog) => {
         status: true,
         isWaitingForData: []
       }
-      const reqUrl = toBlog 
+      const reqUrl = toBlob
         ? new Request(url) 
         : url
       fetch(reqUrl).then(r => {
-        if (toBlog) {
+        if (toBlob) {
           return r.blob()
         } else {
           return r.json()
@@ -25,7 +25,7 @@ const fetchWCache = (url, toBlog) => {
       })
       .then(data => {
         fetchEdUrls[url].hasData = true
-        if (toBlog) {
+        if (toBlob) {
           fetchEdUrls[url].data = URL.createObjectURL(data)
         } else {
           fetchEdUrls[url].data = data
@@ -112,6 +112,7 @@ export default {
   getFilteredList,
   getIconsPicture,
   getClansByID,
+  fetchWCache,
   getClanList,
   getSettings,
   checkKey, 

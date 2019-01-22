@@ -173,26 +173,39 @@ body
   border-radius 17px 17px 0px 0px
   background-color #0d0222
   .top
-    display flex
-    justify-content center
-    align-items center
     padding 10px 20px 20px 20px
-    .links
+    overflow-x auto
+    overflow-y hidden
+    max-height: 33px;
+    &::-webkit-scrollbar
+      display none
+    .fullscreenCenter
       display flex
-      flex-direction row
-    h2
-      padding 0px 20px
-      font-size 30px
-      font-weight 800
-      margin 0px 2px
-      border-bottom 2px solid rgba(255,255,255,0)
-      cursor pointer
-      user-select none
-      -moz-user-select none
-      -webkit-user-select none
-      -webkit-touch-callout none
-    .selected
-      border-bottom 2px solid rgba(255,255,255,0.77)
+      flex-wrap nowrap
+      margin 0px auto
+    button
+      padding 5px 5px 7px 5px
+      width 150px
+      font-size 25px
+      border 0px solid black
+      background-color #3d2b7e
+      color white
+      &.blue
+        // background-color #46727d
+        &.selected, &:hover
+          background-color #72cee5
+      &.green
+        // background-color #2f7b52
+        &.selected, &:hover
+          background-color #33eb88
+      &.yellow
+        // background-color #818030
+        &.selected, &:hover
+          background-color #e5e33e
+      &.red
+        // background-color #712d2f
+        &.selected, &:hover
+          background-color #e0454a
   .promo
     height 80px
     transition height 0.3s
@@ -433,6 +446,118 @@ button
     display flex
     justify-content flex-start
     flex-wrap wrap
+
+.comunity, .settings
+  h2
+    font-size 50px
+    font-weight 700
+
+.comunity
+  padding-bottom 100px
+  h2
+    padding 20px 20px 0px 20px
+  .about
+    padding 0px 20px 20px 20px
+  .commingSoon 
+    margin 20px
+    font-size 22px
+    display inline-block
+    padding 3px 15px 5px 15px
+    border 3px solid #b04ebf
+    background-color #6a2175 
+    color white
+    border-radius 10px
+    transform scale(1)
+    transition transform 0.2s
+    &:hover
+      transform scale(1.01)
+  .floatingElements
+    display flex
+    flex-direction row
+    flex-wrap wrap
+    padding 0px 20px 20px 0px
+    .floating
+      box-shadow 0px 5px 30px -10px rgba(0,0,0,0.6)
+      margin 20px 0px 0px 20px
+      height 240px
+      width 100%
+      max-width 380px
+      border-radius 20px
+      overflow hidden
+      transform scale(1)
+      transition transform 0.2s
+      &:hover
+        transform scale(1.01)
+      &.discordBot
+        background-color #ef4c4f
+      &.discordServer
+        background-color #4cefd1
+      &.facebookComunity
+        background-color #4c4fef
+      .back
+        height 100%
+        width 100%
+        h1, h2
+          padding 0px
+          font-weight 700
+          font-style italic
+          opacity 0.1
+          color black
+          position relative
+        h1
+          font-size 250px
+          top -65px
+          left -85px
+        h2
+          font-size 160px
+          line-height 0.8
+          top -15px
+          left -45px
+
+      .frond
+        position relative
+        top -100%
+        height 100%
+        width 100%
+        padding 15px
+        box-sizing border-box
+        display flex
+        flex-direction column
+        p, a
+          font-weight bold
+          display inline-block
+        p
+          height 100%
+          font-size 35px
+          color rgb(240,240,240)
+          span
+            color #fff
+            font-size 38px
+        a
+          background-color #27214b
+          font-size 25px
+          cursor pointer
+          color white
+          padding 4px 25px 6px 25px
+          -webkit-user-select none       
+          -moz-user-select none
+          -ms-user-select none
+          user-select none
+          border-radius 8px
+          box-shadow 0px 3px 40px -5px rgba(0,0,0,0.5)
+          text-decoration none
+          transition background-color 0.2s
+          &:hover
+            background-color #6700ff
+      @media screen and (max-width: 450px)
+        .frond
+          p
+            font-size 28px
+        .back
+          h1
+            font-size 196px
+            top -29px
+            left -78px
 
 .settingsBlock
   max-width 500px

@@ -35,6 +35,11 @@ const route = rlite(async () => ns(), {
     index: {
       currentPage: 'settings'
     }
+  }),
+  'comunity': async () => ns({
+    index: {
+      currentPage: 'comunity'
+    }
   })
 })
 

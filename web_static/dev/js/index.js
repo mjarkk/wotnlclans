@@ -8,6 +8,7 @@ import f from './funs/functions'
 import n from './funs/networking'
 import r from './funs/routes'
 import '../style/index.styl'
+import Comunity from './ui/comunity'
 
 class Site extends React.Component {
   constructor() {
@@ -106,7 +107,11 @@ class Site extends React.Component {
           ? <Settings
               user={this.state.user}
             />
-          : ''
+          : this.state.currentPage == 'comunity' 
+          ? <Comunity
+              
+            />
+          :''
         }
       </div>
     )
