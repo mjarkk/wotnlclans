@@ -13,7 +13,7 @@ steps:
   - go build
   when:
     branch:
-    - v3
+    - master
 - name: Build web_static files
   image: kkarczmarczyk/node-yarn
   commands: 
@@ -22,7 +22,7 @@ steps:
   - yarn build
   when:
     branch:
-    - v3
+    - master
 - name: Copy files to the webserver
   image: instrumentisto/rsync-ssh
   commands: 
@@ -35,7 +35,7 @@ steps:
   - cp -r ./icons/logos/* /var/wotnlclans/icons/logos/
   when:
     branch:
-    - v3
+    - master
   volumes:
   - name: website
     path: /var/wotnlclans
@@ -53,7 +53,7 @@ steps:
     - systemctl restart wotnlclans-dev.service
   when:
     branch:
-    - v3
+    - master
 
 volumes:
 - name: website
