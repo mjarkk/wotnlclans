@@ -4,10 +4,10 @@
 ## About
 This is the code for [wotnlbeclans.eu](https://wotnlbeclans.eu/).  
 
-| Item | Made in | Why |
+| Item | Used | Why |
 |---|---|---|
 | Backend | Golang | Mostly because go is a typed language and i'm a fan of go |
-| Frondend | Javascript (React/Preact) | because React is nowadays more of a standard and preact in production because it's less without anny costs  |
+| Frondend | Javascript (React/Preact) | because React is nowadays more of a standard and preact in production because it's less bytes without anny costs  |
 | Database | Mongodb | This is more because i know the most about this database |
 
 ## Dev Setup
