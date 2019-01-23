@@ -13,6 +13,7 @@ func GetCurrentClansData() ([]ClanStats, error) {
 	collection := DB.Collection("currentStats")
 	query := bson.M{
 		"tag":     bson.M{"$exists": true, "$ne": ""},
+		"members": bson.M{"$gt": 1},
 		"blocked": false,
 	}
 	cur, err := collection.Find(C(), query)
