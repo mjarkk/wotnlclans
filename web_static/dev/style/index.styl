@@ -447,12 +447,12 @@ button
     justify-content flex-start
     flex-wrap wrap
 
-.comunity, .settings
+.community, .settings
   h2
     font-size 50px
     font-weight 700
 
-.comunity
+.community
   padding-bottom 100px
   h2
     padding 20px 20px 0px 20px
@@ -471,6 +471,56 @@ button
     transition transform 0.2s
     &:hover
       transform scale(1.01)
+  .fullscreen
+    position fixed
+    display flex
+    justify-content center
+    align-items center
+    overflow hidden
+    height 100vh
+    width 100vw
+    top 0px
+    left 0px
+    z-index 5
+    background-color rgba(0,0,0,0.2)
+    .center
+      display flex
+      flex-direction column
+      margin 5px
+      border-radius 10px
+      height 100%
+      width 100%
+      box-sizing border-box
+      background-color white
+      max-width 600px
+      max-height 600px
+      color black
+      .titlebar
+        height 50px
+        border-bottom 3px solid #eee
+        display flex
+        justify-content flex-start
+        align-items center
+        cursor pointer
+        *
+          cursor pointer
+        p
+          font-size 26px
+        svg
+          position relative
+          top 4px
+          height 40px
+      .markdownPart
+        height 100%
+        overflow-x hidden
+        overflow-y scroll
+        padding 10px 20px
+        code
+          background-color #e5e5e5
+          display inline-block
+          padding 2px 7px
+          border-radius 5px
+          border 1px solid #ccc
   .floatingElements
     display flex
     flex-direction row
@@ -492,7 +542,7 @@ button
         background-color #ef4c4f
       &.discordServer
         background-color #4cefd1
-      &.facebookComunity
+      &.facebookCommunity
         background-color #4c4fef
       .back
         height 100%
@@ -523,6 +573,22 @@ button
         box-sizing border-box
         display flex
         flex-direction column
+        .btns
+          display flex
+          justify-content space-between
+          .infoBtn
+            display inline-block
+            cursor pointer
+            svg
+              height 40px
+              fill white
+              position relative
+              top 4px
+              transform scale(1)
+              transition transform 0.2s, fill 0.1s
+              &:hover
+                transform scale(1.2)
+                fill #6700ff
         p, a
           font-weight bold
           display inline-block

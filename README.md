@@ -4,7 +4,7 @@
 ## About
 This is the code for [wotnlbeclans.eu](https://wotnlbeclans.eu/).  
 | Item | Made in | Why |
-|---|---|---|---|---|
+|---|---|---|
 | Backend | Golang | Mostly because go is a typed language and i'm a fan of go |
 | Frondend | Javascript (React/Preact) | because React is nowadays more of a standard and preact in production because it's less without anny costs  |
 | Database | Mongodb | This is more because i know the most about this database |
@@ -22,6 +22,15 @@ This is the code for [wotnlbeclans.eu](https://wotnlbeclans.eu/).
 2. `go build`
 3. `./wotnlclans -wgkey "yourWargamingApiKey"` or `WARGAMINGAPIKEY=yourWargamingApiKey ./wotnlclans`
 
-### Systemctl file.
+### Systemctl service file.
 1. Make sure you have followed the [#Dev Setup](#Release%20Setup) section
 2. `./wotnlclans -generateDotService`
+
+### Enable the discord bot
+1. Make sure you have followed the [#Dev Setup](#Release%20Setup) section
+2. Generate a new application here: https://discordapp.com/developers/applications/
+3. Set a icon and after that go to the **Bot** tab
+4. Click the copy button
+5. `./wotnlclans -discordAuthToken DiscordBotTokenHere` or `DISCORDAUTHTOKEN=DiscordBotTokenHere ./wotnlclans`
+6. If you don't want to do this every time add the `DISCORDAUTHTOKEN=DiscordBotTokenHere` to your bashrc
+*NOTE: The community tab has a static discord bot invite link that is from the production build*

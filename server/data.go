@@ -3,6 +3,8 @@ package server
 import (
 	"strings"
 
+	"github.com/mjarkk/wotnlclans/discord"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mjarkk/wotnlclans/db"
 )
@@ -133,5 +135,19 @@ func serveDataRoutes(r *gin.Engine) {
 			"default": db.CurrentDefaultFiltered(),
 			"err":     hasErr,
 		})
+	})
+	r.GET("/discord", func(c *gin.Context) {
+		if discord.IsEnabled {
+			c.JSON(200, gin.H{
+				"status":     true,
+				"enabled":    true,
+				"inviteLink": discord.AuthURL,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"status":  true,
+				"enabled": false,
+			})
+		}
 	})
 }

@@ -5,6 +5,7 @@ import close from '../../icons/close.svg'
 import search from '../../icons/search.svg'
 import plus from '../../icons/plus.svg'
 import plusBlock from '../../icons/plusBlock.svg'
+import filledInfo from '../../icons/filledInfo.svg'
 import removeBlock from '../../icons/removeBlock.svg'
 
 const returnIcon = icon => {
@@ -14,7 +15,8 @@ const returnIcon = icon => {
     ['search', search],
     ['plus', plus],
     ['plusBlock', plusBlock],
-    ['removeBlock', removeBlock]
+    ['removeBlock', removeBlock],
+    ['filledInfo', filledInfo]
   ]
   let toUse = ''
   for (const option of options) {

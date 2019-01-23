@@ -38,6 +38,7 @@ func Setup() {
 		return
 	}
 
+	IsEnabled = true
 	fmt.Println("Discord bot is now setted up")
 
 	sc := make(chan os.Signal, 1)

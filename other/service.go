@@ -34,6 +34,8 @@ func MakeServiceFile() error {
 		return errors.New("No wargaming key given")
 	}
 
+	discordAPIToken := Ask("What is your discord api token? (leave empty to disable the discord bot)")
+
 	wotnlclansBinary = wotnlclansBinary + " -wgkey " + wgKey
 
 	service := `
@@ -53,10 +55,10 @@ LimitRSS=infinity
 LimitCORE=infinity
 LimitNOFILE=65536
 TimeoutStopSec=8s
+Environment="DISCORDAUTHTOKEN=` + discordAPIToken + `"
 
 [Install]
-WantedBy=multi-user.target
-	`
+WantedBy=multi-user.target`
 
 	serviceName := "wotnlclans"
 	if dev {

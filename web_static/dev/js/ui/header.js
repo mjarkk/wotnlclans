@@ -14,8 +14,8 @@ export default class Header extends React.Component {
           color: 'blue',
           onClick: () => this.clickedListLink()
         },{
-          selectedWhen: 'comunity',
-          name: 'Comunity',
+          selectedWhen: 'community',
+          name: 'Community',
           color: 'green',
           onClick: () => this.clickedComunityLink()
         }
@@ -64,7 +64,7 @@ export default class Header extends React.Component {
     location.hash = '/settings'
   }
   clickedComunityLink() {
-    location.hash = '/comunity'
+    location.hash = '/community'
   }
   clickedListLink() {
     location.hash = '/'
