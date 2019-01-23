@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="shortcut icon" type="image/jpeg" href="/logos/logo_32.jpg" />
+  <title>wot nl/be clans</title>
+  <% htmlWebpackPlugin.files.js.forEach(jsFile => { %>
+    <link rel="preload" href="<%= jsFile %>" as="script">
+  <% }) %>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700" rel="stylesheet">
+</head>
+<body>
+  <div id="root"></div>
+  <% htmlWebpackPlugin.files.js.forEach(jsFile => { %>
+    <script type="text/javascript" src="<%= jsFile %>"></script>
+  <% }) %>
+  <% if (!htmlWebpackPlugin.options.production) { %>
+    <script src="http://localhost:35729/livereload.js"></script>
+  <% } else { %>
+    <script type="text/javascript" defer>
+      var sc_project=11930686; 
+      var sc_invisible=1; 
+      var sc_security="9b0b9522";
+    </script>
+    <script 
+      type="text/javascript"
+      src="https://www.statcounter.com/counter/counter.js"
+      defer
+    ></script>
+  <% } %>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "name": "wotnlclans",
+  "version": "3.0.0",
+  "description": "the wotnlclans site",
+  "repository": "https://github.com/mjarkk/wotnlclans",
+  "author": "Mark Kopenga (mkopenga@gmail.com)",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "webpack --progress --display=minimal --config \"webpack.config.js\"",
+    "dev": "webpack --watch --display=minimal --config \"webpack.config.js\""
+  },
+  "dependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/runtime": "^7.2.0",
+    "babel-loader": "^8.0.4",
+    "bowser": "^2.0.0-beta.3",
+    "classnames": "^2.2.6",
+    "css-loader": "^2.0.1",
+    "friendly-errors-webpack-plugin": "^1.7.0",
+    "html-webpack-plugin": "^3.2.0",
+    "lodash.reverse": "^4.0.1",
+    "lodash.sortby": "^4.7.0",
+    "preact": "^8.4.2",
+    "preact-compat": "^3.18.4",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-inlinesvg": "^0.8.3",
+    "rlite-router": "^2.0.3",
+    "snarkdown": "^1.2.2",
+    "style-loader": "^0.23.1",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.2",
+    "unfetch": "^4.0.1",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-livereload-plugin": "^2.1.1"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "svg-inline-loader": "^0.8.0"
+  }
+}

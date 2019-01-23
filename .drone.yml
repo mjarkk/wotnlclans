@@ -1,0 +1,64 @@
+kind: pipeline
+name: build
+
+workspace:
+  base: /go
+  path: src/github.com/mjarkk/wotnlclans
+
+steps:
+- name: Build go files
+  image: golang
+  commands:
+  - go get
+  - go build
+  when:
+    branch:
+    - v3
+- name: Build web_static files
+  image: kkarczmarczyk/node-yarn
+  commands: 
+  - cd web_static
+  - yarn
+  - yarn build
+  when:
+    branch:
+    - v3
+- name: Copy files to the webserver
+  image: instrumentisto/rsync-ssh
+  commands: 
+  - cp ./wotnlclans /var/wotnlclans/
+  - mkdir -p /var/wotnlclans/web_static/build
+  - rm -rf /var/wotnlclans/web_static/build/*
+  - cp -r ./web_static/build/* /var/wotnlclans/web_static/build/
+  - cp -r ./web_static/manifest.json /var/wotnlclans/web_static/manifest.json
+  - mkdir -p /var/wotnlclans/icons/logos
+  - cp -r ./icons/logos/* /var/wotnlclans/icons/logos/
+  when:
+    branch:
+    - v3
+  volumes:
+  - name: website
+    path: /var/wotnlclans
+- name: Restart webserver
+  image: appleboy/drone-ssh
+  volumes:
+  - name: privatekey
+    path: /root/ssh/drone_rsa
+  settings:
+    host: mkopenga.com
+    username: root
+    port: 22
+    key_path: /root/ssh/drone_rsa
+    script:
+    - systemctl restart wotnlclans-dev.service
+  when:
+    branch:
+    - v3
+
+volumes:
+- name: website
+  host:
+    path: /var/www/wotnlclans
+- name: privatekey
+  host:
+    path: /root/.ssh/id_rsa

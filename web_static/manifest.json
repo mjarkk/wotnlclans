@@ -1,0 +1,53 @@
+{
+  "short_name": "WotNlBeClans",
+  "name": "Wot NL/BE clans list",
+  "description": "A simple way to view all top dutch clans",
+  "icons": [ 
+    {
+      "src": "/logos/logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "1000x1000"
+    },{
+      "src": "/logos/logo_512.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512"
+    },{
+      "src": "/logos/logo_192.jpg",
+      "type": "image/jpeg",
+      "sizes": "192x192"
+    },{
+      "src": "/logos/logo_168.jpg",
+      "type": "image/jpeg",
+      "sizes": "168x168"
+    },{
+      "src": "/logos/logo_144.jpg",
+      "type": "image/jpeg",
+      "sizes": "144x144"
+    },{
+      "src": "/logos/logo_96.jpg",
+      "type": "image/jpeg",
+      "sizes": "96x96"
+    },{
+      "src": "/logos/logo_72.jpg",
+      "type": "image/jpeg",
+      "sizes": "72x72"
+    },{
+      "src": "/logos/logo_48.jpg",
+      "type": "image/jpeg",
+      "sizes": "48x48"
+    },{
+      "src": "/logos/logo_32.jpg",
+      "type": "image/jpeg",
+      "sizes": "32x32"
+    },{
+      "src": "/logos/logo_16.jpg",
+      "type": "image/jpeg",
+      "sizes": "16x16"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#27214b",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#27214b"
+}
