@@ -1,7 +1,8 @@
 import React from 'react'
 import cn from 'classnames'
-import Button from '../els/button'
-import ClanDetials from './clandetails'
+import d from '../funs/dynamic'
+
+const ClanDetials = d(import('./clandetails'))
 
 export default class Header extends React.Component {
   constructor(props) {

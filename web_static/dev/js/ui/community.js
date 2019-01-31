@@ -1,8 +1,10 @@
 import React from 'react'
-import n from '../funs/networking'
 import snarkdown from 'snarkdown'
-import SVG from '../els/svg'
 import {discordBot} from '../funs/texts'
+import n from '../funs/networking'
+import d from '../funs/dynamic'
+
+const SVG = d(import('../els/svg'))
 
 export default class Comunity extends React.Component {
   constructor(props) {

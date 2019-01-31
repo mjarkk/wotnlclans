@@ -1,9 +1,11 @@
 import React from 'react'
 import cn from 'classnames'
-import n from '../funs/networking'
-import Button from '../els/button'
-import SVG from '../els/svg'
 import f from '../funs/functions'
+import d from '../funs/dynamic'
+import n from '../funs/networking'
+
+const SVG = d(import('../els/svg'))
+const Button = d(import('../els/button'))
 
 export default class Settings extends React.Component {
   constructor() {

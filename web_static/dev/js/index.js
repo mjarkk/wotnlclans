@@ -1,14 +1,17 @@
 import React from 'react'
 import ReactDOM  from 'react-dom'
+import d from './funs/dynamic'
 import List from './ui/list'
-import Header from './ui/header'
-import Login from './ui/login'
-import Settings from './ui/settings'
 import f from './funs/functions'
 import n from './funs/networking'
 import r from './funs/routes'
 import '../style/index.styl'
-import Community from './ui/community'
+
+const Header = d(import('./ui/header'))
+const Login = d(import('./ui/login'))
+const Settings = d(import('./ui/settings'))
+const Chart = d(import('./ui/chart'))
+const Community = d(import('./ui/community'))
 
 class Site extends React.Component {
   constructor() {
@@ -111,7 +114,11 @@ class Site extends React.Component {
           ? <Community
               
             />
-          :''
+          : this.state.isMobile && this.state.currentPage == 'chart'
+          ? <Chart
+              type="dark"
+            />
+          : ''
         }
       </div>
     )

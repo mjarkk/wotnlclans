@@ -1,6 +1,8 @@
 import React from 'react'
 import cn from 'classnames'
-import Icon from '../els/svg'
+import d from '../funs/dynamic'
+
+const Icon = d(import('../els/svg'))
 
 export default class ClanDetials extends React.Component {
   constructor(props) {

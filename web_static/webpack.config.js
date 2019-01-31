@@ -3,6 +3,7 @@ const webpack = require('webpack')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const LiveReloadPlugin = require('webpack-livereload-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 
 const production = process.env.npm_lifecycle_event == 'build'
 
@@ -51,6 +52,7 @@ module.exports = {
       } : {}
   },
   plugins: [
+    new CleanWebpackPlugin(['build']),
     new FriendlyErrorsWebpackPlugin(),
     new LiveReloadPlugin({}),
     new webpack.DefinePlugin({
@@ -64,11 +66,11 @@ module.exports = {
       inject: false
     })
   ],
-  optimization: {
-    splitChunks: {
-      chunks: 'all'
-    }
-  },
+  // optimization: {
+  //   splitChunks: {
+  //     chunks: 'all'
+  //   }
+  // },
   stats: {
     colors: true
   },

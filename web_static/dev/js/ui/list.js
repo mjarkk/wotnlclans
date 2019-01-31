@@ -1,10 +1,13 @@
 import React from 'react'
 import n from '../funs/networking'
 import f from '../funs/functions'
-import Icon from '../els/svg'
-import ClanDetials from './clandetails'
-import Search from '../els/search'
-import Button from '../els/button'
+import d from '../funs/dynamic'
+
+const SVG = d(import('../els/svg'))
+const Search = d(import('../els/search'))
+const Button = d(import('../els/button'))
+const Chart = d(import('./chart'))
+const ClanDetials = d(import('./clandetails'))
 
 export default class List extends React.Component {
   constructor(props) {
@@ -286,7 +289,7 @@ export default class List extends React.Component {
                       <span>{item.stats.battles}</span>
                     </div>
                     <div className="moreinfo">
-                      <Icon icon="arrow"/>
+                      <SVG icon="arrow"/>
                     </div>
                   </div>
                 )
@@ -303,10 +306,10 @@ export default class List extends React.Component {
           : ''}
         </div>
         { !this.props.isMobile
-          ? <div className={'graphAndStats'}>
-              <div className="graph">
-                Click a clan to get more details
-              </div>
+          ? <div className="chartAndStats">
+              <Chart
+                type="dark"
+              />
               <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
             </div>
         : ''}
