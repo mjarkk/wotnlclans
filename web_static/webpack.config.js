@@ -58,7 +58,8 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': production 
         ? '"production"' 
-        : '"development"'
+        : '"development"',
+      WEBPACK_PRODUCTION: production
     }),
     new HtmlWebpackPlugin({
       production: production,

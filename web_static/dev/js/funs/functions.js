@@ -41,13 +41,13 @@ export default {
   },
   watchScreenSize(cb) {
     cb(screenPosition)
-    window.onresize = () => {
+    window.addEventListener('resize', () => {
       const newPos = document.body.offsetWidth < deskTopSize
       if (newPos != screenPosition) {
         screenPosition = newPos
         cb(newPos)
       }
-    }
+    })
   },
   isNumbers(input) {
     return input.split('').reduce((acc, curr) => !/[0-9]/.test(curr) ? false : acc, true)

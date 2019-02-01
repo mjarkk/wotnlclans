@@ -308,7 +308,7 @@ export default class List extends React.Component {
         { !this.props.isMobile
           ? <div className="chartAndStats">
               <Chart
-                type="dark"
+                type="light"
               />
               <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
             </div>
