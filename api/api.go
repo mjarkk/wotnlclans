@@ -113,7 +113,7 @@ func SearchForClanIds(flags other.FlagsType, isInit bool) error {
 	other.DevPrint("Fetched", len(clans), "clan ids")
 	clans = FilterOutClans(clans)
 	other.DevPrint("Filtered out all dutch clans,", len(clans), "clans")
-	// TODO: Remove blacklisted clans and add extra clans to the clans list
+	// TODO: Removes blacklisted clans and add extra clans to the clans list
 	clans = RemovedDuplicates(clans)
 	other.DevPrint("Removed all duplicate clans")
 	db.SetClanIDs(clans)

@@ -9,7 +9,7 @@ import (
 func CheckAPI() error {
 	rawOut, err := CallRoute("nicknameAndClan", map[string]string{"playerID": "516673968"})
 	if err != nil {
-		return nil
+		return err
 	}
 
 	var output NicknameAndClan
