@@ -32,3 +32,23 @@ func RemoveQuotes(input []string) []string {
 	}
 	return toReturn
 }
+
+// FormatSearch formats a string to make it better for comparing to other things
+func FormatSearch(input string) string {
+	return strings.Replace(
+		strings.Replace(
+			strings.Replace(
+				strings.ToLower(input),
+				"1",
+				"i",
+				-1,
+			),
+			"3",
+			"e",
+			-1,
+		),
+		"0",
+		"o",
+		-1,
+	)
+}
