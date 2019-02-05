@@ -106,6 +106,9 @@ const updateClanIDsList = async(userKey, userID, route, clans) =>
 const getClansByID = async(ids) => 
   await (await fetch(`/clanData/${ids.join('+')}`)).json()
 
+const search = async(filter, sorting) =>
+  await (await fetch(`/search/${encodeURIComponent(filter)}/${encodeURIComponent(sorting)}`)).json()
+
 export default {
   updateClanIDsList,
   getIconsLocation,
@@ -116,5 +119,6 @@ export default {
   getClanList,
   getSettings,
   checkKey, 
+  search
 }
   

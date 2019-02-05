@@ -26,6 +26,27 @@ func serveDataRoutes(r *gin.Engine) {
 			"data":   data,
 		})
 	})
+	r.GET("/search/:query/:sortOn", func(c *gin.Context) {
+		query := c.Param("query")
+		sortOn := c.Param("sortOn")
+		if len(query) < 1 {
+			c.JSON(200, map[string]interface{}{
+				"status": false,
+				"error":  "the query param must be longer than 1 caracter \"/search/:query/:sortOn\"",
+			})
+			return
+		}
+
+		list, err := db.SearchClans(query, sortOn)
+		if returnIfErr(c, err, "Failed to search for clans using query: "+query+", and sorting on: "+sortOn) {
+			return
+		}
+
+		c.JSON(200, map[string]interface{}{
+			"status": true,
+			"data":   list,
+		})
+	})
 	r.GET("/clanData/:ids", func(c *gin.Context) {
 		stats, err := db.GetCurrentClansByID(strings.Split(c.Param("ids"), "+")...)
 		if returnIfErr(c, err, "Failed to get clans by ID") {
@@ -40,93 +61,10 @@ func serveDataRoutes(r *gin.Engine) {
 		status := true
 		hasErr := ""
 
-		itemToGet := c.Param("toGet")
-
-		data := db.SortedRating
-
-		toReturn := map[string]interface{}{}
-
-		if itemToGet == "all" {
-			toReturn["actualData"] = map[string][]int{}
-			for clanID, clan := range data {
-				toReturn["actualData"].(map[string][]int)[clanID] = []int{
-					clan.Members,
-					clan.Battles,
-					clan.Dailybattles,
-					clan.Efficiency,
-					clan.Fbelo10,
-					clan.Fbelo8,
-					clan.Fbelo6,
-					clan.Fbelo,
-					clan.Gmelo10,
-					clan.Gmelo8,
-					clan.Gmelo8,
-					clan.Gmelo,
-					clan.Global,
-					clan.GlobalWeighted,
-					clan.Winratio,
-					clan.V10l,
-				}
-			}
-			toReturn["dataMapping"] = []string{
-				"members",
-				"battles",
-				"dailybattles",
-				"efficiency",
-				"fbelo10",
-				"fbelo8",
-				"fbelo6",
-				"fbelo",
-				"gmelo10",
-				"gmelo8",
-				"gmelo6",
-				"gmelo",
-				"globrating",
-				"globRatingweighted",
-				"winratio",
-				"v10l",
-			}
-		} else {
-			toReturn["actualData"] = map[string]int{}
-			for clanID, clan := range data {
-				switch itemToGet {
-				case "members":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Members
-				case "battles":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Battles
-				case "dailybattles":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Dailybattles
-				case "efficiency":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Efficiency
-				case "fbelo10":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Fbelo10
-				case "fbelo8":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Fbelo8
-				case "fbelo6":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Fbelo6
-				case "fbelo":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Fbelo
-				case "gmelo10":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Gmelo10
-				case "gmelo8":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Gmelo8
-				case "gmelo6":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Gmelo6
-				case "gmelo":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Gmelo
-				case "globrating":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Global
-				case "globRatingweighted":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.GlobalWeighted
-				case "winratio":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.Winratio
-				case "v10l":
-					toReturn["actualData"].(map[string]int)[clanID] = clan.V10l
-				default:
-					status = false
-					hasErr = "\"" + itemToGet + "\" can't be filterd on"
-				}
-			}
+		toReturn, err := db.LightClanPositions(c.Param("toGet"))
+		if err != nil {
+			hasErr = err.Error()
+			status = false
 		}
 
 		c.JSON(200, gin.H{

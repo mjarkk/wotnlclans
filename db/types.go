@@ -57,3 +57,29 @@ type UserToken struct {
 	Key      string `json:"key"`
 	LastUsed string `json:"lastused"`
 }
+
+// ClanPositionEvery this shows the clan possition in all type stats
+type ClanPositionEvery struct {
+	V10l           int `json:"v10l"`
+	Winratio       int `json:"winratio"`
+	GlobalWeighted int `json:"globalWeighted"`
+	Global         int `json:"global"`
+	Gmelo          int `json:"gmelo"`
+	Gmelo6         int `json:"gmelo6"`
+	Gmelo8         int `json:"gmelo8"`
+	Gmelo10        int `json:"gmelo10"`
+	Fbelo          int `json:"fbelo"`
+	Fbelo6         int `json:"fbelo6"`
+	Fbelo8         int `json:"fbelo8"`
+	Fbelo10        int `json:"fbelo10"`
+	Efficiency     int `json:"efficiency"`
+	Dailybattles   int `json:"dailybattles"`
+	Battles        int `json:"battles"`
+	Members        int `json:"members"`
+}
+
+// ClanNameAndTag is a type that has the tag, name and id of a clan
+type ClanNameAndTag struct {
+	Tag  string
+	Name string
+}

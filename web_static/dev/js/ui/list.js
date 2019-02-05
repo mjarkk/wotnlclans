@@ -29,6 +29,12 @@ export default class List extends React.Component {
       isFetchingData: false,
       haveAllClans: false
     }, props)
+    
+    this.search = {
+      buzzy: false,
+      lastFilter: ''
+    }
+
     this.canSetState = true
     this.lastListItem = undefined
     this.scrollEvHandeler = async () => {
@@ -83,6 +89,53 @@ export default class List extends React.Component {
           }
         }
       }
+    }
+  }
+  componentWillUpdate(_, nextState) {
+    if (this.state.filter != nextState.filter) {
+      this.searchForClans(nextState, false)
+    }
+  }
+  searchForClans(nextState, force) {
+    const filter = nextState.filter
+    if (!this.search.buzzy || force) {
+      this.search = {
+        buzzy: true,
+        lastFilter: filter
+      }
+      setTimeout(async () => {
+        const out = await n.search(filter, nextState.sortOn)
+        if (out.status) {
+          const toFetch = []
+          const haveClanIds = this.state.haveClanIds
+          out.data.map(id => {
+            if (!haveClanIds[id]) {
+              haveClanIds[id] = true
+              toFetch.push(id)
+            }
+          })
+
+          this.state.haveClanIds = haveClanIds
+
+          const clans = toFetch.length == 0 ? {status: false} : await n.getClansByID(toFetch)
+          if (clans.status) {
+            this.setState({
+              list: f.sortList(this.state.sortOn, [...this.state.list, ...clans.data]),
+            })
+          }
+        }
+        setTimeout(() => {
+          const currentFilter = this.state.filter
+          if (filter != currentFilter) {
+            this.searchForClans(this.state, true)
+          } else {
+            this.search = {
+              buzzy: false,
+              lastFilter: currentFilter
+            }
+          }
+        }, 50)
+      }, 50)
     }
   }
   componentDidMount() {
