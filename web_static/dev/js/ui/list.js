@@ -250,7 +250,16 @@ export default class List extends React.Component {
       })
     })
   }
+  transfromToMatch(input) {
+    return input
+      .replace(/0/g, 'o')
+      .replace(/3/g, 'e')
+      .replace(/1/g, 'i')
+      .toUpperCase()
+  }
   render() {
+    const stateFilter = this.transfromToMatch(this.state.filter)
+    console.log(stateFilter)
     return(
       <div className="list">
         <div className="title">
@@ -289,8 +298,8 @@ export default class List extends React.Component {
                     style={{
                       display: 
                         this.state.filter == '' 
-                        || item.tag.toUpperCase().indexOf(this.state.filter.toUpperCase()) != -1 
-                        || item.name.toUpperCase().indexOf(this.state.filter.toUpperCase()) != -1 
+                        || this.transfromToMatch(item.tag).indexOf(stateFilter) != -1 
+                        || this.transfromToMatch(item.name).indexOf(stateFilter) != -1 
                           ? 'grid'
                           : 'none'
                     }} 

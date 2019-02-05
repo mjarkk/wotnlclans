@@ -106,8 +106,8 @@ const updateClanIDsList = async(userKey, userID, route, clans) =>
 const getClansByID = async(ids) => 
   await (await fetch(`/clanData/${ids.join('+')}`)).json()
 
-const search = async(filter, sorting) =>
-  await (await fetch(`/search/${encodeURIComponent(filter)}/${encodeURIComponent(sorting)}`)).json()
+const search = async(filter, sorting) => 
+  fetchWCache(`/search/${encodeURIComponent(filter)}/${encodeURIComponent(sorting)}`)
 
 export default {
   updateClanIDsList,
