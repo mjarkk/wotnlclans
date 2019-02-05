@@ -35,20 +35,22 @@ func RemoveQuotes(input []string) []string {
 
 // FormatSearch formats a string to make it better for comparing to other things
 func FormatSearch(input string) string {
-	return strings.Replace(
+	return strings.ToUpper(
 		strings.Replace(
 			strings.Replace(
-				strings.ToLower(input),
-				"1",
-				"i",
+				strings.Replace(
+					input,
+					"1",
+					"i",
+					-1,
+				),
+				"3",
+				"e",
 				-1,
 			),
-			"3",
-			"e",
+			"0",
+			"o",
 			-1,
 		),
-		"0",
-		"o",
-		-1,
 	)
 }
