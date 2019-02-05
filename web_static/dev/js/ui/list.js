@@ -259,7 +259,6 @@ export default class List extends React.Component {
   }
   render() {
     const stateFilter = this.transfromToMatch(this.state.filter)
-    console.log(stateFilter)
     return(
       <div className="list">
         <div className="title">

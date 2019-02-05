@@ -13,13 +13,15 @@ import (
 func serveDataRoutes(r *gin.Engine) {
 	r.GET("/clanData", func(c *gin.Context) {
 		data, err := db.GetCurrentClansTop(50)
-		c.Request.Close = true
 		if err != nil {
 			c.JSON(400, gin.H{
 				"status": false,
 				"err":    err.Error(),
 			})
 			return
+		}
+		for id := range data {
+			data[id].Description = ""
 		}
 		c.JSON(200, gin.H{
 			"status": true,
@@ -52,6 +54,9 @@ func serveDataRoutes(r *gin.Engine) {
 		if returnIfErr(c, err, "Failed to get clans by ID") {
 			return
 		}
+		for id := range stats {
+			stats[id].Description = ""
+		}
 		c.JSON(200, gin.H{
 			"status": true,
 			"data":   stats,
@@ -72,6 +77,24 @@ func serveDataRoutes(r *gin.Engine) {
 			"data":    toReturn,
 			"default": db.CurrentDefaultFiltered(),
 			"err":     hasErr,
+		})
+	})
+	r.GET("/clanDescription/:clanID", func(c *gin.Context) {
+		stats, err := db.GetCurrentClansByID(c.Param("clanID"))
+		if returnIfErr(c, err, "Failed to get clans by ID") {
+			return
+		}
+		if len(stats) < 1 {
+			c.JSON(200, map[string]interface{}{
+				"status": false,
+				"error":  "Clan not found",
+			})
+			return
+		}
+
+		c.JSON(200, gin.H{
+			"status": true,
+			"data":   stats[0].Description,
 		})
 	})
 	r.GET("/discord", func(c *gin.Context) {

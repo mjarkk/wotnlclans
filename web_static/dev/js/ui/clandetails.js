@@ -1,6 +1,7 @@
 import React from 'react'
 import cn from 'classnames'
 import d from '../funs/dynamic'
+import n from '../funs/networking'
 
 const Icon = d(import('../els/svg'))
 
@@ -10,6 +11,15 @@ export default class ClanDetials extends React.Component {
     this.state = {
       showIcon: props.showClan && props.showClan.emblems ? this.getIcon(props.showClan.emblems) : '',
       showClan: props.showClan,
+    }
+    if (this.state.showClan) {
+      n.getDescription(this.state.showClan.id).then(description => {
+        const showClan = this.state.showClan
+        showClan.description = description
+        this.setState({
+          showClan
+        })
+      })
     }
   }
   renderStats(clan) {
@@ -68,6 +78,12 @@ export default class ClanDetials extends React.Component {
         showIcon: this.props.showClan 
           ? this.getIcon(this.props.showClan.emblems)
           : this.state.showIcon
+      }, async () => {
+        const showClan = this.state.showClan
+        showClan.description = await n.getDescription(showClan.id)
+        this.setState({
+          showClan
+        })
       }))
     }
   }

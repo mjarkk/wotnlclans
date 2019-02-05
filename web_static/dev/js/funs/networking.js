@@ -109,11 +109,17 @@ const getClansByID = async(ids) =>
 const search = async(filter, sorting) => 
   fetchWCache(`/search/${encodeURIComponent(filter)}/${encodeURIComponent(sorting)}`)
 
+const getDescription = async (clanID) => {
+  const out = await fetchWCache(`/clanDescription/${clanID}`)
+  return out.status ? out.data : ''
+}
+
 export default {
   updateClanIDsList,
   getIconsLocation,
   getFilteredList,
   getIconsPicture,
+  getDescription,
   getClansByID,
   fetchWCache,
   getClanList,

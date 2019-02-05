@@ -164,7 +164,23 @@ func SearchClans(query, sortOn string) ([]string, error) {
 		if !ok {
 			continue
 		}
-		formattedQuery := strings.ToLower(query)
+
+		formattedQuery := strings.Replace(
+			strings.Replace(
+				strings.Replace(
+					strings.ToLower(query),
+					"1",
+					"i",
+					-1,
+				),
+				"3",
+				"e",
+				-1,
+			),
+			"0",
+			"o",
+			-1,
+		)
 	checkList:
 		for _, check := range []string{clanNameAndTag.Name, clanNameAndTag.Tag} {
 			if strings.Contains(strings.ToLower(check), formattedQuery) {
