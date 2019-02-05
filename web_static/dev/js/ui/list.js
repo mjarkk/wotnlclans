@@ -98,10 +98,10 @@ export default class List extends React.Component {
   }
   searchForClans(nextState, force) {
     const filter = nextState.filter
-    if (!this.search.buzzy || force) {
+    if ((!this.search.buzzy || force) && filter) {
       this.search = {
         buzzy: true,
-        lastFilter: filter
+        lastFilter: this.state.filter
       }
       setTimeout(async () => {
         const out = await n.search(filter, nextState.sortOn)
