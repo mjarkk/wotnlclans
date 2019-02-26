@@ -1,5 +1,6 @@
 # WotNlClans site
 [![Site version](https://img.shields.io/badge/Site%20version-V3-blue.svg)](https://wotnlclans.unknownclouds.com/)
+[![Build Status](https://drone.unknownclouds.com/api/badges/mjarkk/wotnlclans/status.svg)](https://drone.unknownclouds.com/mjarkk/wotnlclans)
 
 ## About
 This is the code for [wotnlbeclans.eu](https://wotnlbeclans.eu/).  
