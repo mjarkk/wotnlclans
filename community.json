@@ -1,0 +1,32 @@
+[
+  {
+    "text": "Join the WOT NL/BE\nclans Facebook community",
+    "background": {
+      "text": "FACE\nBOOK",
+      "color": "#4c4fef",
+      "image": ""
+    },
+    "link": {
+      "url": "https://www.facebook.com/groups/wotbelgium/",
+      "text": "Go To"
+    },
+    "info": "",
+    "requirements": []
+  },
+  {
+    "text": "Add the Discord\nbot to your server",
+    "background": {
+      "text": "BOT",
+      "color": "#ef4c4f",
+      "image": ""
+    },
+    "link": {
+      "url": "https://discordapp.com/oauth2/authorize?client_id=536542444154519552&permissions=522304&scope=bot",
+      "text": "Add to server"
+    },
+    "info": "# How to use the discord bot\nThis discord bot can show the stats of clans  \nType `w help` to get started.  \n  \nDo you have a good idea?  \nPlease contact: [info@dpg-hq.eu](mailto:info@dpg-hq.eu)",
+    "requirements": [
+      "discord"
+    ]
+  }
+]

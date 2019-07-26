@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/mjarkk/wotnlclans/discord"
+	"github.com/mjarkk/wotnlclans/other"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mjarkk/wotnlclans/db"
@@ -110,5 +111,11 @@ func serveDataRoutes(r *gin.Engine) {
 				"enabled": false,
 			})
 		}
+	})
+	r.GET("/community", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status": true,
+			"data":   other.GetCommunityData(),
+		})
 	})
 }
