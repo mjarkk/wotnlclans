@@ -38,8 +38,8 @@ docker run \
 ```
 
 **Discord:**  
-2. Generate a new application here: https://discordapp.com/developers/applications/
-3. Set a icon and after that go to the **Bot** tab
-4. Click the copy button
-5. add this to the docker run command: `-e DISCORDAUTHTOKEN=DiscordBotTokenHere`
+1. Generate a new application here: https://discordapp.com/developers/applications/
+2. Set a icon and after that go to the **Bot** tab
+3. Click the copy button
+4. add this to the docker run command: `-e DISCORDAUTHTOKEN=DiscordBotTokenHere`
 *NOTE: The community tab has a static discord bot invite link that is from the production build*
