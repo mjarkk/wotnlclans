@@ -1,14 +1,14 @@
 # Golang Binary Wrapper
 
-[![](https://img.shields.io/badge/docs-godoc-blue.svg)](https://godoc.org/github.com/nickalie/go-binwrapper)
-[![](https://circleci.com/gh/nickalie/go-binwrapper.png?circle-token=cf936dc931a1c9d0056377518a0d7ee385d7fd9e)](https://circleci.com/gh/nickalie/go-binwrapper)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3b76e4623faf4575ac5431b3f45c40df)](https://www.codacy.com/app/nickalie/go-binwrapper?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nickalie/go-binwrapper&amp;utm_campaign=Badge_Grade)
+[![](https://img.shields.io/badge/docs-godoc-blue.svg)](https://godoc.org/github.com/mjarkk/go-binwrapper)
+[![](https://circleci.com/gh/mjarkk/go-binwrapper.png?circle-token=cf936dc931a1c9d0056377518a0d7ee385d7fd9e)](https://circleci.com/gh/mjarkk/go-binwrapper)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3b76e4623faf4575ac5431b3f45c40df)](https://www.codacy.com/app/mjarkk/go-binwrapper?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mjarkk/go-binwrapper&amp;utm_campaign=Badge_Grade)
 
 Inspired by and partially ported from npm package [bin-wrapper](https://github.com/kevva/bin-wrapper)
 
 ## Install
 
-```go get -u github.com/nickalie/go-binwrapper```
+```go get -u github.com/mjarkk/go-binwrapper```
 
 ## Example of usage
 
@@ -18,7 +18,7 @@ Create wrapper for [cwebp](https://developers.google.com/speed/webp/docs/cwebp)
 package main
 
 import (
-	"github.com/nickalie/go-binwrapper"
+	"github.com/mjarkk/go-binwrapper"
 	"fmt"
 )
 

@@ -15,12 +15,12 @@ type ExtraClans []string
 
 // BlockedClanDB is what a database entery contains
 type BlockedClanDB struct {
-	ID int `json:"id"`
+	ID int `json:"id" bson:"id"`
 }
 
 // ExtraClanDB is what a database entery contains
 type ExtraClanDB struct {
-	ID int `json:"id"`
+	ID int `json:"id" bson:"id"`
 }
 
 // PostBlockedClans is post data type for the web server

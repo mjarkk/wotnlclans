@@ -8,5 +8,5 @@ This folder contains the actual website
 - Style: **[Stylus](http://stylus-lang.com/)**
 
 ## How to work on this?
-1. Start the build using this flag: `./buildAndRun -skipBuild`
-2. Cd into `web-static` and run `yarn dev` or `npm run dev`
+1. Start the build using this flag: `./buildAndRun`
+2. In a new tab cd into `web-static` and run `yarn dev` or `npm run dev`

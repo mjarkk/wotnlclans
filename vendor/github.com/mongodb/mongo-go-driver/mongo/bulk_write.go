@@ -7,233 +7,446 @@
 package mongo
 
 import (
-	"github.com/mongodb/mongo-go-driver/mongo/options"
-	"github.com/mongodb/mongo-go-driver/x/mongo/driver"
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson/bsoncodec"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
+	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
+	"go.mongodb.org/mongo-driver/x/mongo/driver"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/description"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/operation"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/session"
 )
 
-// WriteModel is the interface satisfied by all models for bulk writes.
-type WriteModel interface {
-	convertModel() driver.WriteModel
+type bulkWriteBatch struct {
+	models   []WriteModel
+	canRetry bool
 }
 
-// InsertOneModel is the write model for insert operations.
-type InsertOneModel struct {
-	driver.InsertOneModel
+// bulkWrite perfoms a bulkwrite operation
+type bulkWrite struct {
+	ordered                  *bool
+	bypassDocumentValidation *bool
+	models                   []WriteModel
+	session                  *session.Client
+	collection               *Collection
+	selector                 description.ServerSelector
+	writeConcern             *writeconcern.WriteConcern
+	result                   BulkWriteResult
 }
 
-// NewInsertOneModel creates a new InsertOneModel.
-func NewInsertOneModel() *InsertOneModel {
-	return &InsertOneModel{}
-}
-
-// Document sets the BSON document for the InsertOneModel.
-func (iom *InsertOneModel) Document(doc interface{}) *InsertOneModel {
-	iom.InsertOneModel.Document = doc
-	return iom
-}
-
-func (iom *InsertOneModel) convertModel() driver.WriteModel {
-	return iom.InsertOneModel
-}
-
-// DeleteOneModel is the write model for delete operations.
-type DeleteOneModel struct {
-	driver.DeleteOneModel
-}
-
-// NewDeleteOneModel creates a new DeleteOneModel.
-func NewDeleteOneModel() *DeleteOneModel {
-	return &DeleteOneModel{}
-}
-
-// Filter sets the filter for the DeleteOneModel.
-func (dom *DeleteOneModel) Filter(filter interface{}) *DeleteOneModel {
-	dom.DeleteOneModel.Filter = filter
-	return dom
-}
-
-// Collation sets the collation for the DeleteOneModel.
-func (dom *DeleteOneModel) Collation(collation *options.Collation) *DeleteOneModel {
-	dom.DeleteOneModel.Collation = collation
-	return dom
-}
-
-func (dom *DeleteOneModel) convertModel() driver.WriteModel {
-	return dom.DeleteOneModel
-}
-
-// DeleteManyModel is the write model for deleteMany operations.
-type DeleteManyModel struct {
-	driver.DeleteManyModel
-}
-
-// NewDeleteManyModel creates a new DeleteManyModel.
-func NewDeleteManyModel() *DeleteManyModel {
-	return &DeleteManyModel{}
-}
-
-// Filter sets the filter for the DeleteManyModel.
-func (dmm *DeleteManyModel) Filter(filter interface{}) *DeleteManyModel {
-	dmm.DeleteManyModel.Filter = filter
-	return dmm
-}
-
-// Collation sets the collation for the DeleteManyModel.
-func (dmm *DeleteManyModel) Collation(collation *options.Collation) *DeleteManyModel {
-	dmm.DeleteManyModel.Collation = collation
-	return dmm
-}
-
-func (dmm *DeleteManyModel) convertModel() driver.WriteModel {
-	return dmm.DeleteManyModel
-}
-
-// ReplaceOneModel is the write model for replace operations.
-type ReplaceOneModel struct {
-	driver.ReplaceOneModel
-}
-
-// NewReplaceOneModel creates a new ReplaceOneModel.
-func NewReplaceOneModel() *ReplaceOneModel {
-	return &ReplaceOneModel{}
-}
-
-// Filter sets the filter for the ReplaceOneModel.
-func (rom *ReplaceOneModel) Filter(filter interface{}) *ReplaceOneModel {
-	rom.ReplaceOneModel.Filter = filter
-	return rom
-}
-
-// Replacement sets the replacement document for the ReplaceOneModel.
-func (rom *ReplaceOneModel) Replacement(rep interface{}) *ReplaceOneModel {
-	rom.ReplaceOneModel.Replacement = rep
-	return rom
-}
-
-// Collation sets the collation for the ReplaceOneModel.
-func (rom *ReplaceOneModel) Collation(collation *options.Collation) *ReplaceOneModel {
-	rom.ReplaceOneModel.Collation = collation
-	return rom
-}
-
-// Upsert specifies if a new document should be created if no document matches the query.
-func (rom *ReplaceOneModel) Upsert(upsert bool) *ReplaceOneModel {
-	rom.ReplaceOneModel.Upsert = upsert
-	rom.ReplaceOneModel.UpsertSet = true
-	return rom
-}
-
-func (rom *ReplaceOneModel) convertModel() driver.WriteModel {
-	return rom.ReplaceOneModel
-}
-
-// UpdateOneModel is the write model for update operations.
-type UpdateOneModel struct {
-	driver.UpdateOneModel
-}
-
-// NewUpdateOneModel creates a new UpdateOneModel.
-func NewUpdateOneModel() *UpdateOneModel {
-	return &UpdateOneModel{}
-}
-
-// Filter sets the filter for the UpdateOneModel.
-func (uom *UpdateOneModel) Filter(filter interface{}) *UpdateOneModel {
-	uom.UpdateOneModel.Filter = filter
-	return uom
-}
-
-// Update sets the update document for the UpdateOneModel.
-func (uom *UpdateOneModel) Update(update interface{}) *UpdateOneModel {
-	uom.UpdateOneModel.Update = update
-	return uom
-}
-
-// ArrayFilters specifies a set of filters specifying to which array elements an update should apply.
-func (uom *UpdateOneModel) ArrayFilters(filters options.ArrayFilters) *UpdateOneModel {
-	uom.UpdateOneModel.ArrayFilters = filters
-	uom.UpdateOneModel.ArrayFiltersSet = true
-	return uom
-}
-
-// Collation sets the collation for the UpdateOneModel.
-func (uom *UpdateOneModel) Collation(collation *options.Collation) *UpdateOneModel {
-	uom.UpdateOneModel.Collation = collation
-	return uom
-}
-
-// Upsert specifies if a new document should be created if no document matches the query.
-func (uom *UpdateOneModel) Upsert(upsert bool) *UpdateOneModel {
-	uom.UpdateOneModel.Upsert = upsert
-	uom.UpdateOneModel.UpsertSet = true
-	return uom
-}
-
-func (uom *UpdateOneModel) convertModel() driver.WriteModel {
-	return uom.UpdateOneModel
-}
-
-// UpdateManyModel is the write model for updateMany operations.
-type UpdateManyModel struct {
-	driver.UpdateManyModel
-}
-
-// NewUpdateManyModel creates a new UpdateManyModel.
-func NewUpdateManyModel() *UpdateManyModel {
-	return &UpdateManyModel{}
-}
-
-// Filter sets the filter for the UpdateManyModel.
-func (umm *UpdateManyModel) Filter(filter interface{}) *UpdateManyModel {
-	umm.UpdateManyModel.Filter = filter
-	return umm
-}
-
-// Update sets the update document for the UpdateManyModel.
-func (umm *UpdateManyModel) Update(update interface{}) *UpdateManyModel {
-	umm.UpdateManyModel.Update = update
-	return umm
-}
-
-// ArrayFilters specifies a set of filters specifying to which array elements an update should apply.
-func (umm *UpdateManyModel) ArrayFilters(filters options.ArrayFilters) *UpdateManyModel {
-	umm.UpdateManyModel.ArrayFilters = filters
-	umm.UpdateManyModel.ArrayFiltersSet = true
-	return umm
-}
-
-// Collation sets the collation for the UpdateManyModel.
-func (umm *UpdateManyModel) Collation(collation *options.Collation) *UpdateManyModel {
-	umm.UpdateManyModel.Collation = collation
-	return umm
-}
-
-// Upsert specifies if a new document should be created if no document matches the query.
-func (umm *UpdateManyModel) Upsert(upsert bool) *UpdateManyModel {
-	umm.UpdateManyModel.Upsert = upsert
-	umm.UpdateManyModel.UpsertSet = true
-	return umm
-}
-
-func (umm *UpdateManyModel) convertModel() driver.WriteModel {
-	return umm.UpdateManyModel
-}
-
-func dispatchToMongoModel(model driver.WriteModel) WriteModel {
-	switch conv := model.(type) {
-	case driver.InsertOneModel:
-		return &InsertOneModel{conv}
-	case driver.DeleteOneModel:
-		return &DeleteOneModel{conv}
-	case driver.DeleteManyModel:
-		return &DeleteManyModel{conv}
-	case driver.ReplaceOneModel:
-		return &ReplaceOneModel{conv}
-	case driver.UpdateOneModel:
-		return &UpdateOneModel{conv}
-	case driver.UpdateManyModel:
-		return &UpdateManyModel{conv}
+func (bw *bulkWrite) execute(ctx context.Context) error {
+	ordered := true
+	if bw.ordered != nil {
+		ordered = *bw.ordered
 	}
 
+	batches := createBatches(bw.models, ordered)
+	bw.result = BulkWriteResult{
+		UpsertedIDs: make(map[int64]interface{}),
+	}
+
+	bwErr := BulkWriteException{
+		WriteErrors: make([]BulkWriteError, 0),
+	}
+
+	var lastErr error
+	var opIndex int64 // the operation index for the upsertedIDs map
+	continueOnError := !ordered
+	for _, batch := range batches {
+		if len(batch.models) == 0 {
+			continue
+		}
+
+		bypassDocValidation := bw.bypassDocumentValidation
+		if bypassDocValidation != nil && !*bypassDocValidation {
+			bypassDocValidation = nil
+		}
+
+		batchRes, batchErr, err := bw.runBatch(ctx, batch)
+
+		bw.mergeResults(batchRes, opIndex)
+
+		bwErr.WriteConcernError = batchErr.WriteConcernError
+		for i := range batchErr.WriteErrors {
+			batchErr.WriteErrors[i].Index = batchErr.WriteErrors[i].Index + int(opIndex)
+		}
+
+		bwErr.WriteErrors = append(bwErr.WriteErrors, batchErr.WriteErrors...)
+
+		if !continueOnError && (err != nil || len(batchErr.WriteErrors) > 0 || batchErr.WriteConcernError != nil) {
+			if err != nil {
+				return err
+			}
+
+			return bwErr
+		}
+
+		if err != nil {
+			lastErr = err
+		}
+
+		opIndex += int64(len(batch.models))
+	}
+
+	bw.result.MatchedCount -= bw.result.UpsertedCount
+	if lastErr != nil {
+		return lastErr
+	}
+	if len(bwErr.WriteErrors) > 0 || bwErr.WriteConcernError != nil {
+		return bwErr
+	}
 	return nil
 }
+
+func (bw *bulkWrite) runBatch(ctx context.Context, batch bulkWriteBatch) (BulkWriteResult, BulkWriteException, error) {
+	batchRes := BulkWriteResult{
+		UpsertedIDs: make(map[int64]interface{}),
+	}
+	batchErr := BulkWriteException{}
+
+	var writeErrors []driver.WriteError
+	switch batch.models[0].(type) {
+	case *InsertOneModel:
+		res, err := bw.runInsert(ctx, batch)
+		if err != nil {
+			writeErr, ok := err.(driver.WriteCommandError)
+			if !ok {
+				return BulkWriteResult{}, batchErr, err
+			}
+			writeErrors = writeErr.WriteErrors
+			batchErr.WriteConcernError = convertDriverWriteConcernError(writeErr.WriteConcernError)
+		}
+		batchRes.InsertedCount = int64(res.N)
+	case *DeleteOneModel, *DeleteManyModel:
+		res, err := bw.runDelete(ctx, batch)
+		if err != nil {
+			writeErr, ok := err.(driver.WriteCommandError)
+			if !ok {
+				return BulkWriteResult{}, batchErr, err
+			}
+			writeErrors = writeErr.WriteErrors
+			batchErr.WriteConcernError = convertDriverWriteConcernError(writeErr.WriteConcernError)
+		}
+		batchRes.DeletedCount = int64(res.N)
+	case *ReplaceOneModel, *UpdateOneModel, *UpdateManyModel:
+		res, err := bw.runUpdate(ctx, batch)
+		if err != nil {
+			writeErr, ok := err.(driver.WriteCommandError)
+			if !ok {
+				return BulkWriteResult{}, batchErr, err
+			}
+			writeErrors = writeErr.WriteErrors
+			batchErr.WriteConcernError = convertDriverWriteConcernError(writeErr.WriteConcernError)
+		}
+		batchRes.MatchedCount = int64(res.N)
+		batchRes.ModifiedCount = int64(res.NModified)
+		batchRes.UpsertedCount = int64(len(res.Upserted))
+		for _, upsert := range res.Upserted {
+			batchRes.UpsertedIDs[upsert.Index] = upsert.ID
+		}
+	}
+
+	batchErr.WriteErrors = make([]BulkWriteError, 0, len(writeErrors))
+	convWriteErrors := writeErrorsFromDriverWriteErrors(writeErrors)
+	for _, we := range convWriteErrors {
+		batchErr.WriteErrors = append(batchErr.WriteErrors, BulkWriteError{
+			WriteError: we,
+			Request:    batch.models[0],
+		})
+	}
+	return batchRes, batchErr, nil
+}
+
+func (bw *bulkWrite) runInsert(ctx context.Context, batch bulkWriteBatch) (operation.InsertResult, error) {
+	docs := make([]bsoncore.Document, len(batch.models))
+	var i int
+	for _, model := range batch.models {
+		converted := model.(*InsertOneModel)
+		doc, _, err := transformAndEnsureIDv2(bw.collection.registry, converted.Document)
+		if err != nil {
+			return operation.InsertResult{}, err
+		}
+
+		docs[i] = doc
+		i++
+	}
+
+	op := operation.NewInsert(docs...).
+		Session(bw.session).WriteConcern(bw.writeConcern).CommandMonitor(bw.collection.client.monitor).
+		ServerSelector(bw.selector).ClusterClock(bw.collection.client.clock).
+		Database(bw.collection.db.name).Collection(bw.collection.name).
+		Deployment(bw.collection.client.topology)
+	if bw.bypassDocumentValidation != nil && *bw.bypassDocumentValidation {
+		op = op.BypassDocumentValidation(*bw.bypassDocumentValidation)
+	}
+	if bw.ordered != nil {
+		op = op.Ordered(*bw.ordered)
+	}
+
+	retry := driver.RetryNone
+	if bw.collection.client.retryWrites && batch.canRetry {
+		retry = driver.RetryOncePerCommand
+	}
+	op = op.Retry(retry)
+
+	err := op.Execute(ctx)
+
+	return op.Result(), err
+}
+
+func (bw *bulkWrite) runDelete(ctx context.Context, batch bulkWriteBatch) (operation.DeleteResult, error) {
+	docs := make([]bsoncore.Document, len(batch.models))
+	var i int
+
+	for _, model := range batch.models {
+		var doc bsoncore.Document
+		var err error
+
+		switch converted := model.(type) {
+		case *DeleteOneModel:
+			doc, err = createDeleteDoc(converted.Filter, converted.Collation, true, bw.collection.registry)
+		case *DeleteManyModel:
+			doc, err = createDeleteDoc(converted.Filter, converted.Collation, false, bw.collection.registry)
+		}
+
+		if err != nil {
+			return operation.DeleteResult{}, err
+		}
+
+		docs[i] = doc
+		i++
+	}
+
+	op := operation.NewDelete(docs...).
+		Session(bw.session).WriteConcern(bw.writeConcern).CommandMonitor(bw.collection.client.monitor).
+		ServerSelector(bw.selector).ClusterClock(bw.collection.client.clock).
+		Database(bw.collection.db.name).Collection(bw.collection.name).
+		Deployment(bw.collection.client.topology)
+	if bw.ordered != nil {
+		op = op.Ordered(*bw.ordered)
+	}
+	retry := driver.RetryNone
+	if bw.collection.client.retryWrites && batch.canRetry {
+		retry = driver.RetryOncePerCommand
+	}
+	op = op.Retry(retry)
+
+	err := op.Execute(ctx)
+
+	return op.Result(), err
+}
+
+func createDeleteDoc(filter interface{}, collation *options.Collation, deleteOne bool, registry *bsoncodec.Registry) (bsoncore.Document, error) {
+	f, err := transformBsoncoreDocument(registry, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var limit int32
+	if deleteOne {
+		limit = 1
+	}
+	didx, doc := bsoncore.AppendDocumentStart(nil)
+	doc = bsoncore.AppendDocumentElement(doc, "q", f)
+	doc = bsoncore.AppendInt32Element(doc, "limit", limit)
+	if collation != nil {
+		doc = bsoncore.AppendDocumentElement(doc, "collation", collation.ToDocument())
+	}
+	doc, _ = bsoncore.AppendDocumentEnd(doc, didx)
+
+	return doc, nil
+}
+
+func (bw *bulkWrite) runUpdate(ctx context.Context, batch bulkWriteBatch) (operation.UpdateResult, error) {
+	docs := make([]bsoncore.Document, len(batch.models))
+	for i, model := range batch.models {
+		var doc bsoncore.Document
+		var err error
+
+		switch converted := model.(type) {
+		case *ReplaceOneModel:
+			doc, err = createUpdateDoc(converted.Filter, converted.Replacement, nil, converted.Collation, converted.Upsert, false,
+				bw.collection.registry)
+		case *UpdateOneModel:
+			doc, err = createUpdateDoc(converted.Filter, converted.Update, converted.ArrayFilters, converted.Collation, converted.Upsert, false,
+				bw.collection.registry)
+		case *UpdateManyModel:
+			doc, err = createUpdateDoc(converted.Filter, converted.Update, converted.ArrayFilters, converted.Collation, converted.Upsert, true,
+				bw.collection.registry)
+		}
+		if err != nil {
+			return operation.UpdateResult{}, err
+		}
+
+		docs[i] = doc
+	}
+
+	op := operation.NewUpdate(docs...).
+		Session(bw.session).WriteConcern(bw.writeConcern).CommandMonitor(bw.collection.client.monitor).
+		ServerSelector(bw.selector).ClusterClock(bw.collection.client.clock).
+		Database(bw.collection.db.name).Collection(bw.collection.name).
+		Deployment(bw.collection.client.topology)
+	if bw.ordered != nil {
+		op = op.Ordered(*bw.ordered)
+	}
+	if bw.bypassDocumentValidation != nil && *bw.bypassDocumentValidation {
+		op = op.BypassDocumentValidation(*bw.bypassDocumentValidation)
+	}
+	retry := driver.RetryNone
+	if bw.collection.client.retryWrites && batch.canRetry {
+		retry = driver.RetryOncePerCommand
+	}
+	op = op.Retry(retry)
+
+	err := op.Execute(ctx)
+
+	return op.Result(), err
+}
+func createUpdateDoc(
+	filter interface{},
+	update interface{},
+	arrayFilters *options.ArrayFilters,
+	collation *options.Collation,
+	upsert *bool,
+	multi bool,
+	registry *bsoncodec.Registry,
+) (bsoncore.Document, error) {
+	f, err := transformBsoncoreDocument(registry, filter)
+	if err != nil {
+		return nil, err
+	}
+	u, err := transformBsoncoreDocument(registry, update)
+	if err != nil {
+		return nil, err
+	}
+
+	uidx, updateDoc := bsoncore.AppendDocumentStart(nil)
+	updateDoc = bsoncore.AppendDocumentElement(updateDoc, "q", f)
+	updateDoc = bsoncore.AppendDocumentElement(updateDoc, "u", u)
+	updateDoc = bsoncore.AppendBooleanElement(updateDoc, "multi", multi)
+
+	if arrayFilters != nil {
+		arr, err := arrayFilters.ToArrayDocument()
+		if err != nil {
+			return nil, err
+		}
+		updateDoc = bsoncore.AppendArrayElement(updateDoc, "arrayFilters", arr)
+	}
+
+	if collation != nil {
+		updateDoc = bsoncore.AppendDocumentElement(updateDoc, "collation", bsoncore.Document(collation.ToDocument()))
+	}
+
+	if upsert != nil {
+		updateDoc = bsoncore.AppendBooleanElement(updateDoc, "upsert", *upsert)
+	}
+	updateDoc, _ = bsoncore.AppendDocumentEnd(updateDoc, uidx)
+
+	return updateDoc, nil
+}
+
+func createBatches(models []WriteModel, ordered bool) []bulkWriteBatch {
+	if ordered {
+		return createOrderedBatches(models)
+	}
+
+	batches := make([]bulkWriteBatch, 5)
+	batches[insertCommand].canRetry = true
+	batches[deleteOneCommand].canRetry = true
+	batches[updateOneCommand].canRetry = true
+
+	// TODO(GODRIVER-1157): fix batching once operation retryability is fixed
+	for _, model := range models {
+		switch model.(type) {
+		case *InsertOneModel:
+			batches[insertCommand].models = append(batches[insertCommand].models, model)
+		case *DeleteOneModel:
+			batches[deleteOneCommand].models = append(batches[deleteOneCommand].models, model)
+		case *DeleteManyModel:
+			batches[deleteManyCommand].models = append(batches[deleteManyCommand].models, model)
+		case *ReplaceOneModel, *UpdateOneModel:
+			batches[updateOneCommand].models = append(batches[updateOneCommand].models, model)
+		case *UpdateManyModel:
+			batches[updateManyCommand].models = append(batches[updateManyCommand].models, model)
+		}
+	}
+
+	return batches
+}
+
+func createOrderedBatches(models []WriteModel) []bulkWriteBatch {
+	var batches []bulkWriteBatch
+	var prevKind writeCommandKind = -1
+	i := -1 // batch index
+
+	for _, model := range models {
+		var createNewBatch bool
+		var canRetry bool
+		var newKind writeCommandKind
+
+		// TODO(GODRIVER-1157): fix batching once operation retryability is fixed
+		switch model.(type) {
+		case *InsertOneModel:
+			createNewBatch = prevKind != insertCommand
+			canRetry = true
+			newKind = insertCommand
+		case *DeleteOneModel:
+			createNewBatch = prevKind != deleteOneCommand
+			canRetry = true
+			newKind = deleteOneCommand
+		case *DeleteManyModel:
+			createNewBatch = prevKind != deleteManyCommand
+			newKind = deleteManyCommand
+		case *ReplaceOneModel, *UpdateOneModel:
+			createNewBatch = prevKind != updateOneCommand
+			canRetry = true
+			newKind = updateOneCommand
+		case *UpdateManyModel:
+			createNewBatch = prevKind != updateManyCommand
+			newKind = updateManyCommand
+		}
+
+		if createNewBatch {
+			batches = append(batches, bulkWriteBatch{
+				models:   []WriteModel{model},
+				canRetry: canRetry,
+			})
+			i++
+		} else {
+			batches[i].models = append(batches[i].models, model)
+			if !canRetry {
+				batches[i].canRetry = false // don't make it true if it was already false
+			}
+		}
+
+		prevKind = newKind
+	}
+
+	return batches
+}
+
+func (bw *bulkWrite) mergeResults(newResult BulkWriteResult, opIndex int64) {
+	bw.result.InsertedCount += newResult.InsertedCount
+	bw.result.MatchedCount += newResult.MatchedCount
+	bw.result.ModifiedCount += newResult.ModifiedCount
+	bw.result.DeletedCount += newResult.DeletedCount
+	bw.result.UpsertedCount += newResult.UpsertedCount
+
+	for index, upsertID := range newResult.UpsertedIDs {
+		bw.result.UpsertedIDs[index+opIndex] = upsertID
+	}
+}
+
+// WriteCommandKind is the type of command represented by a Write
+type writeCommandKind int8
+
+// These constants represent the valid types of write commands.
+const (
+	insertCommand writeCommandKind = iota
+	updateOneCommand
+	updateManyCommand
+	deleteOneCommand
+	deleteManyCommand
+)

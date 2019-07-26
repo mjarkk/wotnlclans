@@ -9,8 +9,8 @@ package mongo
 import (
 	"fmt"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/x/network/result"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/operation"
 )
 
 // BulkWriteResult holds the result of a bulk write operation.
@@ -50,7 +50,8 @@ type ListDatabasesResult struct {
 	TotalSize int64
 }
 
-func (ldr ListDatabasesResult) fromResult(res result.ListDatabases) ListDatabasesResult {
+func newListDatabasesResultFromOperation(res operation.ListDatabasesResult) ListDatabasesResult {
+	var ldr ListDatabasesResult
 	ldr.Databases = make([]DatabaseSpecification, 0, len(res.Databases))
 	for _, spec := range res.Databases {
 		ldr.Databases = append(
@@ -78,6 +79,8 @@ type UpdateResult struct {
 	MatchedCount int64
 	// The number of documents that were modified.
 	ModifiedCount int64
+	// The number of documents that were upserted.
+	UpsertedCount int64
 	// The identifier of the inserted document if an upsert took place.
 	UpsertedID interface{}
 }

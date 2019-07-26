@@ -310,6 +310,15 @@ func writeNewSymbolicLink(fpath string, target string) error {
 	if err != nil {
 		return fmt.Errorf("%s: making directory for file: %v", fpath, err)
 	}
+
+	_, err = os.Lstat(fpath)
+	if err == nil {
+		err = os.Remove(fpath)
+		if err != nil {
+			return fmt.Errorf("%s: failed to unlink: %+v", fpath, err)
+		}
+	}
+
 	err = os.Symlink(target, fpath)
 	if err != nil {
 		return fmt.Errorf("%s: making symbolic link for: %v", fpath, err)
@@ -322,6 +331,15 @@ func writeNewHardLink(fpath string, target string) error {
 	if err != nil {
 		return fmt.Errorf("%s: making directory for file: %v", fpath, err)
 	}
+
+	_, err = os.Lstat(fpath)
+	if err == nil {
+		err = os.Remove(fpath)
+		if err != nil {
+			return fmt.Errorf("%s: failed to unlink: %+v", fpath, err)
+		}
+	}
+
 	err = os.Link(target, fpath)
 	if err != nil {
 		return fmt.Errorf("%s: making hard link for: %v", fpath, err)
@@ -425,6 +443,8 @@ func ByExtension(filename string) (interface{}, error) {
 		return NewRar(), nil
 	case *Tar:
 		return NewTar(), nil
+	case *TarBrotli:
+		return NewTarBrotli(), nil
 	case *TarBz2:
 		return NewTarBz2(), nil
 	case *TarGz:
@@ -435,6 +455,8 @@ func ByExtension(filename string) (interface{}, error) {
 		return NewTarSz(), nil
 	case *TarXz:
 		return NewTarXz(), nil
+	case *TarZstd:
+		return NewTarZstd(), nil
 	case *Zip:
 		return NewZip(), nil
 	case *Gz:
@@ -442,11 +464,13 @@ func ByExtension(filename string) (interface{}, error) {
 	case *Bz2:
 		return NewBz2(), nil
 	case *Lz4:
-		return NewBz2(), nil
+		return NewLz4(), nil
 	case *Snappy:
 		return NewSnappy(), nil
 	case *Xz:
 		return NewXz(), nil
+	case *Zstd:
+		return NewZstd(), nil
 	}
 	return nil, fmt.Errorf("format unrecognized by filename: %s", filename)
 }
@@ -482,19 +506,23 @@ func ByHeader(input io.ReadSeeker) (Unarchiver, error) {
 // that can check extensions. Only to be used for
 // checking extensions - not any archival operations.
 var extCheckers = []ExtensionChecker{
+	&TarBrotli{},
 	&TarBz2{},
 	&TarGz{},
 	&TarLz4{},
 	&TarSz{},
 	&TarXz{},
+	&TarZstd{},
 	&Rar{},
 	&Tar{},
 	&Zip{},
+	&Brotli{},
 	&Gz{},
 	&Bz2{},
 	&Lz4{},
 	&Snappy{},
 	&Xz{},
+	&Zstd{},
 }
 
 var matchers = []Matcher{
