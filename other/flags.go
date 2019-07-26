@@ -11,13 +11,11 @@ import (
 type FlagsType struct {
 	Debug               bool
 	Dev                 bool
-	SkipBuild           bool
 	WGKey               string
 	MaxIndexPages       int
 	SkipStartupIndexing bool
 	MongoUIR            string
 	MongoDataBase       string
-	CreateServiceFile   bool
 	WebServerLocation   string
 	DiscordAuthToken    string
 }
@@ -31,10 +29,8 @@ var defaultWebServerLocation = "localhost:8282"
 func SetupFlags() {
 	debug := fBool("debug", false, "debug the program")
 	dev := fBool("dev", false, "launch the project in dev mode")
-	skipBuild := fBool("skipBuild", false, "skip the web_static build process")
 	maxIndexPages := fInt("maxindexpages", 4000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
 	skipStartupIndexing := fBool("skipstartupindexing", false, "skip the indexing of clans on start")
-	createServiceFile := fBool("generateDotService", false, "Generate a .service file for linux")
 	webServerLocation := fString("webserverLocation", defaultWebServerLocation, "On with address and port to create a webserver")
 	discordAuthToken := fString("discordAuthToken", "", "Spesifi the discord api authentication token")
 
@@ -75,7 +71,7 @@ func SetupFlags() {
 	}
 
 	if len(wgKey) == 0 && *dev {
-		wgKey = "7e5ce7007256737daa79dbec35f4f072" // my wargaming key
+		wgKey = "7e5ce7007256737daa79dbec35f4f072" // my wargaming key for development, i can only use this at home
 	}
 
 	if *dev && *maxIndexPages == 4000 {
@@ -85,13 +81,11 @@ func SetupFlags() {
 	Flags = FlagsType{
 		Debug:               *debug,
 		Dev:                 *dev,
-		SkipBuild:           *skipBuild,
 		WGKey:               wgKey,
 		MaxIndexPages:       *maxIndexPages,
 		SkipStartupIndexing: *skipStartupIndexing,
 		MongoUIR:            mongoURI,
 		MongoDataBase:       mongoDataBase,
-		CreateServiceFile:   *createServiceFile,
 		WebServerLocation:   *webServerLocation,
 		DiscordAuthToken:    discordAuthTokenOverwrite,
 	}

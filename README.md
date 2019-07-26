@@ -9,29 +9,37 @@ This is the code for [wotnlbeclans.eu](https://wotnlbeclans.eu/).
 |---|---|
 | Backend | Golang |
 | Frondend | Javascript (React/Preact) |
-| Database | Mongodb and a view arrays in memory |
+| Database | Mongodb and a few arrays in memory |
 
 ## Dev Setup
 1. Make sure you have installed [golang](https://golang.org/doc/install), [mongodb](https://docs.mongodb.com/manual/installation/) and [nodejs](https://nodejs.org/en/) also Make sure that golang is setted up correctly with a working gopath
 2. `mkdir -p $GOPATH/src/github.com/mjarkk && cd $GOPATH/src/github.com/mjarkk`
 3. `git clone git@github.com:mjarkk/wotnlclans.git && cd wotnlclans`
 4. `go get`
-5. `./buildAndRun.sh -wgkey "yourWargamingApiKey"` (if mongodb is not located at `mongodb://localhost:27017` make sure to add the `-mongoURI` pram)
+5. Read [web_static/README.md](./web_static/README.md)
+5. `./buildAndRun.sh -wgkey "yourWargamingApiKey"` (if mongodb is not located at `"localhost"` make sure to add the `-mongoURI` pram, this is required due to some wired mongodb bug )
 
-## Release Setup
-1. Follow step 1 to 4 from [#Dev Setup](#Dev%20Setup)
-2. `go build`
-3. `./wotnlclans -wgkey "yourWargamingApiKey"` or `WARGAMINGAPIKEY=yourWargamingApiKey ./wotnlclans`
+*To build the dockerfile run: `docker build -t wotnlclans .`*
 
-### Systemctl service file.
-1. Follow step 1 to 4 from [#Dev Setup](#Release%20Setup)
-2. `./wotnlclans -generateDotService`
+## Production
+1. Make sure you have installed [docker](https://docs.docker.com/install/) and [mongodb](https://docs.mongodb.com/manual/installation/)
+2. `docker pull mjarkk/wotnlclans`
+3. Run the command under here and edit what needs to change
+```sh
+docker run \
+  --restart always \
+  --name wotnlclans \
+  -d \
+  -p 8282:8282 \
+  -e MONGOURI=mongodb://your.mongodb.server:27017 \
+  -e MONGODATABASE=wotnlclans \
+  -e WARGAMINGAPIKEY=YourWgApiKey \
+  wotnlclans
+```
 
-### Enable the discord bot
-1. Follow step 1 to 4 from [#Dev Setup](#Release%20Setup)
-2. Generate a new application here: https://discordapp.com/developers/applications/
-3. Set a icon and after that go to the **Bot** tab
-4. Click the copy button
-5. `./wotnlclans -discordAuthToken DiscordBotTokenHere` or `DISCORDAUTHTOKEN=DiscordBotTokenHere ./wotnlclans`
-6. If you don't want to do this every time add the `DISCORDAUTHTOKEN=DiscordBotTokenHere` to your bashrc
+**Discord:**  
+1. Generate a new application here: https://discordapp.com/developers/applications/
+2. Set a icon and after that go to the **Bot** tab
+3. Click the copy button
+4. add this to the docker run command: `-e DISCORDAUTHTOKEN=DiscordBotTokenHere`
 *NOTE: The community tab has a static discord bot invite link that is from the production build*

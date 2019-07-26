@@ -2,10 +2,10 @@ package db
 
 // ErrDB is what a database error entry contains
 type ErrDB struct {
-	From    string `json:"from"`    // the function that triggerd the adding of errors
-	Message string `json:"message"` // the actual error message
-	Package string `json:"package"` // the package from where the error came
-	Meta    string `json:"meta"`    // meta data if available
+	From    string `json:"from" bson:"from"`       // the function that triggerd the adding of errors
+	Message string `json:"message" bson:"message"` // the actual error message
+	Package string `json:"package" bson:"package"` // the package from where the error came
+	Meta    string `json:"meta" bson:"meta"`       // meta data if available
 }
 
 // GetErrors returns all errors in the database

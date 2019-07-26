@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/mjarkk/wotnlclans/other"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -25,7 +26,7 @@ func Setup() error {
 	if len(mongoDataBase) == 0 {
 		return errors.New("Mongodb database not defined use `./wotnlclans -help` for more information")
 	}
-	client, err := mongo.Connect(C(), mongoUIR)
+	client, err := mongo.Connect(C(), options.Client().ApplyURI(mongoUIR))
 	if err != nil {
 		return other.NewErr("mongo.Connect", err)
 	}
@@ -73,31 +74,27 @@ func GetClanIDs() []string {
 
 	defer cur.Close(C())
 	for cur.Next(C()) {
-		raw, err := cur.DecodeBytes()
+		var item ClanID
+		err := cur.Decode(&item)
 		if err != nil {
 			continue
 		}
-		// Background: do something with output
-		els, err := raw.Elements()
-		if err != nil {
-			continue
-		}
-		for _, dat := range els {
-			key := dat.Key()
-			if key == "id" {
-				toReturn = append(toReturn, dat.Value().String())
-			}
-		}
+		toReturn = append(toReturn, item.ID)
 	}
 
 	return other.RemoveQuotes(toReturn)
+}
+
+// ClanID is the collection type for the clan IDs
+type ClanID struct {
+	ID string `bson:"id"`
 }
 
 // SetClanIDs saves a list of clan id's in the database
 func SetClanIDs(toSave []string) {
 	toInsert := make([]interface{}, len(toSave))
 	for i, item := range toSave {
-		toInsert[i] = struct{ ID string }{
+		toInsert[i] = ClanID{
 			ID: item,
 		}
 	}

@@ -3,12 +3,12 @@ A simple `HTTP Request` package for golang. `GET` `POST` `DELETE` `PUT`
 
 
 
-# Installation
+## Installation
 ```
 go get github.com/kirinlabs/HttpRequest
 ```
 
-# Example
+## Example
 ```go
 package main
 
@@ -43,7 +43,7 @@ func main() {
 }
 ```
 
-# Object Example
+## Object Example
 
 ```go
 package main
@@ -139,42 +139,5 @@ func main() {
   }
 
   print body
-
-```
-
-## Public function
-
-```go
-
-  // Request
-
-  NewRequest()
-
-  Debug(flag bool)
-
-  SetHeaders(header map[string]string)
-
-  SetCookies(header map[string]string)
-
-  SetTimeout(d time.Duration)
-
-  DisableKeepAlives(flag bool)
-
-  SetTLSClient(v *tls.Config)
-
-
-  // Response
-
-  Response() *http.Response
-
-  StatusCode() int
-
-  Body() ([]byte, error)
-
-  Time() string
-
-  Json() (string,error)
-
-  Url() string
 
 ```

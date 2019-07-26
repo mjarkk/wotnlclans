@@ -16,18 +16,9 @@ func main() {
 
 	other.SetupFlags()
 
-	if other.Flags.CreateServiceFile {
-		err := other.MakeServiceFile()
-		if err != nil {
-			fmt.Println("The MakeServiceFile function got an error:", err.Error())
-			os.Exit(1)
-		}
-		os.Exit(0)
-	}
-
 	err := db.Setup()
 	if err != nil {
-		fmt.Println("Database error:" + err.Error())
+		fmt.Println("Database error:", err.Error())
 		os.Exit(1)
 	}
 
@@ -38,15 +29,13 @@ func main() {
 	go func() {
 		err := api.SetupAPI()
 		if err != nil {
-			fmt.Println("Api error:" + err.Error())
+			fmt.Println("Api error:", err.Error())
 			os.Exit(1)
 		}
 	}()
 
-	other.BuildWebStatic()
-
 	r := server.SetupRouter()
-	webLoc := other.Flags.WebServerLocation
-	fmt.Println("Running server on", webLoc)
-	r.Run(webLoc)
+	addr := other.Flags.WebServerLocation
+	fmt.Println("Running server on", addr)
+	r.Run(addr)
 }

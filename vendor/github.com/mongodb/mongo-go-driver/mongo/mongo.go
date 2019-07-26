@@ -4,7 +4,7 @@
 // not use this file except in compliance with the License. You may obtain
 // a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
-package mongo
+package mongo // import "go.mongodb.org/mongo-driver/mongo"
 
 import (
 	"context"
@@ -12,15 +12,17 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"strconv"
 	"strings"
 
-	"github.com/mongodb/mongo-go-driver/mongo/options"
-	"github.com/mongodb/mongo-go-driver/x/bsonx"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/bsonx"
+	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/bsoncodec"
-	"github.com/mongodb/mongo-go-driver/bson/bsontype"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/bsoncodec"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Dialer is used to make network connections.
@@ -55,7 +57,7 @@ type MarshalError struct {
 
 // Error implements the error interface.
 func (me MarshalError) Error() string {
-	return fmt.Sprintf("cannot transform type %s to a *bsonx.Document", reflect.TypeOf(me.Value))
+	return fmt.Sprintf("cannot transform type %s to a BSON Document: %v", reflect.TypeOf(me.Value), me.Err)
 }
 
 // Pipeline is a type that makes creating aggregation pipelines easier. It is a
@@ -63,10 +65,10 @@ func (me MarshalError) Error() string {
 //
 // Example usage:
 //
-// 		mongo.Pipeline{{
-// 			{"$group", bson.D{{"_id", "$state"}, {"totalPop", bson.D{"$sum", "$pop"}}}},
-// 			{"$match": bson.D{{"totalPop", bson.D{"$gte", 10*1000*1000}}}},
-// 		}}
+//		mongo.Pipeline{
+//			{{"$group", bson.D{{"_id", "$state"}, {"totalPop", bson.D{{"$sum", "$pop"}}}}}},
+//			{{"$match", bson.D{{"totalPop", bson.D{{"$gte", 10*1000*1000}}}}}},
+//		}
 //
 type Pipeline []bson.D
 
@@ -81,7 +83,7 @@ func transformAndEnsureID(registry *bsoncodec.Registry, val interface{}) (bsonx.
 	}
 	switch tt := val.(type) {
 	case nil:
-		val = bsonx.Doc{}
+		return nil, nil, ErrNilDocument
 	case bsonx.Doc:
 		val = tt.Copy()
 	case []byte:
@@ -103,29 +105,102 @@ func transformAndEnsureID(registry *bsoncodec.Registry, val interface{}) (bsonx.
 
 	var id interface{}
 
-	v, err := bson.Raw(b).LookupErr("_id")
-	switch err.(type) {
-	case nil:
-		if err := v.Unmarshal(&id); err != nil {
-			return nil, nil, err
-		}
+	idx := d.IndexOf("_id")
+	var idElem bsonx.Elem
+	switch idx {
+	case -1:
+		idElem = bsonx.Elem{"_id", bsonx.ObjectID(primitive.NewObjectID())}
+		d = append(d, bsonx.Elem{})
+		copy(d[1:], d)
+		d[0] = idElem
 	default:
-		oid := primitive.NewObjectID()
-		d = append(d, bsonx.Elem{"_id", bsonx.ObjectID(oid)})
-		id = oid
+		idElem = d[idx]
+		copy(d[1:idx+1], d[0:idx])
+		d[0] = idElem
 	}
+
+	idBuf := make([]byte, 0, 256)
+	t, data, err := idElem.Value.MarshalAppendBSONValue(idBuf[:0])
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = bson.RawValue{Type: t, Value: data}.UnmarshalWithRegistry(registry, &id)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	return d, id, nil
 }
 
-func transformDocument(registry *bsoncodec.Registry, val interface{}) (bsonx.Doc, error) {
+// transformAndEnsureIDv2 is a hack that makes it easy to get a RawValue as the _id value. This will
+// be removed when we switch from using bsonx to bsoncore for the driver package.
+func transformAndEnsureIDv2(registry *bsoncodec.Registry, val interface{}) (bsoncore.Document, interface{}, error) {
 	if registry == nil {
 		registry = bson.NewRegistryBuilder().Build()
 	}
-	if val == nil {
-		return bsonx.Doc{}, nil
+	switch tt := val.(type) {
+	case nil:
+		return nil, nil, ErrNilDocument
+	case bsonx.Doc:
+		val = tt.Copy()
+	case []byte:
+		// Slight optimization so we'll just use MarshalBSON and not go through the codec machinery.
+		val = bson.Raw(tt)
 	}
+
+	// TODO(skriptble): Use a pool of these instead.
+	doc := make(bsoncore.Document, 0, 256)
+	doc, err := bson.MarshalAppendWithRegistry(registry, doc, val)
+	if err != nil {
+		return nil, nil, MarshalError{Value: val, Err: err}
+	}
+
+	var id interface{}
+
+	value := doc.Lookup("_id")
+	switch value.Type {
+	case bsontype.Type(0):
+		value = bsoncore.Value{Type: bsontype.ObjectID, Data: bsoncore.AppendObjectID(nil, primitive.NewObjectID())}
+		olddoc := doc
+		doc = make(bsoncore.Document, 0, len(olddoc)+17) // type byte + _id + null byte + object ID
+		_, doc = bsoncore.ReserveLength(doc)
+		doc = bsoncore.AppendValueElement(doc, "_id", value)
+		doc = append(doc, olddoc[4:]...) // remove the length
+		doc = bsoncore.UpdateLength(doc, 0, int32(len(doc)))
+	default:
+		// We copy the bytes here to ensure that any bytes returned to the user aren't modified
+		// later.
+		buf := make([]byte, len(value.Data))
+		copy(buf, value.Data)
+		value.Data = buf
+	}
+
+	err = bson.RawValue{Type: value.Type, Value: value.Data}.UnmarshalWithRegistry(registry, &id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return doc, id, nil
+}
+
+func transformDocument(registry *bsoncodec.Registry, val interface{}) (bsonx.Doc, error) {
 	if doc, ok := val.(bsonx.Doc); ok {
 		return doc.Copy(), nil
+	}
+	b, err := transformBsoncoreDocument(registry, val)
+	if err != nil {
+		return nil, err
+	}
+	return bsonx.ReadDoc(b)
+}
+
+func transformBsoncoreDocument(registry *bsoncodec.Registry, val interface{}) (bsoncore.Document, error) {
+	if registry == nil {
+		registry = bson.DefaultRegistry
+	}
+	if val == nil {
+		return nil, ErrNilDocument
 	}
 	if bs, ok := val.([]byte); ok {
 		// Slight optimization so we'll just use MarshalBSON and not go through the codec machinery.
@@ -138,7 +213,7 @@ func transformDocument(registry *bsoncodec.Registry, val interface{}) (bsonx.Doc
 	if err != nil {
 		return nil, MarshalError{Value: val, Err: err}
 	}
-	return bsonx.ReadDoc(b)
+	return b, nil
 }
 
 func ensureID(d bsonx.Doc) (bsonx.Doc, interface{}) {
@@ -157,7 +232,22 @@ func ensureID(d bsonx.Doc) (bsonx.Doc, interface{}) {
 }
 
 func ensureDollarKey(doc bsonx.Doc) error {
-	if len(doc) > 0 && !strings.HasPrefix(doc[0].Key, "$") {
+	if len(doc) == 0 {
+		return errors.New("update document must have at least one element")
+	}
+	if !strings.HasPrefix(doc[0].Key, "$") {
+		return errors.New("update document must contain key beginning with '$'")
+	}
+	return nil
+}
+
+func ensureDollarKeyv2(doc bsoncore.Document) error {
+	firstElem, err := doc.IndexErr(0)
+	if err != nil {
+		return errors.New("update document must have at least one element")
+	}
+
+	if !strings.HasPrefix(firstElem.Key(), "$") {
 		return errors.New("update document must contain key beginning with '$'")
 	}
 	return nil
@@ -195,32 +285,104 @@ func transformAggregatePipeline(registry *bsoncodec.Registry, pipeline interface
 	return pipelineArr, nil
 }
 
-// Build the aggregation pipeline for the CountDocument command.
-func countDocumentsAggregatePipeline(registry *bsoncodec.Registry, filter interface{}, opts *options.CountOptions) (bsonx.Arr, error) {
-	pipeline := bsonx.Arr{}
-	filterDoc, err := transformDocument(registry, filter)
+func transformAggregatePipelinev2(registry *bsoncodec.Registry, pipeline interface{}) (bsoncore.Document, bool, error) {
+	switch t := pipeline.(type) {
+	case bsoncodec.ValueMarshaler:
+		btype, val, err := t.MarshalBSONValue()
+		if err != nil {
+			return nil, false, err
+		}
+		if btype != bsontype.Array {
+			return nil, false, fmt.Errorf("ValueMarshaler returned a %v, but was expecting %v", btype, bsontype.Array)
+		}
 
+		var hasOutputStage bool
+		pipelineDoc := bsoncore.Document(val)
+		if _, err := pipelineDoc.LookupErr("$out"); err == nil {
+			hasOutputStage = true
+		}
+		if _, err := pipelineDoc.LookupErr("$merge"); err == nil {
+			hasOutputStage = true
+		}
+
+		return pipelineDoc, hasOutputStage, nil
+	default:
+		val := reflect.ValueOf(t)
+		if !val.IsValid() || (val.Kind() != reflect.Slice && val.Kind() != reflect.Array) {
+			return nil, false, fmt.Errorf("can only transform slices and arrays into aggregation pipelines, but got %v", val.Kind())
+		}
+
+		aidx, arr := bsoncore.AppendArrayStart(nil)
+		var hasOutputStage bool
+		valLen := val.Len()
+		for idx := 0; idx < valLen; idx++ {
+			doc, err := transformBsoncoreDocument(registry, val.Index(idx).Interface())
+			if err != nil {
+				return nil, false, err
+			}
+
+			if idx == valLen-1 {
+				if elem, err := doc.IndexErr(0); err == nil && (elem.Key() == "$out" || elem.Key() == "$merge") {
+					hasOutputStage = true
+				}
+			}
+			arr = bsoncore.AppendDocumentElement(arr, strconv.Itoa(idx), doc)
+		}
+		arr, _ = bsoncore.AppendArrayEnd(arr, aidx)
+		return arr, hasOutputStage, nil
+	}
+}
+
+func transformValue(registry *bsoncodec.Registry, val interface{}) (bsoncore.Value, error) {
+	switch conv := val.(type) {
+	case string:
+		return bsoncore.Value{Type: bsontype.String, Data: bsoncore.AppendString(nil, conv)}, nil
+	default:
+		doc, err := transformBsoncoreDocument(registry, val)
+		if err != nil {
+			return bsoncore.Value{}, err
+		}
+
+		return bsoncore.Value{Type: bsontype.EmbeddedDocument, Data: doc}, nil
+	}
+}
+
+// Build the aggregation pipeline for the CountDocument command.
+func countDocumentsAggregatePipeline(registry *bsoncodec.Registry, filter interface{}, opts *options.CountOptions) (bsoncore.Document, error) {
+	filterDoc, err := transformBsoncoreDocument(registry, filter)
 	if err != nil {
 		return nil, err
 	}
-	pipeline = append(pipeline, bsonx.Document(bsonx.Doc{{"$match", bsonx.Document(filterDoc)}}))
 
+	aidx, arr := bsoncore.AppendArrayStart(nil)
+	didx, arr := bsoncore.AppendDocumentElementStart(arr, strconv.Itoa(0))
+	arr = bsoncore.AppendDocumentElement(arr, "$match", filterDoc)
+	arr, _ = bsoncore.AppendDocumentEnd(arr, didx)
+
+	index := 1
 	if opts != nil {
 		if opts.Skip != nil {
-			pipeline = append(pipeline, bsonx.Document(bsonx.Doc{{"$skip", bsonx.Int64(*opts.Skip)}}))
+			didx, arr = bsoncore.AppendDocumentElementStart(arr, strconv.Itoa(index))
+			arr = bsoncore.AppendInt64Element(arr, "$skip", *opts.Skip)
+			arr, _ = bsoncore.AppendDocumentEnd(arr, didx)
+			index++
 		}
 		if opts.Limit != nil {
-			pipeline = append(pipeline, bsonx.Document(bsonx.Doc{{"$limit", bsonx.Int64(*opts.Limit)}}))
+			didx, arr = bsoncore.AppendDocumentElementStart(arr, strconv.Itoa(index))
+			arr = bsoncore.AppendInt64Element(arr, "$limit", *opts.Limit)
+			arr, _ = bsoncore.AppendDocumentEnd(arr, didx)
+			index++
 		}
 	}
 
-	pipeline = append(pipeline, bsonx.Document(bsonx.Doc{
-		{"$group", bsonx.Document(bsonx.Doc{
-			{"_id", bsonx.Null()},
-			{"n", bsonx.Document(bsonx.Doc{{"$sum", bsonx.Int32(1)}})},
-		})},
-	},
-	))
+	didx, arr = bsoncore.AppendDocumentElementStart(arr, strconv.Itoa(index))
+	iidx, arr := bsoncore.AppendDocumentElementStart(arr, "$group")
+	arr = bsoncore.AppendInt32Element(arr, "_id", 1)
+	iiidx, arr := bsoncore.AppendDocumentElementStart(arr, "n")
+	arr = bsoncore.AppendInt32Element(arr, "$sum", 1)
+	arr, _ = bsoncore.AppendDocumentEnd(arr, iiidx)
+	arr, _ = bsoncore.AppendDocumentEnd(arr, iidx)
+	arr, _ = bsoncore.AppendDocumentEnd(arr, didx)
 
-	return pipeline, nil
+	return bsoncore.AppendArrayEnd(arr, aidx)
 }
