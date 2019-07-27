@@ -31,9 +31,6 @@ func GetIcons() error {
 		return err
 	}
 
-	// toSavePath := "./icons/clanIcons"
-	// os.RemoveAll(toSavePath)
-	// os.Mkdir(toSavePath, os.ModePerm)
 	imgAndID := []imageAndIDType{}
 
 	var waitForImgs sync.WaitGroup

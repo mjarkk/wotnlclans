@@ -36,6 +36,7 @@ func SetupAPI() error {
 	} else {
 		other.DevPrint("Skipping searching for clans")
 		GetClanData(clanIds)
+		GetIcons()
 	}
 	GetIcons()
 	Buzzy = false
