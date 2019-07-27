@@ -2,7 +2,8 @@
 [![Site version](https://img.shields.io/badge/Site%20version-V3-blue.svg)](https://wotnlclans.unknownclouds.com/)
 
 ## About
-This is the code for [wotnlbeclans.eu](https://wotnlbeclans.eu/).  
+This contains the code/container for [wotnlbeclans.eu](https://wotnlbeclans.eu/).  
+On this site you can see all Dutch & Belgium clans ranked.  
 
 | Item | Used |
 |---|---|

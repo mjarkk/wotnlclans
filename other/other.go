@@ -2,7 +2,9 @@ package other
 
 import (
 	"crypto/sha1"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"strings"
 )
 
@@ -53,4 +55,64 @@ func FormatSearch(input string) string {
 			-1,
 		),
 	)
+}
+
+// CommunityBlock contains the data for 1 block on the community tab
+type CommunityBlock struct {
+	// Text is the title shown
+	Text string `json:"text"`
+
+	// Background are the options for the background,
+	// There are 3 diffrent options here:
+	// 1. Link to the background image with no background text nor color
+	// 2. background text with background color
+	// 3. Only Color
+	Background struct {
+		Text  string `json:"text"`
+		Color string `json:"color"`
+		Image string `json:"image"`
+	} `json:"background"`
+
+	// Link is the data for the link at the right bottom
+	// if both of these are empty the link button won't be shown
+	Link struct {
+		URL  string `json:"url"`
+		Text string `json:"text"`
+	} `json:"link"`
+
+	// Info can be set if you want to show the I button with
+	// The frontend will transform this to markdown
+	// If empty this will be hidden
+	Info string `json:"info"`
+
+	// Requirements is a list of requirements/block tags
+	// these can be used for hiding a block if they are added
+	//
+	// Supported:
+	// - "discord" (the discord token needs to be available)
+	Requirements []string `json:"requirements"`
+}
+
+var cachedCommunityData []CommunityBlock
+
+// GetCommunityData returns the CommunityBlocks
+func GetCommunityData() []CommunityBlock {
+	if cachedCommunityData != nil {
+		return cachedCommunityData
+	}
+
+	data, err := ioutil.ReadFile("./community.json")
+	if err != nil {
+		fmt.Println("ERROR: Can't read community.json,", err)
+		cachedCommunityData = []CommunityBlock{}
+		return cachedCommunityData
+	}
+
+	err = json.Unmarshal(data, &cachedCommunityData)
+	if err != nil {
+		cachedCommunityData = []CommunityBlock{}
+		return cachedCommunityData
+	}
+
+	return cachedCommunityData
 }
