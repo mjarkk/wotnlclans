@@ -83,6 +83,7 @@ func apiErr(functionName string, err error, meta ...string) {
 	if len(meta) > 0 {
 		insertMeta = meta[0]
 	}
+	fmt.Println("Recived ERROR (API."+functionName+"):", err.Error(), insertMeta)
 	db.AddErr(db.ErrDB{
 		From:    functionName,
 		Message: err.Error(),

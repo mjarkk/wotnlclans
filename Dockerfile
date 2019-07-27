@@ -41,4 +41,4 @@ COPY --from=buildWeb /wotnlclans/web_static/manifest.json /wotnlclans/web_static
 WORKDIR /wotnlclans
 EXPOSE 8282
 
-CMD ./wotnlclans
+CMD ["./wotnlclans", "-debug"]
