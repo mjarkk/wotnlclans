@@ -42,6 +42,7 @@ func GetIcons() error {
 	for _, clan := range clans {
 		go func(clan db.ClanStats) {
 			defer waitForImgs.Done()
+
 			iconToGet, ok := clan.Emblems["X195.Portal"]
 			if !ok || len(iconToGet) == 0 {
 				iconToGet, ok = clan.Emblems["X256.Wowp"]
@@ -59,14 +60,6 @@ func GetIcons() error {
 				apiErr("GetIcons", err, "Can't fetch image: "+iconToGet)
 				return
 			}
-
-			// uriDots := strings.Split(iconToGet, ".")
-			// fileExt := uriDots[len(uriDots)-1]
-			// imgPath := toSavePath + "/" + clan.ID + "." + fileExt
-			// err = ioutil.WriteFile(imgPath, out, 0644)
-			// if err != nil {
-			// 	return
-			// }
 
 			img, _, err := image.Decode(bytes.NewReader(out))
 			if err != nil {
