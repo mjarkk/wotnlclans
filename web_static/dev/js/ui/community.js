@@ -3,6 +3,7 @@ import snarkdown from 'snarkdown'
 import { discordBot } from '../funs/texts'
 import n from '../funs/networking'
 import d from '../funs/dynamic'
+import CommunityBlock from '../els/communityBlock'
 
 const SVG = d(import('../els/svg'))
 
@@ -66,38 +67,11 @@ export default class Comunity extends React.Component {
           Here will be tools, websites, forums, etc for the Dutch and Belgium World Of Tanks community
         </p>
         <div className="floatingElements">
-          {this.state.blocks.map((block, id) =>
-            <div className="floating" key={id} style={{ backgroundColor: block.background.color }}>
-              <div className="back">
-                <h2>{block.background.text.split('\n').map((item, key) => <React.Fragment key={key}>{item}<br /></React.Fragment>)}</h2>
-              </div>
-              <div className="frond">
-                <p>{block.text.split('\n').map((item, key) => <React.Fragment key={key}>{item}<br /></React.Fragment>)}</p>
-                <div className="btns">
-                  <a
-                    href={block.link.url}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >{block.link.text || 'Link'}</a>
-                </div>
-              </div>
-            </div>
+          {this.state.blocks.map((block, key) =>
+            block.requirements.indexOf('discord') != -1 && !this.state.inviteLink
+              ? ''
+              : <CommunityBlock key={key} data={block} />
           )}
-          <div className="floating facebookCommunity">
-            <div className="back">
-              <h2>FACE<br />BOOK</h2>
-            </div>
-            <div className="frond">
-              <p>Join the WOT NL/BE clans <span>Facebook community</span></p>
-              <div className="btns">
-                <a
-                  href="https://www.facebook.com/groups/wotbelgium/"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >Go To</a>
-              </div>
-            </div>
-          </div>
           {this.state.inviteLink && !this.state.hasError ?
             <div className="floating discordBot">
               <div className="back">
