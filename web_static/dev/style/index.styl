@@ -461,22 +461,73 @@ button
     font-weight 700
 
 .community
-  padding-bottom 100px
+  padding-bottom 200px
   h2
     padding 20px 20px 0px 20px
   .about
     padding 0px 20px 20px 20px
+  .blockCreator
+    justify-content center
+    align-items flex-start
+    flex-wrap wrap
+    .side
+      max-width 450px
+      width 100%
+      padding 10px
+      box-sizing border-box
+      display inline-block
+    .data
+      background-color white
+      border-radius 10px
+      color black
+      h3
+        font-size 30px
+        border-bottom 2px solid #ddd
+      .input
+        padding-top 10px
+        label 
+          font-weight bold
+          display block
+        input, textarea
+          display block
+          font-size 16px
+          padding 2px
+          box-sizing border-box
+          width 100%
+          background-color #eee
+          border-bottom 2px solid gray
+        textarea
+          height 100px
+        textarea.mini
+          height 45px
+        .checkbox
+          display inline-block
+          height 20px
+          width 20px
+          border 2px solid black
+          cursor pointer
+          border-radius 3px
+          .check
+            height 16px
+            width 16px
+            background-color white
+            border 2px solid white
+            border-radius 3px
+            transition background-color 0.2s
+        .checkbox.checked .check
+          background-color black
   .commingSoon 
     margin 20px
     font-size 22px
     display inline-block
     padding 3px 15px 5px 15px
-    border 3px solid #b04ebf
-    background-color #6a2175 
+    border 2px solid #da5eed
+    background-color #5b1665 
     color white
     border-radius 10px
     transform scale(1)
     transition transform 0.2s
+    cursor pointer
     &:hover
       transform scale(1.01)
   .fullscreen
@@ -534,101 +585,102 @@ button
     flex-direction row
     flex-wrap wrap
     padding 0px 20px 20px 0px
-    .floating
-      box-shadow 0px 5px 30px -10px rgba(0,0,0,0.6)
-      margin 20px 0px 0px 20px
-      height 240px
-      width 380px
-      max-width 85vw
-      border-radius 20px
-      background-position center
-      background-size cover
-      overflow hidden
-      transform scale(1)
-      transition transform 0.2s
-      &:hover
-        transform scale(1.02)
-      .back
-        height 100%
-        width 100%
-        h1, h2
-          padding 0px
-          font-weight 700
-          font-style italic
-          opacity 0.1
-          color black
-          position relative
-        h1
-          font-size 200px
-          top -35px
-          left -73px
-        h2
-          font-size 160px
-          line-height 0.8
-          top -15px
-          left -45px
+.floating
+  box-shadow 0px 5px 30px -10px rgba(0,0,0,0.6)
+  margin 20px 0px 0px 20px
+  height 240px
+  width 380px
+  max-width 85vw
+  border-radius 20px
+  background-position center
+  background-size cover
+  overflow hidden
+  transform scale(1)
+  transition transform 0.2s, background-color 0.2s
+  will-change transform, background-color
+  &:hover
+    transform scale(1.02)
+  .back
+    height 100%
+    width 100%
+    h1, h2
+      padding 0px
+      font-weight 700
+      font-style italic
+      opacity 0.1
+      color black
+      position relative
+    h1
+      font-size 200px
+      top -35px
+      left -73px
+    h2
+      font-size 160px
+      line-height 0.8
+      top -15px
+      left -45px
 
-      .frond
-        position relative
-        top -100%
-        height 100%
-        width 100%
-        padding 15px
-        box-sizing border-box
-        display flex
-        flex-direction column
-        .btns
-          display flex
-          justify-content space-between
-          .infoBtn
-            display inline-block
-            cursor pointer
-            svg
-              height 40px
-              fill white
-              position relative
-              top 4px
-              transform scale(1)
-              transition transform 0.2s, fill 0.1s
-              &:hover
-                transform scale(1.2)
-                fill #6700ff
-        p, a
-          font-weight bold
-          display inline-block
-        p
-          height 100%
-          font-size 35px
-          color rgb(240,240,240)
-          line-height 1.05
-          span
-            color #fff
-            font-size 38px
-        a
-          background-color #27214b
-          font-size 25px
-          cursor pointer
-          color white
-          padding 4px 25px 6px 25px
-          -webkit-user-select none       
-          -moz-user-select none
-          -ms-user-select none
-          user-select none
-          border-radius 8px
-          box-shadow 0px 3px 40px -5px rgba(0,0,0,0.5)
-          text-decoration none
-          transition background-color 0.2s
+  .frond
+    position relative
+    top -100%
+    height 100%
+    width 100%
+    padding 15px
+    box-sizing border-box
+    display flex
+    flex-direction column
+    .btns
+      display flex
+      justify-content space-between
+      .infoBtn
+        display inline-block
+        cursor pointer
+        svg
+          height 40px
+          fill white
+          position relative
+          top 4px
+          transform scale(1)
+          transition transform 0.2s, fill 0.1s
           &:hover
-            background-color #6700ff
-      @media screen and (max-width: 450px)
-        .frond
-          p
-            font-size 28px
-        .back
-          h1
-            font-size 196px
-            top -29px
-            left -78px
+            transform scale(1.2)
+            fill #6700ff
+    p, a
+      font-weight bold
+      display inline-block
+    p
+      height 100%
+      font-size 35px
+      color rgb(240,240,240)
+      line-height 1.05
+      span
+        color #fff
+        font-size 38px
+    a
+      background-color #27214b
+      font-size 25px
+      cursor pointer
+      color white
+      padding 4px 25px 6px 25px
+      -webkit-user-select none       
+      -moz-user-select none
+      -ms-user-select none
+      user-select none
+      border-radius 8px
+      box-shadow 0px 3px 40px -5px rgba(0,0,0,0.5)
+      text-decoration none
+      transition background-color 0.2s
+      &:hover
+        background-color #6700ff
+  @media screen and (max-width: 450px)
+    .frond
+      p
+        font-size 28px
+    .back
+      h1
+        font-size 196px
+        top -29px
+        left -78px
 
 .settingsBlock
   max-width 500px
