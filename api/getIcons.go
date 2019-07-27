@@ -1,13 +1,13 @@
 package api
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"image"
 	"image/draw"
 	"image/png" // This needs to be imported because otherwhise image.Decode won't work with png images
+	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -126,22 +126,15 @@ func GetIcons() error {
 			return err
 		}
 
-		file, err = os.Create("./icons/allIcons.json")
+		data, err := json.Marshal(ids)
 		if err != nil {
-			apiErr("GetIcons", err, "Can't create allIcons.json")
+			apiErr("GetIcons", err, "Can't transform clan id's into json")
 			return err
 		}
-		writer := bufio.NewWriter(file)
 
-		defer func() {
-			writer.Flush()
-			file.Close()
-		}()
-
-		jsonEncoder := json.NewEncoder(writer)
-		err = jsonEncoder.Encode(ids)
+		err = ioutil.WriteFile("./icons/allIcons.json", data, 0666)
 		if err != nil {
-			apiErr("GetIcons", err, "Can't encode config into json")
+			apiErr("GetIcons", err, "Can't create allIcons.json")
 			return err
 		}
 	}
