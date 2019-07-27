@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"image"
 	"image/draw"
 	"image/png" // This needs to be imported because otherwhise image.Decode won't work with png images
@@ -16,7 +17,6 @@ import (
 	"github.com/disintegration/imaging"
 	webpbin "github.com/mjarkk/go-webpbin"
 	"github.com/mjarkk/wotnlclans/db"
-	"github.com/mjarkk/wotnlclans/other"
 )
 
 type imageAndIDType struct {
@@ -26,7 +26,7 @@ type imageAndIDType struct {
 
 // GetIcons fetches all clan icons and creates a grid
 func GetIcons() error {
-	other.DevPrint("Getting clan icons...")
+	fmt.Println("Getting clan icons...")
 	clans, err := db.GetCurrentClansData()
 	if err != nil {
 		return err

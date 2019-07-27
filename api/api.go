@@ -27,17 +27,17 @@ func SetupAPI() error {
 	}
 	fmt.Println("Running api...")
 	Buzzy = true
+	GetIcons()
 	clanIds := db.GetClanIDs()
 	if len(clanIds) == 0 {
+		fmt.Println("First!")
 		err := SearchForClanIds(flags, true)
 		if err != nil {
-			other.DevPrint("ERROR: [SearchForClanIds]:", err.Error())
+			fmt.Println("ERROR: [SearchForClanIds]:", err.Error())
+			return err
 		}
 	} else {
-		other.DevPrint("Skipping searching for clans")
-		GetIcons()
 		GetClanData(clanIds)
-		GetIcons()
 	}
 	GetIcons()
 	Buzzy = false
