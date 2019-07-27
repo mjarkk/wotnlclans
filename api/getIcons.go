@@ -9,6 +9,7 @@ import (
 	"image/png" // This needs to be imported because otherwhise image.Decode won't work with png images
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -114,6 +115,21 @@ func GetIcons() error {
 		}
 		png.Encode(file, outputImg)
 		file.Close()
+
+		doesNotSupportWebPBin := false
+		if runtime.GOARCH == "arm" {
+			doesNotSupportWebPBin = true
+		} else if runtime.GOOS == "linux" {
+			output, err := ioutil.ReadFile("/etc/issue")
+			if err == nil && bytes.Contains(bytes.ToLower(output), []byte("alpine")) {
+				doesNotSupportWebPBin = true
+			}
+		}
+
+		webpbin.DetectUnsupportedPlatforms()
+		if doesNotSupportWebPBin {
+			webpbin.Dest("vendor/webp")
+		}
 
 		err = webpbin.NewCWebP().
 			Quality(50).
