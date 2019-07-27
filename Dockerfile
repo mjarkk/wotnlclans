@@ -20,7 +20,7 @@ RUN yarn && yarn build
 
 FROM alpine
 
-RUN apk add ca-certificates ffmpeg libwebp libwebp-tools \
+RUN apk add ca-certificates libwebp libwebp-tools \
   && mkdir /wotnlclans \
   && mkdir /wotnlclans/web_static \
   && mkdir /wotnlclans/vendor \
