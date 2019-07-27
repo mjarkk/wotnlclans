@@ -36,6 +36,7 @@ COPY --from=buildWeb /wotnlclans/wotnlclans /wotnlclans/wotnlclans
 COPY --from=buildWeb /wotnlclans/icons /wotnlclans/icons
 COPY --from=buildWeb /wotnlclans/community.json /wotnlclans/community.json
 COPY --from=buildWeb /wotnlclans/web_static/build /wotnlclans/web_static/build
+COPY --from=buildWeb /wotnlclans/web_static/manifest.json /wotnlclans/web_static/manifest.json
 
 WORKDIR /wotnlclans
 EXPOSE 8282

@@ -35,6 +35,7 @@ func SetupAPI() error {
 		}
 	} else {
 		other.DevPrint("Skipping searching for clans")
+		GetIcons()
 		GetClanData(clanIds)
 		GetIcons()
 	}
