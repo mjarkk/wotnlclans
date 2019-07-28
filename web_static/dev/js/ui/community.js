@@ -16,7 +16,7 @@ export default class Comunity extends React.Component {
       hasError: false,
       showInfo: false,
       blocks: [],
-      showBlockCreator: true,
+      showBlockCreator: false,
       blockCratorBackgroundImage: false,
       blockCreatorErrors: [],
       blockCreatorFirstFetch: false,
