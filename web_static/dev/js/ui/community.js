@@ -17,7 +17,7 @@ export default class Comunity extends React.Component {
       showInfo: false,
       blocks: [],
       showBlockCreator: false,
-      blockCratorBackgroundImage: false,
+      blockCratorBackgroundImage: true,
       blockCreatorErrors: [],
       blockCreatorFirstFetch: false,
       blockCreatorData: {
@@ -61,7 +61,6 @@ export default class Comunity extends React.Component {
     }).then(out => out.json()).then(data => {
       if (data.status) {
         this.endRanValidateBlock(blockData, data.data.errors)
-        console.log(data.data.errors)
       } else {
         this.endRanValidateBlock()
         console.log("Post error:", data.error)
@@ -146,7 +145,7 @@ export default class Comunity extends React.Component {
               {this.state.blockCratorBackgroundImage ?
                 <React.Fragment>
                   <div className="input">
-                    <label htmlFor="background-url">Backgorund image url:</label>
+                    <label htmlFor="background-url">Background image url:</label>
                     <input
                       id="background-url"
                       type="input"
@@ -198,23 +197,22 @@ export default class Comunity extends React.Component {
                     </div>
                     : this.state.blockCreatorErrors.length == 0 ?
                       <div className="submit">
-                        <h4>Submit block,</h4>
-                        <p>There are 2 ways you can submit a new block</p>
+                        <h4>Submit the block</h4>
+                        <p>From here you can submit the code for the block to DPG</p>
                         <div className="options">
                           <a
                             href={`mailto:info@dpg-hq.eu?subject=${encodeURIComponent('(Wot NL/BE clans) Een kader toevoegen aan community pagina')}&body=${encodeURIComponent('Zou deze kader mogen toegevoegt worden aan de WOT NL/BE clans site?\n\n' + JSON.stringify(this.state.blockCreatorData, null, 2) + '\n\nM.V.G.\n...')}`}
                             rel="noopener noreferrer" target="_blank" className="option email"
                           >
-                            <p>Might take longer</p>
-                            <h3>Email dpg clan</h3>
+                            <p>info@dpg-hq.eu</p>
+                            <h3>Make email</h3>
                           </a>
-                          <a
-                            href={`https://github.com/mjarkk/wotnlclans/issues/new?title=${encodeURIComponent('Add block to community page')}&body=${encodeURIComponent('\`\`\`json\n' + JSON.stringify(this.state.blockCreatorData, null, 2) + '\n\`\`\`')}`}
-                            rel="noopener noreferrer" target="_blank" className="option github"
-                          >
-                            <p>Fastest</p>
-                            <h3>Via a Github issue</h3>
-                          </a>
+                        </div>
+                        <div className="manual">
+                          <h4>If the email button doesn't work:</h4>
+                          <p>Address: <b>info@dpg-hq.eu</b></p>
+                          <p>Make sure to include:</p>
+                          <pre>{JSON.stringify(this.state.blockCreatorData, null, 2)}</pre>
                         </div>
                       </div>
                       :
