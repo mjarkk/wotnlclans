@@ -467,19 +467,65 @@ button
   .about
     padding 0px 20px 20px 20px
   .blockCreator
+    padding-top 100px
     justify-content center
     align-items flex-start
     flex-wrap wrap
     .side
       max-width 450px
       width 100%
-      padding 10px
       box-sizing border-box
       display inline-block
+    .preview
+      padding 0px 10px
+      .floating
+        margin 0px 10px
     .data
+      padding 10px
       background-color white
       border-radius 10px
       color black
+      margin-bottom 10px
+      .submit, .errors, .loading
+        padding-top 20px
+        padding-bottom 5px
+        h4
+          font-size 22px
+      .submit
+        .options
+          display flex
+          flex-wrap wrap
+          .option
+            display inline-block
+            padding 10px
+            border-radius 5px
+            margin 10px
+            max-width 160px
+            cursor pointer
+            border-width 2px
+            border-style solid
+            color black
+            transition background-color 0.2s, color 0.2s
+            text-decoration none
+            &:hover
+              color white
+            &.github
+              background-color #b4def1
+              border-color #619bb6
+              &:hover
+                background-color #619bb6
+            &.email
+              background-color #7ffdc6
+              border-color: #45be89
+              &:hover
+                background-color #45be89
+            h3
+              border-bottom 0px solid #eee
+              font-size 20px
+            p
+              font-weight bold
+              font-style italic
+              font-size 16px
       h3
         font-size 30px
         border-bottom 2px solid #ddd
@@ -502,20 +548,34 @@ button
           height 45px
         .checkbox
           display inline-block
-          height 20px
-          width 20px
+          min-height 24px
+          min-width 24px
+          max-height 24px
+          max-width 24px
+          margin 0px
           border 2px solid black
+          background-color white
           cursor pointer
           border-radius 3px
-          .check
-            height 16px
-            width 16px
-            background-color white
-            border 2px solid white
-            border-radius 3px
-            transition background-color 0.2s
-        .checkbox.checked .check
-          background-color black
+          padding 0px
+          overflow hidden
+        .check
+          display inline-block
+          position relative
+          top 0px
+          right 22px
+          min-height 16px
+          min-width 16px
+          max-height 16px
+          max-width 16px
+          padding 0px
+          margin 0px
+          background-color white
+          border 2px solid white
+          border-radius 5px
+          transition background-color 0.2s
+      .check.checked
+        background-color black
   .commingSoon 
     margin 20px
     font-size 22px

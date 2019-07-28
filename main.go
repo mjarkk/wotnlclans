@@ -37,5 +37,5 @@ func main() {
 	r := server.SetupRouter()
 	addr := other.Flags.WebServerLocation
 	fmt.Println("Running server on", addr)
-	r.Run(addr)
+	fmt.Println("ERROR:", r.Run(addr))
 }

@@ -3,6 +3,7 @@ package other
 import (
 	"crypto/sha1"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -115,4 +116,84 @@ func GetCommunityData() []CommunityBlock {
 	}
 
 	return cachedCommunityData
+}
+
+// CheckCommunityBlock checks a communityblock and returns in a slice the errors if found
+func (block *CommunityBlock) CheckCommunityBlock() []string {
+	foundErrors := []string{}
+	addErr := func(err string) {
+		foundErrors = append(foundErrors, err)
+	}
+
+	bgColor := block.Background.Color
+	bgImage := block.Background.Image
+	if len(bgImage) > 0 {
+		if !strings.HasPrefix(bgImage, "https://") {
+			addErr("A background image must start with https:// not http:// nor some.url.com")
+		}
+		if len(bgImage) > 100 {
+			addErr("The background images url can't contain more than 100 characters")
+		}
+	} else if len(bgColor) > 0 {
+		checkColor := func(c string) error {
+			c = string(c[1:])
+			if len(c) != 3 && len(c) != 6 {
+				return errors.New("not a valid hex color")
+			}
+			toReplace := strings.Split("1234567890abcdefABCDEF", "")
+			for _, item := range toReplace {
+				c = strings.Replace(c, item, "", -1)
+			}
+			if len(c) > 0 {
+				return errors.New("not a valid hex color")
+			}
+			return nil
+		}
+		if !strings.HasPrefix(bgColor, "#") || checkColor(bgColor) != nil {
+			addErr("a background color must be a valid hex color like #000000 or #a1b2c3")
+		}
+	} else {
+		addErr("You must have a background color or image")
+	}
+
+	bgText := block.Background.Text
+	if len(bgText) > 16 {
+		addErr("The background text can't contain more than 16 characters")
+	}
+
+	linkText := block.Link.Text
+	if len(linkText) > 15 {
+		addErr("The link text can't contain more than 15 characters")
+	}
+
+	linkURL := block.Link.URL
+	if linkURL != "" {
+		if !strings.HasPrefix(linkURL, "https://") {
+			addErr("A background image must start with https:// not http:// nor some.url.com")
+		}
+		if len(linkURL) > 100 {
+			addErr("The background images url can't contain more than 100 characters")
+		}
+	}
+
+	if len(block.Requirements) > 0 {
+		addErr("Invalid requirements")
+	}
+
+	if len(block.Text) > 60 {
+		addErr("The title can't contain more than 60 characters")
+	}
+
+	if len(block.Text) > 60 {
+		addErr("The title can't contain more than 60 characters")
+	}
+
+	if len(block.Info) > 1700 {
+		addErr("The info can't contain more than 60 characters")
+	}
+	if strings.Contains(block.Info, "javascript:") || strings.Contains(block.Info, "data:") {
+		addErr("The info can't contain `javascript:` or `data:`")
+	}
+
+	return foundErrors
 }
