@@ -1,5 +1,7 @@
 package db
 
+import "github.com/mongodb/mongo-go-driver/bson"
+
 // ErrDB is what a database error entry contains
 type ErrDB struct {
 	From    string `json:"from" bson:"from"`       // the function that triggerd the adding of errors
@@ -13,7 +15,7 @@ func GetErrors() ([]ErrDB, error) {
 	toReturn := []ErrDB{}
 
 	collection := DB.Collection("appErrors")
-	cur, err := collection.Find(C(), nil)
+	cur, err := collection.Find(C(), bson.M{})
 	if err != nil {
 		return toReturn, err
 	}

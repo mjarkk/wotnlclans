@@ -9,15 +9,16 @@ import (
 
 // FlagsType is the interface for the program flags
 type FlagsType struct {
-	Debug               bool
-	Dev                 bool
-	WGKey               string
-	MaxIndexPages       int
-	SkipStartupIndexing bool
-	MongoUIR            string
-	MongoDataBase       string
-	WebServerLocation   string
-	DiscordAuthToken    string
+	Debug                bool
+	Dev                  bool
+	WGKey                string
+	MaxIndexPages        int
+	SkipStartupIndexing  bool
+	ForceStartupIndexing bool
+	MongoUIR             string
+	MongoDataBase        string
+	WebServerLocation    string
+	DiscordAuthToken     string
 }
 
 // Flags have some global settings for the program
@@ -27,10 +28,11 @@ var defaultWebServerLocation = "localhost:8282"
 
 // SetupFlags sets up the Flags var
 func SetupFlags() {
-	debug := fBool("debug", false, "debug the program")
-	dev := fBool("dev", false, "launch the project in dev mode")
+	debug := fBool("debug", "debug the program")
+	dev := fBool("dev", "launch the project in dev mode")
 	maxIndexPages := fInt("maxindexpages", 4000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
-	skipStartupIndexing := fBool("skipstartupindexing", false, "skip the indexing of clans on start")
+	skipStartupIndexing := fBool("skipstartupindexing", "skip the indexing of clans on start (only for development)")
+	forceStartupIndexing := fBool("forcestartupindexing", "force indexing at startup")
 	webServerLocation := fString("webserverLocation", defaultWebServerLocation, "On with address and port to create a webserver")
 	discordAuthToken := fString("discordAuthToken", "", "Spesifi the discord api authentication token")
 
@@ -79,15 +81,16 @@ func SetupFlags() {
 	}
 
 	Flags = FlagsType{
-		Debug:               *debug,
-		Dev:                 *dev,
-		WGKey:               wgKey,
-		MaxIndexPages:       *maxIndexPages,
-		SkipStartupIndexing: *skipStartupIndexing,
-		MongoUIR:            mongoURI,
-		MongoDataBase:       mongoDataBase,
-		WebServerLocation:   *webServerLocation,
-		DiscordAuthToken:    discordAuthTokenOverwrite,
+		Debug:                *debug,
+		Dev:                  *dev,
+		WGKey:                wgKey,
+		MaxIndexPages:        *maxIndexPages,
+		SkipStartupIndexing:  *skipStartupIndexing,
+		ForceStartupIndexing: *forceStartupIndexing,
+		MongoUIR:             mongoURI,
+		MongoDataBase:        mongoDataBase,
+		WebServerLocation:    *webServerLocation,
+		DiscordAuthToken:     discordAuthTokenOverwrite,
 	}
 }
 
@@ -104,8 +107,8 @@ func Run(input string, executeingDir string) error {
 }
 
 // fBool can set a boolean flag
-func fBool(name string, value bool, usage string) *bool {
-	return flag.Bool(name, value, usage)
+func fBool(name string, usage string) *bool {
+	return flag.Bool(name, false, usage)
 }
 
 // fString can set a string flag

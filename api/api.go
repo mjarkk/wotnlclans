@@ -29,8 +29,7 @@ func SetupAPI() error {
 	Buzzy = true
 	GetIcons()
 	clanIds := db.GetClanIDs()
-	if len(clanIds) == 0 {
-		fmt.Println("First!")
+	if len(clanIds) == 0 || flags.ForceStartupIndexing {
 		err := SearchForClanIds(flags, true)
 		if err != nil {
 			fmt.Println("ERROR: [SearchForClanIds]:", err.Error())

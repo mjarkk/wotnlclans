@@ -65,7 +65,7 @@ func RemoveClanIDs(toRemove []string) {
 // GetClanIDs returns the clans ids that where found after searching for new clans
 func GetClanIDs() []string {
 	collection := DB.Collection("clanIDs")
-	cur, err := collection.Find(C(), nil)
+	cur, err := collection.Find(C(), bson.M{})
 	if err != nil {
 		return []string{}
 	}
