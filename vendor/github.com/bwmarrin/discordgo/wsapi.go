@@ -261,7 +261,6 @@ type heartbeatOp struct {
 
 type helloOp struct {
 	HeartbeatInterval time.Duration `json:"heartbeat_interval"`
-	Trace             []string      `json:"_trace"`
 }
 
 // FailedHeartbeatAcks is the Number of heartbeat intervals to wait until forcing a connection restart.
@@ -499,7 +498,7 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 	// Must immediately disconnect from gateway and reconnect to new gateway.
 	if e.Operation == 7 {
 		s.log(LogInformational, "Closing and reconnecting in response to Op7")
-		s.Close()
+		s.CloseWithCode(websocket.CloseServiceRestart)
 		s.reconnect()
 		return e, nil
 	}
@@ -615,11 +614,7 @@ func (s *Session) ChannelVoiceJoin(gID, cID string, mute, deaf bool) (voice *Voi
 	voice.session = s
 	voice.Unlock()
 
-	// Send the request to Discord that we want to join the voice channel
-	data := voiceChannelJoinOp{4, voiceChannelJoinData{&gID, &cID, mute, deaf}}
-	s.wsMutex.Lock()
-	err = s.wsConn.WriteJSON(data)
-	s.wsMutex.Unlock()
+	err = s.ChannelVoiceJoinManual(gID, cID, mute, deaf)
 	if err != nil {
 		return
 	}
@@ -640,22 +635,25 @@ func (s *Session) ChannelVoiceJoin(gID, cID string, mute, deaf bool) (voice *Voi
 // This should only be used when the VoiceServerUpdate will be intercepted and used elsewhere.
 //
 //    gID     : Guild ID of the channel to join.
-//    cID     : Channel ID of the channel to join.
+//    cID     : Channel ID of the channel to join, leave empty to disconnect.
 //    mute    : If true, you will be set to muted upon joining.
 //    deaf    : If true, you will be set to deafened upon joining.
 func (s *Session) ChannelVoiceJoinManual(gID, cID string, mute, deaf bool) (err error) {
 
 	s.log(LogInformational, "called")
 
+	var channelID *string
+	if cID == "" {
+		channelID = nil
+	} else {
+		channelID = &cID
+	}
+
 	// Send the request to Discord that we want to join the voice channel
-	data := voiceChannelJoinOp{4, voiceChannelJoinData{&gID, &cID, mute, deaf}}
+	data := voiceChannelJoinOp{4, voiceChannelJoinData{&gID, channelID, mute, deaf}}
 	s.wsMutex.Lock()
 	err = s.wsConn.WriteJSON(data)
 	s.wsMutex.Unlock()
-	if err != nil {
-		return
-	}
-
 	return
 }
 
@@ -835,9 +833,13 @@ func (s *Session) reconnect() {
 	}
 }
 
+func (s *Session) Close() error {
+	return s.CloseWithCode(websocket.CloseNormalClosure)
+}
+
 // Close closes a websocket and stops all listening/heartbeat goroutines.
 // TODO: Add support for Voice WS/UDP connections
-func (s *Session) Close() (err error) {
+func (s *Session) CloseWithCode(closeCode int) (err error) {
 
 	s.log(LogInformational, "called")
 	s.Lock()
@@ -859,7 +861,7 @@ func (s *Session) Close() (err error) {
 		// To cleanly close a connection, a client should send a close
 		// frame and wait for the server to close the connection.
 		s.wsMutex.Lock()
-		err := s.wsConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+		err := s.wsConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, ""))
 		s.wsMutex.Unlock()
 		if err != nil {
 			s.log(LogInformational, "error closing websocket, %s", err)

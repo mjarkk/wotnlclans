@@ -49,11 +49,13 @@ type Find struct {
 	clock               *session.ClusterClock
 	collection          string
 	monitor             *event.CommandMonitor
+	crypt               *driver.Crypt
 	database            string
 	deployment          driver.Deployment
 	readConcern         *readconcern.ReadConcern
 	readPreference      *readpref.ReadPref
 	selector            description.ServerSelector
+	retry               *driver.RetryMode
 	result              driver.CursorResponse
 }
 
@@ -84,9 +86,12 @@ func (f *Find) Execute(ctx context.Context) error {
 	return driver.Operation{
 		CommandFn:         f.command,
 		ProcessResponseFn: f.processResponse,
+		RetryMode:         f.retry,
+		Type:              driver.Read,
 		Client:            f.session,
 		Clock:             f.clock,
 		CommandMonitor:    f.monitor,
+		Crypt:             f.crypt,
 		Database:          f.database,
 		Deployment:        f.deployment,
 		ReadConcern:       f.readConcern,
@@ -418,6 +423,16 @@ func (f *Find) CommandMonitor(monitor *event.CommandMonitor) *Find {
 	return f
 }
 
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (f *Find) Crypt(crypt *driver.Crypt) *Find {
+	if f == nil {
+		f = new(Find)
+	}
+
+	f.crypt = crypt
+	return f
+}
+
 // Database sets the database to run this operation against.
 func (f *Find) Database(database string) *Find {
 	if f == nil {
@@ -465,5 +480,16 @@ func (f *Find) ServerSelector(selector description.ServerSelector) *Find {
 	}
 
 	f.selector = selector
+	return f
+}
+
+// Retry enables retryable mode for this operation. Retries are handled automatically in driver.Operation.Execute based
+// on how the operation is set.
+func (f *Find) Retry(retry driver.RetryMode) *Find {
+	if f == nil {
+		f = new(Find)
+	}
+
+	f.retry = &retry
 	return f
 }

@@ -27,11 +27,11 @@ import (
 const minHeartbeatInterval = 500 * time.Millisecond
 const connectionSemaphoreSize = math.MaxInt64
 
-// ErrServerClosed occurs when an attempt to get a connection is made after
+// ErrServerClosed occurs when an attempt to Get a connection is made after
 // the server has been closed.
 var ErrServerClosed = errors.New("server is closed")
 
-// ErrServerConnected occurs when at attempt to connect is made after a server
+// ErrServerConnected occurs when at attempt to Connect is made after a server
 // has already been connected.
 var ErrServerConnected = errors.New("server is connected")
 
@@ -58,6 +58,7 @@ const (
 	disconnecting
 	connected
 	connecting
+	initialized
 )
 
 func connectionStateString(state int32) string {
@@ -70,6 +71,8 @@ func connectionStateString(state int32) string {
 		return "Connected"
 	case 3:
 		return "Connecting"
+	case 4:
+		return "Initialized"
 	}
 
 	return ""
@@ -86,9 +89,10 @@ type Server struct {
 	sem  *semaphore.Weighted
 
 	// goroutine management fields
-	done     chan struct{}
-	checkNow chan struct{}
-	closewg  sync.WaitGroup
+	done          chan struct{}
+	checkNow      chan struct{}
+	disconnecting chan struct{}
+	closewg       sync.WaitGroup
 
 	// description related fields
 	desc                   atomic.Value // holds a description.Server
@@ -125,7 +129,7 @@ func NewServer(addr address.Address, opts ...ServerOption) (*Server, error) {
 		return nil, err
 	}
 
-	var maxConns = uint64(cfg.maxConns)
+	var maxConns = cfg.maxConns
 	if maxConns == 0 {
 		maxConns = math.MaxInt64
 	}
@@ -136,16 +140,27 @@ func NewServer(addr address.Address, opts ...ServerOption) (*Server, error) {
 
 		sem: semaphore.NewWeighted(int64(maxConns)),
 
-		done:     make(chan struct{}),
-		checkNow: make(chan struct{}, 1),
+		done:          make(chan struct{}),
+		checkNow:      make(chan struct{}, 1),
+		disconnecting: make(chan struct{}),
 
 		subscribers: make(map[uint64]chan description.Server),
 	}
 	s.desc.Store(description.Server{Addr: addr})
 
 	callback := func(desc description.Server) { s.updateDescription(desc, false) }
-	s.pool = newPool(addr, uint64(cfg.maxIdleConns), withServerDescriptionCallback(callback, cfg.connectionOpts...)...)
+	pc := poolConfig{
+		Address:     addr,
+		MinPoolSize: cfg.minConns,
+		MaxPoolSize: cfg.maxConns,
+		MaxIdleTime: cfg.connectionPoolMaxIdleTime,
+		PoolMonitor: cfg.poolMonitor,
+	}
 
+	s.pool, err = newPool(pc, withServerDescriptionCallback(callback, cfg.connectionOpts...)...)
+	if err != nil {
+		return nil, err
+	}
 	return s, nil
 }
 
@@ -164,7 +179,7 @@ func (s *Server) Connect(updateCallback func(description.Server)) error {
 
 // Disconnect closes sockets to the server referenced by this Server.
 // Subscriptions to this Server will be closed. Disconnect will shutdown
-// any monitoring goroutines, close the idle connection pool, and will
+// any monitoring goroutines, closeConnection the idle connection pool, and will
 // wait until all the in use connections have been returned to the connection
 // pool and are closed before returning. If the context expires via
 // cancellation, deadline, or timeout before the in use connections have been
@@ -180,7 +195,14 @@ func (s *Server) Disconnect(ctx context.Context) error {
 
 	// For every call to Connect there must be at least 1 goroutine that is
 	// waiting on the done channel.
-	s.done <- struct{}{}
+	select {
+	case <-ctx.Done():
+		// signal a disconnect and still wait for receiver of done
+		// to finish.
+		close(s.disconnecting)
+		s.done <- struct{}{}
+	case s.done <- struct{}{}:
+	}
 	err := s.pool.disconnect(ctx)
 	if err != nil {
 		return err
@@ -194,28 +216,43 @@ func (s *Server) Disconnect(ctx context.Context) error {
 
 // Connection gets a connection to the server.
 func (s *Server) Connection(ctx context.Context) (driver.Connection, error) {
+
+	if s.pool.monitor != nil {
+		s.pool.monitor.Event(&event.PoolEvent{
+			Type:    "ConnectionCheckOutStarted",
+			Address: s.pool.address.String(),
+		})
+	}
+
 	if atomic.LoadInt32(&s.connectionstate) != connected {
 		return nil, ErrServerClosed
 	}
 
 	err := s.sem.Acquire(ctx, 1)
 	if err != nil {
-		return nil, err
+		if s.pool.monitor != nil {
+			s.pool.monitor.Event(&event.PoolEvent{
+				Type:    "ConnectionCheckOutFailed",
+				Address: s.pool.address.String(),
+				Reason:  "timeout",
+			})
+		}
+		return nil, ErrWaitQueueTimeout
 	}
 
 	conn, err := s.pool.get(ctx)
 	if err != nil {
 		s.sem.Release(1)
-		connerr, ok := err.(ConnectionError)
-		if !ok {
+		wrappedConnErr := unwrapConnectionError(err)
+		if wrappedConnErr == nil {
 			return nil, err
 		}
 
-		// Since the only kind of ConnectionError we receive from pool.get will be an initialization
+		// Since the only kind of ConnectionError we receive from pool.Get will be an initialization
 		// error, we should set the description.Server appropriately.
 		desc := description.Server{
 			Kind:      description.Unknown,
-			LastError: connerr.Wrapped,
+			LastError: wrappedConnErr,
 		}
 		s.updateDescription(desc, false)
 
@@ -280,15 +317,19 @@ func (s *Server) RequestImmediateCheck() {
 
 // ProcessError handles SDAM error handling and implements driver.ErrorProcessor.
 func (s *Server) ProcessError(err error) {
-	// Invalidate server description if not master or node recovering error occurs
-	if cerr, ok := err.(driver.Error); ok && (cerr.NetworkError() || cerr.NodeIsRecovering() || cerr.NotMaster()) {
+	// Invalidate server description if not master or node recovering error occurs.
+	// These errors can be reported as a command error or a write concern error.
+	if cerr, ok := err.(driver.Error); ok && (cerr.NodeIsRecovering() || cerr.NotMaster()) {
 		desc := s.Description()
 		desc.Kind = description.Unknown
 		desc.LastError = err
 		// updates description to unknown
 		s.updateDescription(desc, false)
-		s.RequestImmediateCheck()
-		s.pool.drain()
+		// If the node is shutting down or is older than 4.2, we synchronously clear the pool
+		if cerr.NodeIsShuttingDown() || desc.WireVersion == nil || desc.WireVersion.Max < 8 {
+			s.RequestImmediateCheck()
+			s.pool.clear()
+		}
 		return
 	}
 	if wcerr, ok := err.(driver.WriteConcernError); ok && (wcerr.NodeIsRecovering() || wcerr.NotMaster()) {
@@ -297,20 +338,24 @@ func (s *Server) ProcessError(err error) {
 		desc.LastError = err
 		// updates description to unknown
 		s.updateDescription(desc, false)
-		s.RequestImmediateCheck()
-		s.pool.drain()
+		// If the node is shutting down or is older than 4.2, we synchronously clear the pool
+		if wcerr.NodeIsShuttingDown() || desc.WireVersion == nil || desc.WireVersion.Max < 8 {
+			s.RequestImmediateCheck()
+			s.pool.clear()
+		}
 		return
 	}
 
-	ne, ok := err.(ConnectionError)
-	if !ok {
+	wrappedConnErr := unwrapConnectionError(err)
+	if wrappedConnErr == nil {
 		return
 	}
 
-	if netErr, ok := ne.Wrapped.(net.Error); ok && netErr.Timeout() {
+	// Ignore transient timeout errors.
+	if netErr, ok := wrappedConnErr.(net.Error); ok && netErr.Timeout() {
 		return
 	}
-	if ne.Wrapped == context.Canceled || ne.Wrapped == context.DeadlineExceeded {
+	if wrappedConnErr == context.Canceled || wrappedConnErr == context.DeadlineExceeded {
 		return
 	}
 
@@ -319,6 +364,7 @@ func (s *Server) ProcessError(err error) {
 	desc.LastError = err
 	// updates description to unknown
 	s.updateDescription(desc, false)
+	s.pool.clear()
 }
 
 // update handles performing heartbeats and updating any subscribers of the
@@ -364,6 +410,13 @@ func (s *Server) update() {
 		conn.nc.Close()
 	}
 	for {
+		select {
+		case <-done:
+			closeServer()
+			return
+		default:
+		}
+
 		select {
 		case <-heartbeatTicker.C:
 		case <-checkNow:
@@ -429,7 +482,15 @@ func (s *Server) heartbeat(conn *connection) (description.Server, *connection) {
 	var desc description.Server
 	var set bool
 	var err error
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() {
+		select {
+		case <-ctx.Done():
+		case <-s.disconnecting:
+			cancel()
+		}
+	}()
 
 	for i := 1; i <= maxRetry; i++ {
 		var now time.Time
@@ -462,6 +523,10 @@ func (s *Server) heartbeat(conn *connection) (description.Server, *connection) {
 			}))
 
 			conn, err = newConnection(ctx, s.address, opts...)
+
+			conn.connect(ctx)
+
+			err = conn.wait()
 			if err == nil {
 				descPtr = &conn.desc
 			}
@@ -478,17 +543,18 @@ func (s *Server) heartbeat(conn *connection) (description.Server, *connection) {
 			if err == nil {
 				tmpDesc := op.Result(s.address)
 				descPtr = &tmpDesc
+			} else {
+				// close the connection here rather than in the error check below to avoid calling Close on a net.Conn
+				// that wasn't successfully created
+				_ = conn.close()
 			}
 		}
 
 		// we do a retry if the server is connected, if succeed return new server desc (see below)
 		if err != nil {
 			saved = err
-			if conn != nil && conn.nc != nil {
-				conn.nc.Close()
-			}
 			conn = nil
-			if _, ok := err.(ConnectionError); ok {
+			if wrappedConnErr := unwrapConnectionError(err); wrappedConnErr != nil {
 				s.pool.drain()
 				// If the server is not connected, give up and exit loop
 				if s.Description().Kind == description.Unknown {
@@ -526,20 +592,6 @@ func (s *Server) updateAverageRTT(delay time.Duration) time.Duration {
 		s.averageRTT = time.Duration(alpha*float64(delay) + (1-alpha)*float64(s.averageRTT))
 	}
 	return s.averageRTT
-}
-
-// Drain will drain the connection pool of this server. This is mainly here so the
-// pool for the server doesn't need to be directly exposed and so that when an error
-// is returned from reading or writing, a client can drain the pool for this server.
-// This is exposed here so we don't have to wrap the Connection type and sniff responses
-// for errors that would cause the pool to be drained, which can in turn centralize the
-// logic for handling errors in the Client type.
-//
-// TODO(GODRIVER-617): I don't think we actually need this method. It's likely replaced by
-// ProcessError.
-func (s *Server) Drain() error {
-	s.pool.drain()
-	return nil
 }
 
 // String implements the Stringer interface.
@@ -585,6 +637,21 @@ func (ss *ServerSubscription) Unsubscribe() error {
 
 	close(ch)
 	delete(ss.s.subscribers, ss.id)
+
+	return nil
+}
+
+// unwrapConnectionError returns the connection error wrapped by err, or nil if err does not wrap a connection error.
+func unwrapConnectionError(err error) error {
+	connErr, ok := err.(ConnectionError)
+	if ok {
+		return connErr.Wrapped
+	}
+
+	driverErr, ok := err.(driver.Error)
+	if ok && driverErr.NetworkError() {
+		return driverErr.Wrapped
+	}
 
 	return nil
 }

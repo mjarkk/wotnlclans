@@ -27,10 +27,12 @@ type ListCollections struct {
 	session        *session.Client
 	clock          *session.ClusterClock
 	monitor        *event.CommandMonitor
+	crypt          *driver.Crypt
 	database       string
 	deployment     driver.Deployment
 	readPreference *readpref.ReadPref
 	selector       description.ServerSelector
+	retry          *driver.RetryMode
 	result         driver.CursorResponse
 }
 
@@ -69,9 +71,12 @@ func (lc *ListCollections) Execute(ctx context.Context) error {
 	return driver.Operation{
 		CommandFn:         lc.command,
 		ProcessResponseFn: lc.processResponse,
+		RetryMode:         lc.retry,
+		Type:              driver.Read,
 		Client:            lc.session,
 		Clock:             lc.clock,
 		CommandMonitor:    lc.monitor,
+		Crypt:             lc.crypt,
 		Database:          lc.database,
 		Deployment:        lc.deployment,
 		ReadPreference:    lc.readPreference,
@@ -143,6 +148,16 @@ func (lc *ListCollections) CommandMonitor(monitor *event.CommandMonitor) *ListCo
 	return lc
 }
 
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (lc *ListCollections) Crypt(crypt *driver.Crypt) *ListCollections {
+	if lc == nil {
+		lc = new(ListCollections)
+	}
+
+	lc.crypt = crypt
+	return lc
+}
+
 // Database sets the database to run this operation against.
 func (lc *ListCollections) Database(database string) *ListCollections {
 	if lc == nil {
@@ -180,5 +195,16 @@ func (lc *ListCollections) ServerSelector(selector description.ServerSelector) *
 	}
 
 	lc.selector = selector
+	return lc
+}
+
+// Retry enables retryable mode for this operation. Retries are handled automatically in driver.Operation.Execute based
+// on how the operation is set.
+func (lc *ListCollections) Retry(retry driver.RetryMode) *ListCollections {
+	if lc == nil {
+		lc = new(ListCollections)
+	}
+
+	lc.retry = &retry
 	return lc
 }

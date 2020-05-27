@@ -2,15 +2,12 @@ package driver
 
 import (
 	"bytes"
-	"compress/zlib"
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"strconv"
 	"time"
 
-	"github.com/golang/snappy"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,6 +21,8 @@ import (
 	"go.mongodb.org/mongo-driver/x/mongo/driver/wiremessage"
 )
 
+const defaultLocalThreshold = 15 * time.Millisecond
+
 var dollarCmd = [...]byte{'.', '$', 'c', 'm', 'd'}
 
 var (
@@ -35,6 +34,13 @@ var (
 	ErrReplyDocumentMismatch = errors.New("number of documents returned does not match numberReturned field")
 	// ErrNonPrimaryReadPref is returned when a read is attempted in a transaction with a non-primary read preference.
 	ErrNonPrimaryReadPref = errors.New("read preference in a transaction must be primary")
+)
+
+const (
+	// maximum BSON object size when client side encryption is enabled
+	cryptMaxBsonObjectSize uint32 = 2097152
+	// minimum wire version necessary to use automatic encryption
+	cryptMinWireVersion int32 = 8
 )
 
 // InvalidOperationError is returned from Validate and indicates that a required field is missing
@@ -170,6 +176,14 @@ type Operation struct {
 	// CommandMonitor specifies the monitor to use for APM events. If this field is not set,
 	// no events will be reported.
 	CommandMonitor *event.CommandMonitor
+
+	// Crypt specifies a Crypt object to use for automatic client side encryption and decryption.
+	Crypt *Crypt
+}
+
+// shouldEncrypt returns true if this operation should automatically be encrypted.
+func (op Operation) shouldEncrypt() bool {
+	return op.Crypt != nil && !op.Crypt.BypassAutoEncryption
 }
 
 // selectServer handles performing server selection for an operation.
@@ -192,7 +206,7 @@ func (op Operation) selectServer(ctx context.Context) (Server, error) {
 		}
 		selector = description.CompositeSelector([]description.ServerSelector{
 			description.ReadPrefSelector(rp),
-			description.LatencySelector(15 * time.Millisecond),
+			description.LatencySelector(defaultLocalThreshold),
 		})
 	}
 
@@ -261,28 +275,52 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 	var operationErr WriteCommandError
 	var original error
 	var retries int
-	// TODO(GODRIVER-617): Add support for retryable reads.
 	retryable := op.retryable(desc.Server)
-	if retryable == Write && op.Client != nil && op.RetryMode != nil {
-		op.Client.RetryWrite = false
-		if *op.RetryMode > RetryNone {
-			op.Client.RetryWrite = true
-			if !op.Client.Committing && !op.Client.Aborting {
-				op.Client.IncrementTxnNumber()
+	if retryable && op.RetryMode != nil {
+		switch op.Type {
+		case Write:
+			if op.Client == nil {
+				break
 			}
-		}
+			switch *op.RetryMode {
+			case RetryOnce, RetryOncePerCommand:
+				retries = 1
+			case RetryContext:
+				retries = -1
+			}
 
-		switch *op.RetryMode {
-		case RetryOnce, RetryOncePerCommand:
-			retries = 1
-		case RetryContext:
-			retries = -1
+			op.Client.RetryWrite = false
+			if *op.RetryMode > RetryNone {
+				op.Client.RetryWrite = true
+				if !op.Client.Committing && !op.Client.Aborting {
+					op.Client.IncrementTxnNumber()
+				}
+			}
+
+		case Read:
+			switch *op.RetryMode {
+			case RetryOnce, RetryOncePerCommand:
+				retries = 1
+			case RetryContext:
+				retries = -1
+			}
 		}
 	}
 	batching := op.Batches.Valid()
+	currIndex := 0
 	for {
 		if batching {
-			err = op.Batches.AdvanceBatch(int(desc.MaxBatchCount), int(desc.MaxDocumentSize))
+			targetBatchSize := desc.MaxDocumentSize
+			maxDocSize := desc.MaxDocumentSize
+			if op.shouldEncrypt() {
+				// For client-side encryption, we want the batch to be split at 2 MiB instead of 16MiB.
+				// If there's only one document in the batch, it can be up to 16MiB, so we set target batch size to
+				// 2MiB but max document size to 16MiB. This will allow the AdvanceBatch call to create a batch
+				// with a single large document.
+				targetBatchSize = cryptMaxBsonObjectSize
+			}
+
+			err = op.Batches.AdvanceBatch(int(desc.MaxBatchCount), int(targetBatchSize), int(maxDocSize))
 			if err != nil {
 				// TODO(GODRIVER-982): Should we also be returning operationErr?
 				return err
@@ -293,7 +331,7 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 		if len(scratch) > 0 {
 			scratch = scratch[:0]
 		}
-		wm, startedInfo, err := op.createWireMessage(scratch, desc)
+		wm, startedInfo, err := op.createWireMessage(ctx, scratch, desc)
 		if err != nil {
 			return err
 		}
@@ -342,14 +380,25 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 		op.updateOperationTime(res)
 		op.Client.UpdateRecoveryToken(bson.Raw(res))
 
+		// automatically attempt to decrypt all results if client side encryption enabled
+		if op.Crypt != nil {
+			// use decryptErr isntead of err because err is used below for retrying
+			var decryptErr error
+			res, decryptErr = op.Crypt.Decrypt(ctx, res)
+			if decryptErr != nil {
+				return decryptErr
+			}
+		}
 		var perr error
 		if op.ProcessResponseFn != nil {
 			perr = op.ProcessResponseFn(res, srvr, desc.Server)
 		}
-
 		switch tt := err.(type) {
 		case WriteCommandError:
-			if retryable == Write && tt.Retryable() && retries != 0 {
+			if e := err.(WriteCommandError); retryable && op.Type == Write && e.UnsupportedStorageEngine() {
+				return ErrUnsupportedStorageEngine
+			}
+			if retryable && tt.Retryable() && retries != 0 {
 				retries--
 				original, err = err, nil
 				conn.Close() // Avoid leaking the connection.
@@ -358,7 +407,7 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 					return original
 				}
 				conn, err = srvr.Connection(ctx)
-				if err != nil || conn == nil || op.retryable(conn.Description()) != Write {
+				if err != nil || conn == nil || !op.retryable(conn.Description()) {
 					if conn != nil {
 						conn.Close()
 					}
@@ -372,6 +421,13 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 				}
 				continue
 			}
+
+			if batching && len(tt.WriteErrors) > 0 && currIndex > 0 {
+				for i := range tt.WriteErrors {
+					tt.WriteErrors[i].Index += int64(currIndex)
+				}
+			}
+
 			// If batching is enabled and either ordered is the default (which is true) or
 			// explicitly set to true and we have write errors, return the errors.
 			if batching && (op.Batches.Ordered == nil || *op.Batches.Ordered == true) && len(tt.WriteErrors) > 0 {
@@ -384,8 +440,10 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 					Code:    int32(tt.WriteConcernError.Code),
 					Message: tt.WriteConcernError.Message,
 				}
-				if err.Code == 64 || err.Code == 50 || tt.WriteConcernError.Retryable() {
-					err.Labels = []string{UnknownTransactionCommitResult}
+				// The UnknownTransactionCommitResult label is added to all writeConcernErrors besides unknownReplWriteConcernCode
+				// and unsatisfiableWriteConcernCode
+				if err.Code != unknownReplWriteConcernCode && err.Code != unsatisfiableWriteConcernCode {
+					err.Labels = append(err.Labels, UnknownTransactionCommitResult)
 				}
 				return err
 			}
@@ -395,7 +453,10 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 			if tt.HasErrorLabel(TransientTransactionError) || tt.HasErrorLabel(UnknownTransactionCommitResult) {
 				op.Client.ClearPinnedServer()
 			}
-			if retryable == Write && tt.Retryable() && retries != 0 {
+			if e := err.(Error); retryable && op.Type == Write && e.UnsupportedStorageEngine() {
+				return ErrUnsupportedStorageEngine
+			}
+			if retryable && tt.Retryable() && retries != 0 {
 				retries--
 				original, err = err, nil
 				conn.Close() // Avoid leaking the connection.
@@ -404,7 +465,7 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 					return original
 				}
 				conn, err = srvr.Connection(ctx)
-				if err != nil || conn == nil || op.retryable(conn.Description()) != Write {
+				if err != nil || conn == nil || !op.retryable(conn.Description()) {
 					if conn != nil {
 						conn.Close()
 					}
@@ -435,7 +496,7 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 		}
 
 		if batching && len(op.Batches.Documents) > 0 {
-			if retryable == Write && op.Client != nil && op.RetryMode != nil {
+			if retryable && op.Client != nil && op.RetryMode != nil {
 				if *op.RetryMode > RetryNone {
 					op.Client.IncrementTxnNumber()
 				}
@@ -443,6 +504,7 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 					retries = 1
 				}
 			}
+			currIndex += len(op.Batches.Current)
 			op.Batches.ClearBatch()
 			continue
 		}
@@ -456,20 +518,28 @@ func (op Operation) Execute(ctx context.Context, scratch []byte) error {
 
 // Retryable writes are supported if the server supports sessions, the operation is not
 // within a transaction, and the write is acknowledged
-func (op Operation) retryable(desc description.Server) Type {
+func (op Operation) retryable(desc description.Server) bool {
 	switch op.Type {
 	case Write:
 		if op.Client != nil && (op.Client.Committing || op.Client.Aborting) {
-			return Write
+			return true
 		}
-		if op.Deployment.SupportsRetry() &&
-			description.SessionsSupported(desc.WireVersion) &&
+		if op.Deployment.SupportsRetryWrites() &&
+			desc.WireVersion != nil && desc.WireVersion.Max >= 6 &&
 			op.Client != nil && !(op.Client.TransactionInProgress() || op.Client.TransactionStarting()) &&
 			writeconcern.AckWrite(op.WriteConcern) {
-			return Write
+			return true
+		}
+	case Read:
+		if op.Client != nil && (op.Client.Committing || op.Client.Aborting) {
+			return true
+		}
+		if desc.WireVersion != nil && desc.WireVersion.Max >= 6 &&
+			(op.Client == nil || !(op.Client.TransactionInProgress() || op.Client.TransactionStarting())) {
+			return true
 		}
 	}
-	return Type(0)
+	return false
 }
 
 // roundTrip writes a wiremessage to the connection and then reads a wiremessage. The wm parameter
@@ -487,7 +557,7 @@ func (op Operation) roundTrip(ctx context.Context, conn Connection, wm []byte) (
 		if op.Client != nil && op.Client.Committing {
 			labels = append(labels, UnknownTransactionCommitResult)
 		}
-		return nil, Error{Message: err.Error(), Labels: labels}
+		return nil, Error{Message: err.Error(), Labels: labels, Wrapped: err}
 	}
 
 	wm, err = conn.ReadWireMessage(ctx, wm[:0])
@@ -502,7 +572,7 @@ func (op Operation) roundTrip(ctx context.Context, conn Connection, wm []byte) (
 		if op.Client != nil && op.Client.Committing {
 			labels = append(labels, UnknownTransactionCommitResult)
 		}
-		return nil, Error{Message: err.Error(), Labels: labels}
+		return nil, Error{Message: err.Error(), Labels: labels, Wrapped: err}
 	}
 
 	// decompress wiremessage
@@ -529,7 +599,7 @@ func (op *Operation) moreToComeRoundTrip(ctx context.Context, conn Connection, w
 		if op.Client != nil {
 			op.Client.MarkDirty()
 		}
-		err = Error{Message: err.Error(), Labels: []string{TransientTransactionError, NetworkError}}
+		err = Error{Message: err.Error(), Labels: []string{TransientTransactionError, NetworkError}, Wrapped: err}
 	}
 	return bsoncore.BuildDocument(nil, bsoncore.AppendInt32Element(nil, "ok", 1)), err
 }
@@ -567,35 +637,26 @@ func (Operation) decompressWireMessage(wm []byte) ([]byte, error) {
 	}
 
 	header := make([]byte, 0, uncompressedSize+16)
-	header = wiremessage.AppendHeader(header, uncompressedSize, reqid, respto, opcode)
-	uncompressed := make([]byte, uncompressedSize)
-	switch compressorID {
-	case wiremessage.CompressorSnappy:
-		var err error
-		uncompressed, err = snappy.Decode(uncompressed, msg)
-		if err != nil {
-			return nil, err
-		}
-	case wiremessage.CompressorZLib:
-		decompressor, err := zlib.NewReader(bytes.NewReader(msg))
-		if err != nil {
-			return nil, err
-		}
-		_, err = io.ReadFull(decompressor, uncompressed)
-		if err != nil {
-			return nil, err
-		}
-	default:
-		return nil, fmt.Errorf("unknown compressorID %d", compressorID)
+	header = wiremessage.AppendHeader(header, uncompressedSize+16, reqid, respto, opcode)
+	opts := CompressionOpts{
+		Compressor:       compressorID,
+		UncompressedSize: uncompressedSize,
 	}
+	uncompressed, err := DecompressPayload(msg, opts)
+	if err != nil {
+		return nil, err
+	}
+
 	return append(header, uncompressed...), nil
 }
 
-func (op Operation) createWireMessage(dst []byte, desc description.SelectedServer) ([]byte, startedInformation, error) {
+func (op Operation) createWireMessage(ctx context.Context, dst []byte,
+	desc description.SelectedServer) ([]byte, startedInformation, error) {
+
 	if desc.WireVersion == nil || desc.WireVersion.Max < wiremessage.OpmsgWireVersion {
 		return op.createQueryWireMessage(dst, desc)
 	}
-	return op.createMsgWireMessage(dst, desc)
+	return op.createMsgWireMessage(ctx, dst, desc)
 }
 
 func (op Operation) addBatchArray(dst []byte) []byte {
@@ -673,7 +734,7 @@ func (op Operation) createQueryWireMessage(dst []byte, desc description.Selected
 	return bsoncore.UpdateLength(dst, wmindex, int32(len(dst[wmindex:]))), info, nil
 }
 
-func (op Operation) createMsgWireMessage(dst []byte, desc description.SelectedServer) ([]byte, startedInformation, error) {
+func (op Operation) createMsgWireMessage(ctx context.Context, dst []byte, desc description.SelectedServer) ([]byte, startedInformation, error) {
 	var info startedInformation
 	var flags wiremessage.MsgFlag
 	var wmindex int32
@@ -690,7 +751,7 @@ func (op Operation) createMsgWireMessage(dst []byte, desc description.SelectedSe
 
 	idx, dst := bsoncore.AppendDocumentStart(dst)
 
-	dst, err := op.CommandFn(dst, desc)
+	dst, err := op.addCommandFields(ctx, dst, desc)
 	if err != nil {
 		return dst, info, err
 	}
@@ -723,7 +784,9 @@ func (op Operation) createMsgWireMessage(dst []byte, desc description.SelectedSe
 	// The command document for monitoring shouldn't include the type 1 payload as a document sequence
 	info.cmd = dst[idx:]
 
-	if op.Batches != nil && len(op.Batches.Current) > 0 {
+	// add batch as a document sequence if auto encryption is not enabled
+	// if auto encryption is enabled, the batch will already be an array in the command document
+	if !op.shouldEncrypt() && op.Batches != nil && len(op.Batches.Current) > 0 {
 		info.documentSequenceIncluded = true
 		dst = wiremessage.AppendMsgSectionType(dst, wiremessage.DocumentSequence)
 		idx, dst = bsoncore.ReserveLength(dst)
@@ -739,6 +802,40 @@ func (op Operation) createMsgWireMessage(dst []byte, desc description.SelectedSe
 	}
 
 	return bsoncore.UpdateLength(dst, wmindex, int32(len(dst[wmindex:]))), info, nil
+}
+
+// addCommandFields adds the fields for a command to the wire message in dst. This assumes that the start of the document
+// has already been added and does not add the final 0 byte.
+func (op Operation) addCommandFields(ctx context.Context, dst []byte, desc description.SelectedServer) ([]byte, error) {
+	if !op.shouldEncrypt() {
+		return op.CommandFn(dst, desc)
+	}
+
+	if desc.WireVersion.Max < cryptMinWireVersion {
+		return dst, errors.New("auto-encryption requires a MongoDB version of 4.2")
+	}
+
+	// create temporary command document
+	cidx, cmdDst := bsoncore.AppendDocumentStart(nil)
+	var err error
+	cmdDst, err = op.CommandFn(cmdDst, desc)
+	if err != nil {
+		return dst, err
+	}
+	// use a BSON array instead of a type 1 payload because mongocryptd will convert to arrays regardless
+	if op.Batches != nil && len(op.Batches.Current) > 0 {
+		cmdDst = op.addBatchArray(cmdDst)
+	}
+	cmdDst, _ = bsoncore.AppendDocumentEnd(cmdDst, cidx)
+
+	// encrypt the command
+	encrypted, err := op.Crypt.Encrypt(ctx, op.Database, cmdDst)
+	if err != nil {
+		return dst, err
+	}
+	// append encrypted command to original destination, removing the first 4 bytes (length) and final byte (terminator)
+	dst = append(dst, encrypted[4:len(encrypted)-1]...)
+	return dst, nil
 }
 
 func (op Operation) addReadConcern(dst []byte, desc description.SelectedServer) ([]byte, error) {
@@ -803,14 +900,14 @@ func (op Operation) addSession(dst []byte, desc description.SelectedServer) ([]b
 	if client == nil || !description.SessionsSupported(desc.WireVersion) || desc.SessionTimeoutMinutes == 0 {
 		return dst, nil
 	}
-	if client.Terminated {
-		return dst, session.ErrSessionEnded
+	if err := client.UpdateUseTime(); err != nil {
+		return dst, err
 	}
 	lsid, _ := client.SessionID.MarshalBSON()
 	dst = bsoncore.AppendDocumentElement(dst, "lsid", lsid)
 
 	var addedTxnNumber bool
-	if op.Type == Write && client != nil && client.RetryWrite {
+	if op.Type == Write && client.RetryWrite {
 		addedTxnNumber = true
 		dst = bsoncore.AppendInt64Element(dst, "txnNumber", op.Client.TxnNumber)
 	}

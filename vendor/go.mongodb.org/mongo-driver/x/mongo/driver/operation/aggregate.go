@@ -41,8 +41,10 @@ type Aggregate struct {
 	deployment               driver.Deployment
 	readConcern              *readconcern.ReadConcern
 	readPreference           *readpref.ReadPref
+	retry                    *driver.RetryMode
 	selector                 description.ServerSelector
 	writeConcern             *writeconcern.WriteConcern
+	crypt                    *driver.Crypt
 
 	result driver.CursorResponse
 }
@@ -92,8 +94,11 @@ func (a *Aggregate) Execute(ctx context.Context) error {
 		Deployment:                     a.deployment,
 		ReadConcern:                    a.readConcern,
 		ReadPreference:                 a.readPreference,
+		Type:                           driver.Read,
+		RetryMode:                      a.retry,
 		Selector:                       a.selector,
 		WriteConcern:                   a.writeConcern,
+		Crypt:                          a.crypt,
 		MinimumWriteConcernWireVersion: 5,
 	}.Execute(ctx, nil)
 
@@ -324,5 +329,27 @@ func (a *Aggregate) WriteConcern(writeConcern *writeconcern.WriteConcern) *Aggre
 	}
 
 	a.writeConcern = writeConcern
+	return a
+}
+
+// Retry enables retryable writes for this operation. Retries are not handled automatically,
+// instead a boolean is returned from Execute and SelectAndExecute that indicates if the
+// operation can be retried. Retrying is handled by calling RetryExecute.
+func (a *Aggregate) Retry(retry driver.RetryMode) *Aggregate {
+	if a == nil {
+		a = new(Aggregate)
+	}
+
+	a.retry = &retry
+	return a
+}
+
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (a *Aggregate) Crypt(crypt *driver.Crypt) *Aggregate {
+	if a == nil {
+		a = new(Aggregate)
+	}
+
+	a.crypt = crypt
 	return a
 }

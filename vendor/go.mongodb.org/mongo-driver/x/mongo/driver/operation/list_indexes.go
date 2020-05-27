@@ -30,6 +30,8 @@ type ListIndexes struct {
 	database   string
 	deployment driver.Deployment
 	selector   description.ServerSelector
+	retry      *driver.RetryMode
+	crypt      *driver.Crypt
 
 	result driver.CursorResponse
 }
@@ -72,7 +74,10 @@ func (li *ListIndexes) Execute(ctx context.Context) error {
 		Database:       li.database,
 		Deployment:     li.deployment,
 		Selector:       li.selector,
+		Crypt:          li.crypt,
 		Legacy:         driver.LegacyListIndexes,
+		RetryMode:      li.retry,
+		Type:           driver.Read,
 	}.Execute(ctx, nil)
 
 }
@@ -182,5 +187,26 @@ func (li *ListIndexes) ServerSelector(selector description.ServerSelector) *List
 	}
 
 	li.selector = selector
+	return li
+}
+
+// Retry enables retryable mode for this operation. Retries are handled automatically in driver.Operation.Execute based
+// on how the operation is set.
+func (li *ListIndexes) Retry(retry driver.RetryMode) *ListIndexes {
+	if li == nil {
+		li = new(ListIndexes)
+	}
+
+	li.retry = &retry
+	return li
+}
+
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (li *ListIndexes) Crypt(crypt *driver.Crypt) *ListIndexes {
+	if li == nil {
+		li = new(ListIndexes)
+	}
+
+	li.crypt = crypt
 	return li
 }

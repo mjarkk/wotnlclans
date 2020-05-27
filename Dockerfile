@@ -13,7 +13,7 @@ RUN GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -v -a -installsuffix cgo
 # Build the javascript files
 FROM node:alpine as buildWeb
 
-# Copy over the current state from 
+# Copy over the current state from
 COPY --from=buildServer /go/src/github.com/mjarkk/wotnlclans /wotnlclans
 WORKDIR /wotnlclans/web_static
 RUN yarn && yarn build

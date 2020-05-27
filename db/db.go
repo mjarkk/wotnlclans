@@ -8,8 +8,8 @@ import (
 	"github.com/mjarkk/wotnlclans/other"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // DB is the mongodb database

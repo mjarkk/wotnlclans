@@ -30,6 +30,7 @@ type Insert struct {
 	clock                    *session.ClusterClock
 	collection               string
 	monitor                  *event.CommandMonitor
+	crypt                    *driver.Crypt
 	database                 string
 	deployment               driver.Deployment
 	selector                 description.ServerSelector
@@ -98,6 +99,7 @@ func (i *Insert) Execute(ctx context.Context) error {
 		Client:            i.session,
 		Clock:             i.clock,
 		CommandMonitor:    i.monitor,
+		Crypt:             i.crypt,
 		Database:          i.database,
 		Deployment:        i.deployment,
 		Selector:          i.selector,
@@ -190,6 +192,16 @@ func (i *Insert) CommandMonitor(monitor *event.CommandMonitor) *Insert {
 	return i
 }
 
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (i *Insert) Crypt(crypt *driver.Crypt) *Insert {
+	if i == nil {
+		i = new(Insert)
+	}
+
+	i.crypt = crypt
+	return i
+}
+
 // Database sets the database to run this operation against.
 func (i *Insert) Database(database string) *Insert {
 	if i == nil {
@@ -230,9 +242,8 @@ func (i *Insert) WriteConcern(writeConcern *writeconcern.WriteConcern) *Insert {
 	return i
 }
 
-// Retry enables retryable writes for this operation. Retries are not handled automatically,
-// instead a boolean is returned from Execute and SelectAndExecute that indicates if the
-// operation can be retried. Retrying is handled by calling RetryExecute.
+// Retry enables retryable mode for this operation. Retries are handled automatically in driver.Operation.Execute based
+// on how the operation is set.
 func (i *Insert) Retry(retry driver.RetryMode) *Insert {
 	if i == nil {
 		i = new(Insert)

@@ -29,6 +29,7 @@ type Delete struct {
 	clock        *session.ClusterClock
 	collection   string
 	monitor      *event.CommandMonitor
+	crypt        *driver.Crypt
 	database     string
 	deployment   driver.Deployment
 	selector     description.ServerSelector
@@ -97,6 +98,7 @@ func (d *Delete) Execute(ctx context.Context) error {
 		Client:            d.session,
 		Clock:             d.clock,
 		CommandMonitor:    d.monitor,
+		Crypt:             d.crypt,
 		Database:          d.database,
 		Deployment:        d.deployment,
 		Selector:          d.selector,
@@ -176,6 +178,16 @@ func (d *Delete) CommandMonitor(monitor *event.CommandMonitor) *Delete {
 	return d
 }
 
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (d *Delete) Crypt(crypt *driver.Crypt) *Delete {
+	if d == nil {
+		d = new(Delete)
+	}
+
+	d.crypt = crypt
+	return d
+}
+
 // Database sets the database to run this operation against.
 func (d *Delete) Database(database string) *Delete {
 	if d == nil {
@@ -216,9 +228,8 @@ func (d *Delete) WriteConcern(writeConcern *writeconcern.WriteConcern) *Delete {
 	return d
 }
 
-// Retry enables retryable writes for this operation. Retries are not handled automatically,
-// instead a boolean is returned from Execute and SelectAndExecute that indicates if the
-// operation can be retried. Retrying is handled by calling RetryExecute.
+// Retry enables retryable mode for this operation. Retries are handled automatically in driver.Operation.Execute based
+// on how the operation is set.
 func (d *Delete) Retry(retry driver.RetryMode) *Delete {
 	if d == nil {
 		d = new(Delete)

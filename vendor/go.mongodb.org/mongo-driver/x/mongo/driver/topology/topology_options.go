@@ -31,7 +31,8 @@ type config struct {
 	replicaSetName         string
 	seedList               []string
 	serverOpts             []ServerOption
-	cs                     connstring.ConnString
+	cs                     connstring.ConnString // This must not be used for any logic in topology.Topology.
+	uri                    string
 	serverSelectionTimeout time.Duration
 }
 
@@ -64,7 +65,7 @@ func WithConnString(fn func(connstring.ConnString) connstring.ConnString) Option
 		var connOpts []ConnectionOption
 
 		if cs.AppName != "" {
-			connOpts = append(connOpts, WithAppName(func(string) string { return cs.AppName }))
+			c.serverOpts = append(c.serverOpts, WithServerAppName(func(string) string { return cs.AppName }))
 		}
 
 		switch cs.Connect {
@@ -96,8 +97,11 @@ func WithConnString(fn func(connstring.ConnString) connstring.ConnString) Option
 		}
 
 		if cs.MaxPoolSizeSet {
-			c.serverOpts = append(c.serverOpts, WithMaxConnections(func(uint16) uint16 { return cs.MaxPoolSize }))
-			c.serverOpts = append(c.serverOpts, WithMaxIdleConnections(func(uint16) uint16 { return cs.MaxPoolSize }))
+			c.serverOpts = append(c.serverOpts, WithMaxConnections(func(uint64) uint64 { return cs.MaxPoolSize }))
+		}
+
+		if cs.MinPoolSizeSet {
+			c.serverOpts = append(c.serverOpts, WithMinConnections(func(u uint64) uint64 { return cs.MinPoolSize }))
 		}
 
 		if cs.ReplicaSet != "" {
@@ -202,9 +206,14 @@ func WithConnString(fn func(connstring.ConnString) connstring.ConnString) Option
 			}))
 
 			for _, comp := range cs.Compressors {
-				if comp == "zlib" {
+				switch comp {
+				case "zlib":
 					connOpts = append(connOpts, WithZlibLevel(func(level *int) *int {
 						return &cs.ZlibLevel
+					}))
+				case "zstd":
+					connOpts = append(connOpts, WithZstdLevel(func(level *int) *int {
+						return &cs.ZstdLevel
 					}))
 				}
 			}
@@ -262,6 +271,14 @@ func WithServerOptions(fn func(...ServerOption) []ServerOption) Option {
 func WithServerSelectionTimeout(fn func(time.Duration) time.Duration) Option {
 	return func(cfg *config) error {
 		cfg.serverSelectionTimeout = fn(cfg.serverSelectionTimeout)
+		return nil
+	}
+}
+
+// WithURI specifies the URI that was used to create the topology.
+func WithURI(fn func(string) string) Option {
+	return func(cfg *config) error {
+		cfg.uri = fn(cfg.uri)
 		return nil
 	}
 }

@@ -30,11 +30,13 @@ type Count struct {
 	clock          *session.ClusterClock
 	collection     string
 	monitor        *event.CommandMonitor
+	crypt          *driver.Crypt
 	database       string
 	deployment     driver.Deployment
 	readConcern    *readconcern.ReadConcern
 	readPreference *readpref.ReadPref
 	selector       description.ServerSelector
+	retry          *driver.RetryMode
 	result         CountResult
 }
 
@@ -85,9 +87,12 @@ func (c *Count) Execute(ctx context.Context) error {
 	return driver.Operation{
 		CommandFn:         c.command,
 		ProcessResponseFn: c.processResponse,
+		RetryMode:         c.retry,
+		Type:              driver.Read,
 		Client:            c.session,
 		Clock:             c.clock,
 		CommandMonitor:    c.monitor,
+		Crypt:             c.crypt,
 		Database:          c.database,
 		Deployment:        c.deployment,
 		ReadConcern:       c.readConcern,
@@ -168,6 +173,16 @@ func (c *Count) CommandMonitor(monitor *event.CommandMonitor) *Count {
 	return c
 }
 
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (c *Count) Crypt(crypt *driver.Crypt) *Count {
+	if c == nil {
+		c = new(Count)
+	}
+
+	c.crypt = crypt
+	return c
+}
+
 // Database sets the database to run this operation against.
 func (c *Count) Database(database string) *Count {
 	if c == nil {
@@ -215,5 +230,16 @@ func (c *Count) ServerSelector(selector description.ServerSelector) *Count {
 	}
 
 	c.selector = selector
+	return c
+}
+
+// Retry enables retryable mode for this operation. Retries are handled automatically in driver.Operation.Execute based
+// on how the operation is set.
+func (c *Count) Retry(retry driver.RetryMode) *Count {
+	if c == nil {
+		c = new(Count)
+	}
+
+	c.retry = &retry
 	return c
 }

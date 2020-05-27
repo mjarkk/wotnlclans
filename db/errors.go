@@ -1,6 +1,6 @@
 package db
 
-import "github.com/mongodb/mongo-go-driver/bson"
+import "go.mongodb.org/mongo-driver/bson"
 
 // ErrDB is what a database error entry contains
 type ErrDB struct {

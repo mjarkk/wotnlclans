@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/mjarkk/wotnlclans/other"
-	"github.com/mongodb/mongo-go-driver/bson"
 	sr "github.com/tuvistavie/securerandom"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // IsLogedIN returns true if the user is logged in

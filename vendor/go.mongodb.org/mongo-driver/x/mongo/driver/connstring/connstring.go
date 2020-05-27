@@ -53,8 +53,10 @@ type ConnString struct {
 	LocalThresholdSet                  bool
 	MaxConnIdleTime                    time.Duration
 	MaxConnIdleTimeSet                 bool
-	MaxPoolSize                        uint16
+	MaxPoolSize                        uint64
 	MaxPoolSizeSet                     bool
+	MinPoolSize                        uint64
+	MinPoolSizeSet                     bool
 	Password                           string
 	PasswordSet                        bool
 	ReadConcernLevel                   string
@@ -62,10 +64,10 @@ type ConnString struct {
 	ReadPreferenceTagSets              []map[string]string
 	RetryWrites                        bool
 	RetryWritesSet                     bool
+	RetryReads                         bool
+	RetryReadsSet                      bool
 	MaxStaleness                       time.Duration
 	MaxStalenessSet                    bool
-	MinPoolSize                        uint16
-	MinPoolSizeSet                     bool
 	ReplicaSet                         string
 	Scheme                             string
 	ServerSelectionTimeout             time.Duration
@@ -78,6 +80,10 @@ type ConnString struct {
 	SSLClientCertificateKeyFileSet     bool
 	SSLClientCertificateKeyPassword    func() string
 	SSLClientCertificateKeyPasswordSet bool
+	SSLCertificateFile                 string
+	SSLCertificateFileSet              bool
+	SSLPrivateKeyFile                  string
+	SSLPrivateKeyFileSet               bool
 	SSLInsecure                        bool
 	SSLInsecureSet                     bool
 	SSLCaFile                          string
@@ -88,6 +94,8 @@ type ConnString struct {
 	Username                           string
 	ZlibLevel                          int
 	ZlibLevelSet                       bool
+	ZstdLevel                          int
+	ZstdLevelSet                       bool
 
 	WTimeout              time.Duration
 	WTimeoutSet           bool
@@ -248,6 +256,10 @@ func (p *parser) parse(original string) error {
 		return err
 	}
 
+	if err = p.validateSSL(); err != nil {
+		return err
+	}
+
 	// Check for invalid write concern (i.e. w=0 and j=true)
 	if p.WNumberSet && p.WNumber == 0 && p.JSet && p.J {
 		return writeconcern.ErrInconsistent
@@ -377,6 +389,27 @@ func (p *parser) validateAuth() error {
 	return nil
 }
 
+func (p *parser) validateSSL() error {
+	if !p.SSL {
+		return nil
+	}
+
+	if p.SSLClientCertificateKeyFileSet {
+		if p.SSLCertificateFileSet || p.SSLPrivateKeyFileSet {
+			return errors.New("the sslClientCertificateKeyFile/tlsCertificateKeyFile URI option cannot be provided " +
+				"along with tlsCertificateFile or tlsPrivateKeyFile")
+		}
+		return nil
+	}
+	if p.SSLCertificateFileSet && !p.SSLPrivateKeyFileSet {
+		return errors.New("the tlsPrivateKeyFile URI option must be provided if the tlsCertificateFile option is specified")
+	}
+	if p.SSLPrivateKeyFileSet && !p.SSLCertificateFileSet {
+		return errors.New("the tlsCertificateFile URI option must be provided if the tlsPrivateKeyFile option is specified")
+	}
+	return nil
+}
+
 func (p *parser) addHost(host string) error {
 	if host == "" {
 		return nil
@@ -502,14 +535,14 @@ func (p *parser) addOption(pair string) error {
 		if err != nil || n < 0 {
 			return fmt.Errorf("invalid value for %s: %s", key, value)
 		}
-		p.MaxPoolSize = uint16(n)
+		p.MaxPoolSize = uint64(n)
 		p.MaxPoolSizeSet = true
 	case "minpoolsize":
 		n, err := strconv.Atoi(value)
 		if err != nil || n < 0 {
 			return fmt.Errorf("invalid value for %s: %s", key, value)
 		}
-		p.MinPoolSize = uint16(n)
+		p.MinPoolSize = uint64(n)
 		p.MinPoolSizeSet = true
 	case "readconcernlevel":
 		p.ReadConcernLevel = value
@@ -551,6 +584,17 @@ func (p *parser) addOption(pair string) error {
 		}
 
 		p.RetryWritesSet = true
+	case "retryreads":
+		switch value {
+		case "true":
+			p.RetryReads = true
+		case "false":
+			p.RetryReads = false
+		default:
+			return fmt.Errorf("invalid value for %s: %s", key, value)
+		}
+
+		p.RetryReadsSet = true
 	case "serverselectiontimeoutms":
 		n, err := strconv.Atoi(value)
 		if err != nil || n < 0 {
@@ -590,6 +634,16 @@ func (p *parser) addOption(pair string) error {
 	case "sslclientcertificatekeypassword", "tlscertificatekeyfilepassword":
 		p.SSLClientCertificateKeyPassword = func() string { return value }
 		p.SSLClientCertificateKeyPasswordSet = true
+	case "tlscertificatefile":
+		p.SSL = true
+		p.SSLSet = true
+		p.SSLCertificateFile = value
+		p.SSLCertificateFileSet = true
+	case "tlsprivatekeyfile":
+		p.SSL = true
+		p.SSLSet = true
+		p.SSLPrivateKeyFile = value
+		p.SSLPrivateKeyFileSet = true
 	case "sslinsecure", "tlsinsecure":
 		switch value {
 		case "true":
@@ -649,6 +703,18 @@ func (p *parser) addOption(pair string) error {
 		}
 		p.ZlibLevel = level
 		p.ZlibLevelSet = true
+	case "zstdcompressionlevel":
+		const maxZstdLevel = 22 // https://github.com/facebook/zstd/blob/a880ca239b447968493dd2fed3850e766d6305cc/contrib/linux-kernel/lib/zstd/compress.c#L3291
+		level, err := strconv.Atoi(value)
+		if err != nil || (level < -1 || level > maxZstdLevel) {
+			return fmt.Errorf("invalid value for %s: %s", key, value)
+		}
+
+		if level == -1 {
+			level = wiremessage.DefaultZstdLevel
+		}
+		p.ZstdLevel = level
+		p.ZstdLevelSet = true
 	default:
 		if p.UnknownOptions == nil {
 			p.UnknownOptions = make(map[string][]string)

@@ -27,6 +27,7 @@ type CommitTransaction struct {
 	session       *session.Client
 	clock         *session.ClusterClock
 	monitor       *event.CommandMonitor
+	crypt         *driver.Crypt
 	database      string
 	deployment    driver.Deployment
 	selector      description.ServerSelector
@@ -58,6 +59,7 @@ func (ct *CommitTransaction) Execute(ctx context.Context) error {
 		Client:            ct.session,
 		Clock:             ct.clock,
 		CommandMonitor:    ct.monitor,
+		Crypt:             ct.crypt,
 		Database:          ct.database,
 		Deployment:        ct.deployment,
 		Selector:          ct.selector,
@@ -128,6 +130,16 @@ func (ct *CommitTransaction) CommandMonitor(monitor *event.CommandMonitor) *Comm
 	return ct
 }
 
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (ct *CommitTransaction) Crypt(crypt *driver.Crypt) *CommitTransaction {
+	if ct == nil {
+		ct = new(CommitTransaction)
+	}
+
+	ct.crypt = crypt
+	return ct
+}
+
 // Database sets the database to run this operation against.
 func (ct *CommitTransaction) Database(database string) *CommitTransaction {
 	if ct == nil {
@@ -168,9 +180,8 @@ func (ct *CommitTransaction) WriteConcern(writeConcern *writeconcern.WriteConcer
 	return ct
 }
 
-// Retry enables retryable writes for this operation. Retries are not handled automatically,
-// instead a boolean is returned from Execute and SelectAndExecute that indicates if the
-// operation can be retried. Retrying is handled by calling RetryExecute.
+// Retry enables retryable mode for this operation. Retries are handled automatically in driver.Operation.Execute based
+// on how the operation is set.
 func (ct *CommitTransaction) Retry(retry driver.RetryMode) *CommitTransaction {
 	if ct == nil {
 		ct = new(CommitTransaction)

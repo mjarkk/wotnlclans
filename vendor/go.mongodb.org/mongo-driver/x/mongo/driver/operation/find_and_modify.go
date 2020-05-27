@@ -33,7 +33,7 @@ type FindAndModify struct {
 	query                    bsoncore.Document
 	remove                   *bool
 	sort                     bsoncore.Document
-	update                   bsoncore.Document
+	update                   bsoncore.Value
 	upsert                   *bool
 	session                  *session.Client
 	clock                    *session.ClusterClock
@@ -44,6 +44,7 @@ type FindAndModify struct {
 	selector                 description.ServerSelector
 	writeConcern             *writeconcern.WriteConcern
 	retry                    *driver.RetryMode
+	crypt                    *driver.Crypt
 
 	result FindAndModifyResult
 }
@@ -131,6 +132,7 @@ func (fam *FindAndModify) Execute(ctx context.Context) error {
 		Deployment:     fam.deployment,
 		Selector:       fam.selector,
 		WriteConcern:   fam.writeConcern,
+		Crypt:          fam.crypt,
 	}.Execute(ctx, nil)
 
 }
@@ -179,9 +181,8 @@ func (fam *FindAndModify) command(dst []byte, desc description.SelectedServer) (
 
 		dst = bsoncore.AppendDocumentElement(dst, "sort", fam.sort)
 	}
-	if fam.update != nil {
-
-		dst = bsoncore.AppendDocumentElement(dst, "update", fam.update)
+	if fam.update.Data != nil {
+		dst = bsoncore.AppendValueElement(dst, "update", fam.update)
 	}
 	if fam.upsert != nil {
 
@@ -283,7 +284,7 @@ func (fam *FindAndModify) Sort(sort bsoncore.Document) *FindAndModify {
 }
 
 // Update specifies the update document to perform on the matched document.
-func (fam *FindAndModify) Update(update bsoncore.Document) *FindAndModify {
+func (fam *FindAndModify) Update(update bsoncore.Value) *FindAndModify {
 	if fam == nil {
 		fam = new(FindAndModify)
 	}
@@ -391,5 +392,15 @@ func (fam *FindAndModify) Retry(retry driver.RetryMode) *FindAndModify {
 	}
 
 	fam.retry = &retry
+	return fam
+}
+
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (fam *FindAndModify) Crypt(crypt *driver.Crypt) *FindAndModify {
+	if fam == nil {
+		fam = new(FindAndModify)
+	}
+
+	fam.crypt = crypt
 	return fam
 }

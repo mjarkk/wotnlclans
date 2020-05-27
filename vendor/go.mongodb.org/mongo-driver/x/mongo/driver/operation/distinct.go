@@ -31,11 +31,13 @@ type Distinct struct {
 	clock          *session.ClusterClock
 	collection     string
 	monitor        *event.CommandMonitor
+	crypt          *driver.Crypt
 	database       string
 	deployment     driver.Deployment
 	readConcern    *readconcern.ReadConcern
 	readPreference *readpref.ReadPref
 	selector       description.ServerSelector
+	retry          *driver.RetryMode
 	result         DistinctResult
 }
 
@@ -85,9 +87,12 @@ func (d *Distinct) Execute(ctx context.Context) error {
 	return driver.Operation{
 		CommandFn:         d.command,
 		ProcessResponseFn: d.processResponse,
+		RetryMode:         d.retry,
+		Type:              driver.Read,
 		Client:            d.session,
 		Clock:             d.clock,
 		CommandMonitor:    d.monitor,
+		Crypt:             d.crypt,
 		Database:          d.database,
 		Deployment:        d.deployment,
 		ReadConcern:       d.readConcern,
@@ -197,6 +202,16 @@ func (d *Distinct) CommandMonitor(monitor *event.CommandMonitor) *Distinct {
 	return d
 }
 
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (d *Distinct) Crypt(crypt *driver.Crypt) *Distinct {
+	if d == nil {
+		d = new(Distinct)
+	}
+
+	d.crypt = crypt
+	return d
+}
+
 // Database sets the database to run this operation against.
 func (d *Distinct) Database(database string) *Distinct {
 	if d == nil {
@@ -244,5 +259,16 @@ func (d *Distinct) ServerSelector(selector description.ServerSelector) *Distinct
 	}
 
 	d.selector = selector
+	return d
+}
+
+// Retry enables retryable mode for this operation. Retries are handled automatically in driver.Operation.Execute based
+// on how the operation is set.
+func (d *Distinct) Retry(retry driver.RetryMode) *Distinct {
+	if d == nil {
+		d = new(Distinct)
+	}
+
+	d.retry = &retry
 	return d
 }

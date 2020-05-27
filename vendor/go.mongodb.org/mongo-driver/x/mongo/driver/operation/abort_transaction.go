@@ -27,6 +27,7 @@ type AbortTransaction struct {
 	clock         *session.ClusterClock
 	collection    string
 	monitor       *event.CommandMonitor
+	crypt         *driver.Crypt
 	database      string
 	deployment    driver.Deployment
 	selector      description.ServerSelector
@@ -58,6 +59,7 @@ func (at *AbortTransaction) Execute(ctx context.Context) error {
 		Client:            at.session,
 		Clock:             at.clock,
 		CommandMonitor:    at.monitor,
+		Crypt:             at.crypt,
 		Database:          at.database,
 		Deployment:        at.deployment,
 		Selector:          at.selector,
@@ -125,6 +127,16 @@ func (at *AbortTransaction) CommandMonitor(monitor *event.CommandMonitor) *Abort
 	return at
 }
 
+// Crypt sets the Crypt object to use for automatic encryption and decryption.
+func (at *AbortTransaction) Crypt(crypt *driver.Crypt) *AbortTransaction {
+	if at == nil {
+		at = new(AbortTransaction)
+	}
+
+	at.crypt = crypt
+	return at
+}
+
 // Database sets the database to run this operation against.
 func (at *AbortTransaction) Database(database string) *AbortTransaction {
 	if at == nil {
@@ -165,9 +177,8 @@ func (at *AbortTransaction) WriteConcern(writeConcern *writeconcern.WriteConcern
 	return at
 }
 
-// Retry enables retryable writes for this operation. Retries are not handled automatically,
-// instead a boolean is returned from Execute and SelectAndExecute that indicates if the
-// operation can be retried. Retrying is handled by calling RetryExecute.
+// Retry enables retryable mode for this operation. Retries are handled automatically in driver.Operation.Execute based
+// on how the operation is set.
 func (at *AbortTransaction) Retry(retry driver.RetryMode) *AbortTransaction {
 	if at == nil {
 		at = new(AbortTransaction)

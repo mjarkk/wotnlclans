@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/mjarkk/wotnlclans/other"
-	"github.com/mongodb/mongo-go-driver/bson"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // ClanNameAndTags is a list of all clan info this can be used for search
