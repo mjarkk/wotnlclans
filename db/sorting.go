@@ -5,22 +5,31 @@ package db
 import (
 	"errors"
 	"sort"
+	"sync"
 )
 
-// SortedRating is a sorted list that contains every clan with it's possition in a field
-var SortedRating = map[string]ClanPositionEvery{}
+// sortedRating is a sorted list that contains every clan with it's possition in a field
+var sortedRating = map[string]ClanPositionEvery{}
+var sortedRatingLock sync.Mutex
 
-// sortClanIds makes a pre sorted list of all clans
-func sortClanIds() error {
-	clans, err := GetCurrentClansData()
-	if err != nil {
-		return err
-	}
+func GetSortedRating() map[string]ClanPositionEvery {
+	sortedRatingLock.Lock()
+	defer sortedRatingLock.Unlock()
+	return sortedRating
+}
 
+// SortClanIds makes a pre sorted list of all clans
+func SortClanIds() {
+	clans := []ClanStats{}
 	out := map[string]ClanPositionEvery{}
 
-	for _, clan := range clans {
-		out[clan.ID] = ClanPositionEvery{} // map ever clan id to the map
+	{
+		// Help the GO GC a bit here by inlining this logic, so the clansMap can be garbage collected earlier hopefully
+		clansMap := GetCurrentClansData()
+		for _, clan := range clansMap {
+			clans = append(clans, clan)
+			out[clan.ID] = ClanPositionEvery{} // map ever clan id to the map
+		}
 	}
 
 	itemsToSort := map[string]func([]ClanStats) []ClanStats{
@@ -264,21 +273,22 @@ func sortClanIds() error {
 		}
 	}
 
-	SortedRating = out
-
-	return nil
+	sortedRatingLock.Lock()
+	defer sortedRatingLock.Unlock()
+	sortedRating = out
 }
 
 // LightClanPositions does mostly the same as sortClanIds
 // this one tells per clan the posstion instaid of per cataory every clan's possition
 func LightClanPositions(itemToGet string) (map[string]interface{}, error) {
-	data := SortedRating
+	sortedRatingLock.Lock()
+	defer sortedRatingLock.Unlock()
 
 	toReturn := map[string]interface{}{}
 
 	if itemToGet == "all" {
 		toReturn["actualData"] = map[string][]int{}
-		for clanID, clan := range data {
+		for clanID, clan := range sortedRating {
 			toReturn["actualData"].(map[string][]int)[clanID] = []int{
 				clan.Members,
 				clan.Battles,
@@ -318,7 +328,7 @@ func LightClanPositions(itemToGet string) (map[string]interface{}, error) {
 		}
 	} else {
 		toReturn["actualData"] = map[string]int{}
-		for clanID, clan := range data {
+		for clanID, clan := range sortedRating {
 			switch itemToGet {
 			case "members":
 				toReturn["actualData"].(map[string]int)[clanID] = clan.Members

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mjarkk/wotnlclans/other"
+	"github.com/mjarkk/wotclans/other"
 )
 
 func handleFile(c *gin.Context, file, contentType string) {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mjarkk/wotnlclans/db"
+	"github.com/mjarkk/wotclans/db"
 )
 
 // Option is a command for the list
@@ -49,13 +49,11 @@ var OptionsList = []Option{
 		ToMatch:     "top clans",
 		Discription: "List the current top clans",
 		Command: func(currentOptions []Option, prefix string, args ...string) (string, error) {
-			clanStats, err := db.GetCurrentClansData()
-			if err != nil {
-				return ":confused: Ow no what happend there, a internal error", nil
-			}
+			clanStats := db.GetCurrentClansData()
 			top10 := make([]db.ClanStats, 10)
+			sortedRatings := db.GetSortedRating()
 			for _, clan := range clanStats {
-				clanPos, ok := db.SortedRating[clan.ID]
+				clanPos, ok := sortedRatings[clan.ID]
 				if !ok {
 					continue
 				}
@@ -80,15 +78,13 @@ var OptionsList = []Option{
 				return "", errors.New("Not enough arguments spesified")
 			}
 			if args[0] == "" {
-				return ":confused: Heu?? nothing is not a clan", nil
+				return ":confused: Heu?? No clans found", nil
 			}
-			clanStats, err := db.GetCurrentClansData()
-			if err != nil {
-				return ":confused: Ow no what happend there, a internal error", nil
-			}
+			clanStats := db.GetCurrentClansData()
+			sortedRatings := db.GetSortedRating()
 			for _, clan := range clanStats {
 				if strings.ToLower(clan.Tag) == strings.ToLower(strings.TrimSpace(args[0])) {
-					clanPos, ok := db.SortedRating[clan.ID]
+					clanPos, ok := sortedRatings[clan.ID]
 					realClanPos := 0
 					if ok {
 						realClanPos = clanPos.Efficiency + 1

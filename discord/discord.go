@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/mjarkk/wotnlclans/other"
+	"github.com/mjarkk/wotclans/other"
 )
 
 // IsEnabled shows if the discord bot is enabled
@@ -20,7 +20,7 @@ const AuthURL = "https://discordapp.com/oauth2/authorize?client_id=5365424441545
 // Setup sets up the discord part
 func Setup() {
 	fmt.Println("Settings up the discord api...")
-	key := other.Flags.DiscordAuthToken
+	key := other.GetConfig().DiscordAuthToken
 	if len(key) == 0 {
 		fmt.Println("No key spesified, Skipping the discord bot")
 		return

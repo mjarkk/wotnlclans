@@ -7,12 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mjarkk/wotnlclans/db"
-	"github.com/mjarkk/wotnlclans/other"
+	"github.com/mjarkk/wotclans/db"
+	"github.com/mjarkk/wotclans/other"
 )
-
-// Buzzy tells other parts of the application if the api is buzzy doing things
-var Buzzy = false
 
 // SetupAPI sets up the api for fetching data from the wargaming api
 func SetupAPI() error {
@@ -20,56 +17,54 @@ func SetupAPI() error {
 	if err != nil {
 		return err
 	}
-	flags := other.Flags
+	flags := other.GetFlags()
+	config := other.GetConfig()
+
 	fmt.Println("setting up the api...")
-	if len(flags.WGKey) == 0 {
+	if len(config.WargamingKey) == 0 {
 		return errors.New("No wargaming api key defined use `./wotnlclans -help` to get more info")
 	}
 	fmt.Println("Running api...")
-	Buzzy = true
 	GetIcons()
 	clanIds := db.GetClanIDs()
 	if len(clanIds) == 0 || flags.ForceStartupIndexing {
-		err := SearchForClanIds(flags, true)
+		err := SearchForClanIds(flags, config, true)
 		if err != nil {
 			fmt.Println("ERROR: [SearchForClanIds]:", err.Error())
 			return err
 		}
 	} else {
-		GetClanData(clanIds)
+		GetClanData(config.WargamingKey, clanIds)
 	}
 	GetIcons()
-	Buzzy = false
-
 	RunSchedule()
 
 	return nil
 }
 
-// RunSchedule runs GetClanData every view hours
+// RunSchedule runs GetClanData every few hours
 func RunSchedule() {
 	go func() {
 		count := 0
 		for {
 			time.Sleep(time.Hour * 4)
 			count++
-			Buzzy = true
+			config := other.GetConfig()
 			if count == 12 {
 				count = 0
-				err := SearchForClanIds(other.Flags, false)
+				err := SearchForClanIds(other.GetFlags(), config, false)
 				if err != nil {
 					apiErr("RunSchedule", err, "error check SearchForClanIds")
 					other.DevPrint("ERROR: [SearchForClanIds]:", err.Error())
 				}
 			} else {
-				err := GetClanData()
+				err := GetClanData(config.WargamingKey)
 				if err != nil {
 					apiErr("RunSchedule", err, "error check GetClanData")
 					other.DevPrint("ERROR: [GetClanData]:", err.Error())
 				}
 			}
 			GetIcons()
-			Buzzy = false
 		}
 	}()
 }
@@ -83,37 +78,21 @@ func apiErr(functionName string, err error, meta ...string) {
 		insertMeta = meta[0]
 	}
 	fmt.Println("Recived ERROR (API."+functionName+"):", err.Error(), insertMeta)
-	db.AddErr(db.ErrDB{
-		From:    functionName,
-		Message: err.Error(),
-		Meta:    insertMeta,
-		Package: "api",
-	})
-}
-
-// UpdateIfPossible updates the clan data if there is nothing going on
-func UpdateIfPossible() bool {
-	if Buzzy {
-		return false
-	}
-	GetClanData()
-	GetIcons()
-	return true
 }
 
 // SearchForClanIds searches through all clans for dutch clans and after that saves them in the database
-func SearchForClanIds(flags other.FlagsType, isInit bool) error {
+func SearchForClanIds(flags other.FlagsType, config other.ConfigType, isInit bool) error {
 	if isInit && flags.SkipStartupIndexing {
 		return nil
 	}
 
-	clans, err := GetAllClanIds(flags)
+	clans, err := GetAllClanIds(flags, config)
 	if err != nil {
 		return err
 	}
 
 	other.DevPrint("Fetched", len(clans), "clan ids")
-	clans = FilterOutClans(clans)
+	clans = FilterOutClans(clans, config.WargamingKey)
 	other.DevPrint("Filtered out all dutch clans,", len(clans), "clans")
 	// TODO: Removes blacklisted clans and add extra clans to the clans list
 	clans = RemovedDuplicates(clans)
@@ -121,25 +100,25 @@ func SearchForClanIds(flags other.FlagsType, isInit bool) error {
 	db.SetClanIDs(clans)
 
 	// when this is ran for the first time make sure to get clan list
-	GetClanData(clans)
+	GetClanData(config.WargamingKey, clans)
 
 	return nil
 }
 
 // GetClanDataTry is a helper function that retries when the api reports on invalid clan IDs
-func GetClanDataTry(chunk []string, toExclude []string) (ClanData, ClanRating, []string, error) {
-	chunk = other.RemoveQuotes(chunk)
+func GetClanDataTry(chunk []string, toExclude []string, key string) (ClanData, ClanRating, []string, error) {
+	chunk = other.RemoveAllQuotes(chunk)
 	toInclude := map[string]string{"clanID": strings.Join(chunk, "%2C")}
 
 	var info ClanData
-	infoOut, err := CallRoute("clanData", toInclude)
+	infoOut, err := CallRoute("clanData", toInclude, key)
 	if err != nil {
 		return ClanData{}, ClanRating{}, []string{}, err
 	}
 	json.Unmarshal([]byte(infoOut), &info)
 
 	var rating ClanRating
-	ratingOut, err := CallRoute("clanRating", toInclude)
+	ratingOut, err := CallRoute("clanRating", toInclude, key)
 	if err != nil {
 		return ClanData{}, ClanRating{}, []string{}, err
 	}
@@ -160,7 +139,7 @@ func GetClanDataTry(chunk []string, toExclude []string) (ClanData, ClanRating, [
 					newChunk = append(newChunk, clanID)
 				}
 			}
-			return GetClanDataTry(newChunk, toExclude)
+			return GetClanDataTry(newChunk, toExclude, key)
 		}
 		toReturnError := errors.New("Clans info message: " + info.Error.Message + ", Clans rating message: " + rating.Error.Message)
 		return ClanData{}, ClanRating{}, []string{}, toReturnError
@@ -174,54 +153,35 @@ func GetClanDataTry(chunk []string, toExclude []string) (ClanData, ClanRating, [
 }
 
 // GetClanData returns all needed information about clans
-// includedClans is not needed but if you have a database
-func GetClanData(includedClans ...[]string) error {
-
-	blockedClans, err := db.GetBlockedClans()
-	if err != nil {
-		return other.NewErr("can't get blocked clans", err)
-	}
-	blockedClans = other.RemoveQuotes(blockedClans)
-
-	extraClans, err := db.GetExtraClans()
-	if err != nil {
-		return other.NewErr("can't get extra clans", err)
-	}
-	extraClans = other.RemoveQuotes(extraClans)
-
-	clans := []string{}
+// includedClans is not required
+func GetClanData(key string, includedClans ...[]string) error {
+	clanIDs := []string{}
 	if len(includedClans) > 0 && len(includedClans[0]) > 0 {
-		clans = includedClans[0]
+		clanIDs = includedClans[0]
 	} else {
-		clans = db.GetClanIDs()
+		clanIDs = db.GetClanIDs()
 	}
+
+	blockedClans := db.GetBlockedClans()
+	extraClans := db.GetExtraClans()
 
 	extraAddClans := make([]bool, len(extraClans))
 	for i := range extraAddClans {
 		extraAddClans[i] = true
 	}
 
-	for _, clan := range clans {
-	extraClansLoop:
-		for id, extraItem := range extraClans {
-			if extraAddClans[id] && extraItem == clan {
-				extraAddClans[id] = false
-				break extraClansLoop
-			}
-		}
+	for _, clanID := range clanIDs {
+		delete(extraClans, clanID)
 	}
-
-	for i, pass := range extraAddClans {
-		if pass {
-			clans = append(clans, extraClans[i])
-		}
+	for id := range extraClans {
+		clanIDs = append(clanIDs, id)
 	}
 
 	toSave := []db.ClanStats{}
-	toFetch := SplitToChucks(clans)
+	toFetch := SplitToChucks(clanIDs)
 
 	for _, chunk := range toFetch {
-		info, rating, clansToRemoveFromIDs, err := GetClanDataTry(chunk, []string{})
+		info, rating, clansToRemoveFromIDs, err := GetClanDataTry(chunk, []string{}, key)
 
 		if err != nil {
 			apiErr("GetClanData", err, "error check GetClanDataTry")
@@ -230,17 +190,11 @@ func GetClanData(includedClans ...[]string) error {
 		db.RemoveClanIDs(clansToRemoveFromIDs)
 
 	intoDBLoop:
-		for i := range info.Data {
-			cInfo := info.Data[i]
-			cRating := rating.Data[i]
-			isBlocked := false
-		blockedClansForLoop:
-			for _, blockedClanID := range blockedClans {
-				if blockedClanID == i {
-					isBlocked = true
-					break blockedClansForLoop
-				}
-			}
+		for id := range info.Data {
+			cInfo := info.Data[id]
+			cRating := rating.Data[id]
+			_, isBlocked := blockedClans[id]
+
 			if len(cInfo.Tag) < 2 {
 				continue intoDBLoop
 			}
@@ -252,7 +206,7 @@ func GetClanData(includedClans ...[]string) error {
 				Members:     cInfo.MembersCount,
 				Description: cInfo.DescriptionHTML,
 				Motto:       cInfo.Motto,
-				ID:          i,
+				ID:          id,
 				Emblems: map[string]string{
 					"X256.Wowp":   cInfo.Emblems.X256.Wowp,
 					"X195.Portal": cInfo.Emblems.X195.Portal,
@@ -264,7 +218,7 @@ func GetClanData(includedClans ...[]string) error {
 				Stats: db.HistoryClanStats{
 					Tag:                cInfo.Tag,
 					Name:               cInfo.Name,
-					ID:                 i,
+					ID:                 id,
 					Members:            cInfo.MembersCount,
 					Battles:            cRating.BattlesCountAvg.Value,
 					DailyBattles:       cRating.BattlesCountAvgDaily.Value,
@@ -336,11 +290,11 @@ func SplitToChucks(list []string) [][]string {
 }
 
 // FilterOutClans filters out all not dutch clans out of a input list
-func FilterOutClans(clanList []string) []string {
+func FilterOutClans(clanList []string, key string) []string {
 	tofetch := SplitToChucks(clanList)
 	toReturn := []string{}
 	for _, ids := range tofetch {
-		rawOut, err := CallRoute("clanDiscription", map[string]string{"clanID": strings.Join(ids, "%2C")}) // %2C = ,
+		rawOut, err := CallRoute("clanDiscription", map[string]string{"clanID": strings.Join(ids, "%2C")}, key) // %2C = ,
 		if err != nil {
 			apiErr("FilterOutClans", err, "error check CallRoute")
 			continue
@@ -381,7 +335,7 @@ func RemovedDuplicates(input []string) (output []string) {
 }
 
 // GetAllClanIds returns all clan ids
-func GetAllClanIds(flags other.FlagsType) ([]string, error) {
+func GetAllClanIds(flags other.FlagsType, config other.ConfigType) ([]string, error) {
 	ids := []string{}
 	page := 0
 
@@ -393,10 +347,9 @@ func GetAllClanIds(flags other.FlagsType) ([]string, error) {
 		var out TopClans
 		outString, err := CallRoute("topClans", map[string]string{
 			"pageNum": fmt.Sprintf("%v", page),
-		})
+		}, config.WargamingKey)
 
-		json.Unmarshal([]byte(outString), &out)
-
+		err = json.Unmarshal([]byte(outString), &out)
 		if err != nil {
 			return ids, err
 		}

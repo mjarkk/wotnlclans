@@ -3,11 +3,13 @@ package api
 import (
 	"encoding/json"
 	"errors"
+
+	"github.com/mjarkk/wotclans/other"
 )
 
 // CheckAPI checks if the key is valid and if there are no other errors
 func CheckAPI() error {
-	rawOut, err := CallRoute("nicknameAndClan", map[string]string{"playerID": "516673968"})
+	rawOut, err := CallRoute("nicknameAndClan", map[string]string{"playerID": "516673968"}, other.GetConfig().WargamingKey)
 	if err != nil {
 		return err
 	}

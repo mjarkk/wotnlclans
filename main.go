@@ -4,21 +4,18 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mjarkk/wotnlclans/api"
-	"github.com/mjarkk/wotnlclans/db"
-	"github.com/mjarkk/wotnlclans/discord"
-	"github.com/mjarkk/wotnlclans/other"
-	"github.com/mjarkk/wotnlclans/server"
+	"github.com/mjarkk/wotclans/api"
+	"github.com/mjarkk/wotclans/discord"
+	"github.com/mjarkk/wotclans/other"
+	"github.com/mjarkk/wotclans/server"
 )
 
 func main() {
 	fmt.Printf("------------------------\n press CTRL + C to exit \n------------------------\n\n")
 
-	other.SetupFlags()
-
-	err := db.Setup()
+	err := other.SetupFlagsAndConfig()
 	if err != nil {
-		fmt.Println("Database error:", err.Error())
+		fmt.Println("Setup error:", err)
 		os.Exit(1)
 	}
 
@@ -35,7 +32,7 @@ func main() {
 	}()
 
 	r := server.SetupRouter()
-	addr := other.Flags.WebServerLocation
+	addr := other.GetConfig().WebserverLocation
 	fmt.Println("Running server on", addr)
 	fmt.Println("ERROR:", r.Run(addr))
 }

@@ -3,11 +3,11 @@ package server
 import (
 	"strings"
 
-	"github.com/mjarkk/wotnlclans/discord"
-	"github.com/mjarkk/wotnlclans/other"
+	"github.com/mjarkk/wotclans/discord"
+	"github.com/mjarkk/wotclans/other"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mjarkk/wotnlclans/db"
+	"github.com/mjarkk/wotclans/db"
 )
 
 // serveDataRoutes serves the data routes
@@ -76,7 +76,7 @@ func serveDataRoutes(r *gin.Engine) {
 		c.JSON(200, gin.H{
 			"status":  status,
 			"data":    toReturn,
-			"default": db.CurrentDefaultFiltered(),
+			"default": "efficiency",
 			"err":     hasErr,
 		})
 	})

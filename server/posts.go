@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mjarkk/wotnlclans/other"
+	"github.com/mjarkk/wotclans/other"
 )
 
 // serverPostRoutes are post routes that are to small to make a file for them

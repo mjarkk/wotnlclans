@@ -16,7 +16,7 @@ import (
 
 	"github.com/disintegration/imaging"
 	webpbin "github.com/mjarkk/go-webpbin"
-	"github.com/mjarkk/wotnlclans/db"
+	"github.com/mjarkk/wotclans/db"
 )
 
 type imageAndIDType struct {
@@ -27,10 +27,7 @@ type imageAndIDType struct {
 // GetIcons fetches all clan icons and creates a grid
 func GetIcons() error {
 	fmt.Println("Getting clan icons...")
-	clans, err := db.GetCurrentClansData()
-	if err != nil {
-		return err
-	}
+	clans := db.GetCurrentClansData()
 
 	imgAndID := []imageAndIDType{}
 

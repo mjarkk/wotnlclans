@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/mjarkk/HttpRequest"
-	"github.com/mjarkk/wotnlclans/other"
 )
 
 var routePrefix = "https://api.worldoftanks.eu"
@@ -25,9 +24,9 @@ var Routes = map[string]string{
 }
 
 // GetAPIRoute returns a route with the inputs parsed
-func GetAPIRoute(what string, inputs map[string]string) (string, error) {
+func GetAPIRoute(what string, inputs map[string]string, key string) (string, error) {
 	if _, hasKey := inputs["key"]; !hasKey {
-		inputs["key"] = other.Flags.WGKey
+		inputs["key"] = key
 	}
 	selectedRoute, check := Routes[what]
 	if !check {
@@ -77,8 +76,8 @@ func Post(uri string, postData map[string]interface{}) (string, error) {
 }
 
 // CallRoute makes a network request
-func CallRoute(what string, inputs map[string]string) (string, error) {
-	url, err := GetAPIRoute(what, inputs)
+func CallRoute(what string, inputs map[string]string, key string) (string, error) {
+	url, err := GetAPIRoute(what, inputs, key)
 	if err != nil {
 		return "", err
 	}

@@ -12,11 +12,20 @@ func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	setupLogin(r)
 	serveDataRoutes(r)
 	serverPostRoutes(r)
 	serveStaticFiles(r)
-	serveSettings(r)
 
 	return r
+}
+
+func returnIfErr(c *gin.Context, err error, message string) bool {
+	if err != nil {
+		c.JSON(200, map[string]interface{}{
+			"status": false,
+			"error":  message,
+		})
+		return true
+	}
+	return false
 }
