@@ -15,7 +15,6 @@ export default class Comunity extends React.Component {
       inviteLink: undefined,
       hasError: false,
       showInfo: false,
-      blocks: [],
       showBlockCreator: false,
       blockCratorBackgroundImage: true,
       blockCreatorErrors: [],
@@ -91,11 +90,6 @@ export default class Comunity extends React.Component {
       .then(out =>
         this.setState(out.status ? { inviteLink: out.inviteLink } : { hasError: true })
       )
-    n.fetchWCache('/community')
-      .then(out =>
-        // The status of /community is always true so we don't have to check that
-        this.setState({ blocks: out.data })
-      )
   }
   render() {
     const bcd = this.state.blockCreatorData // short for "block creator data"
@@ -106,7 +100,7 @@ export default class Comunity extends React.Component {
           Here will be tools, websites, forums, etc for the Dutch and Belgium World Of Tanks community
         </p>
         <div className="floatingElements">
-          {this.state.blocks.map((block, key) =>
+          {(CONF_COMMUNITY || []).map((block, key) =>
             block.requirements.indexOf('discord') != -1 && !this.state.inviteLink && !this.state.hasError && WEBPACK_PRODUCTION
               ? ''
               : <CommunityBlock key={key} data={block} />

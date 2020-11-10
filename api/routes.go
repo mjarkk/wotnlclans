@@ -15,7 +15,6 @@ var Routes = map[string]string{
 	"clanIcon":          "/wgn/clans/info/?application_id={{key}}&clan_id={{clan}}&fields=tag%2Ccolor%2Cemblems.x195",
 	"playerInfoLogedIn": "/wot/account/info/?application_id={{key}}&account_id={{playerID}}&access_token={{playerAccessToken}}",
 	"playerInfo":        "/wot/account/info/?application_id={{key}}&account_id={{playerID}}",
-	"loginLink":         "/wot/auth/login/?display=popup&nofollow=1&application_id={{key}}&redirect_uri={{redirectURL}}",
 	"topClans":          "/wgn/clans/list/?application_id={{key}}&limit=100&game=wot&fields=clan_id&page_no={{pageNum}}",
 	"clanDiscription":   "/wgn/clans/info/?application_id={{key}}&clan_id={{clanID}}&fields=description%2Ctag",
 	"clanTag":           "/wgn/clans/info/?application_id={{key}}&clan_id={{clanID}}&fields=tag",

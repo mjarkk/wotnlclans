@@ -11,10 +11,10 @@ const defaultState = {
 const ns = newState => {
   return Object.keys(defaultState).reduce((acc, key) => {
     acc[key] = Object.assign(
-      {}, 
-      defaultState[key], 
-      newState && newState[key] 
-        ? newState[key] 
+      {},
+      defaultState[key],
+      newState && newState[key]
+        ? newState[key]
         : defaultState[key]
     )
     return acc
@@ -24,18 +24,13 @@ const ns = newState => {
 const route = rlite(async () => ns(), {
   'list': async () => ns(),
   '': async () => ns(),
-  'clan/:clanID': async ({clanID}) => {
+  'clan/:clanID': async ({ clanID }) => {
     return ns({
       index: {
         showClan: await f.getSpesificClan(clanID)
       }
     })
   },
-  'settings': async () => ns({
-    index: {
-      currentPage: 'settings'
-    }
-  }),
   'community': async () => ns({
     index: {
       currentPage: 'community'
@@ -50,6 +45,6 @@ export default {
     return getRoute()
   },
   watchHash(callback) {
-    window.onhashchange = () => getRoute().then(newState => callback(newState)) 
+    window.onhashchange = () => getRoute().then(newState => callback(newState))
   }
 }

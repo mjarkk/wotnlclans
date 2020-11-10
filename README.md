@@ -1,4 +1,4 @@
-# WotNlClans site
+# Wot (NL/BE) Clans site
 [![Site version](https://img.shields.io/badge/Site%20version-V3-blue.svg)](https://wotnlclans.unknownclouds.com/)
 
 ## About

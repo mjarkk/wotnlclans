@@ -14,7 +14,7 @@ const fetchWCache = (url, toBlob) => {
         isWaitingForData: []
       }
       const reqUrl = toBlob
-        ? new Request(url) 
+        ? new Request(url)
         : url
       fetch(reqUrl).then(r => {
         if (toBlob) {
@@ -23,31 +23,31 @@ const fetchWCache = (url, toBlob) => {
           return r.json()
         }
       })
-      .then(data => {
-        fetchEdUrls[url].hasData = true
-        if (toBlob) {
-          fetchEdUrls[url].data = URL.createObjectURL(data)
-        } else {
-          fetchEdUrls[url].data = data
-        }
-        fetchEdUrls[url].status = true
-        const resolveData = fetchEdUrls[url].data
-        fetchEdUrls[url].isWaitingForData.map(waitItem => {
-          waitItem.resolve(resolveData)
+        .then(data => {
+          fetchEdUrls[url].hasData = true
+          if (toBlob) {
+            fetchEdUrls[url].data = URL.createObjectURL(data)
+          } else {
+            fetchEdUrls[url].data = data
+          }
+          fetchEdUrls[url].status = true
+          const resolveData = fetchEdUrls[url].data
+          fetchEdUrls[url].isWaitingForData.map(waitItem => {
+            waitItem.resolve(resolveData)
+          })
+          resolve(resolveData)
         })
-        resolve(resolveData)
-      })
-      .catch(err => {
-        fetchEdUrls[url].hasData = true
-        fetchEdUrls[url].data = err
-        fetchEdUrls[url].status = false
-        fetchEdUrls[url].isWaitingForData.map(waitItem => {
-          waitItem.reject(err)
+        .catch(err => {
+          fetchEdUrls[url].hasData = true
+          fetchEdUrls[url].data = err
+          fetchEdUrls[url].status = false
+          fetchEdUrls[url].isWaitingForData.map(waitItem => {
+            waitItem.reject(err)
+          })
+          reject(err)
         })
-        reject(err)
-      })
     } else if (item && item.hasData === false) {
-      fetchEdUrls[url].isWaitingForData.push({resolve, reject})
+      fetchEdUrls[url].isWaitingForData.push({ resolve, reject })
     } else {
       if (item.status) {
         resolve(item.data)
@@ -63,7 +63,7 @@ const getIconsLocation = () => fetchWCache('/icons/json')
 const getIconsPicture = () => fetchWCache(f.supportsWebp() ? '/icons/webp' : '/icons/png', true)
 const getFilteredList = () => fetchWCache('/clanIDs/all')
 
-const checkKey = async(userKey, userID) => {
+const checkKey = async (userKey, userID) => {
   const res = await fetch('/checkUser', {
     method: 'post',
     body: JSON.stringify({
@@ -78,19 +78,7 @@ const checkKey = async(userKey, userID) => {
   return data
 }
 
-const getSettings = async(userKey, userID) =>
-  await (await fetch('/settings/allData', {
-    method: 'post',
-    body: JSON.stringify({
-      userKey,
-      userID
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    },
-  })).json()
-
-const updateClanIDsList = async(userKey, userID, route, clans) => 
+const updateClanIDsList = async (userKey, userID, route, clans) =>
   await (await fetch(route, {
     method: 'post',
     body: JSON.stringify({
@@ -103,10 +91,10 @@ const updateClanIDsList = async(userKey, userID, route, clans) =>
     },
   })).json()
 
-const getClansByID = async(ids) => 
+const getClansByID = async (ids) =>
   await (await fetch(`/clanData/${ids.join('+')}`)).json()
 
-const search = async(filter, sorting) => 
+const search = async (filter, sorting) =>
   fetchWCache(`/search/${encodeURIComponent(filter)}/${encodeURIComponent(sorting)}`)
 
 const getDescription = async (clanID) => {
@@ -123,8 +111,6 @@ export default {
   getClansByID,
   fetchWCache,
   getClanList,
-  getSettings,
-  checkKey, 
+  checkKey,
   search
 }
-  

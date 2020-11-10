@@ -45,17 +45,9 @@ type HistoryCollectionItem struct {
 
 // User defines what a user is
 type User struct {
-	Rights   string               `json:"rights" bson:"rights"`
-	UserID   int                  `json:"userid" bson:"userid"`
-	NickName string               `json:"nickname" bson:"nickname"`
-	Tokens   map[string]UserToken `json:"tokens" bson:"tokens"`
-}
-
-// UserToken is a user to that someone can use to login
-type UserToken struct {
-	ValidTo  string `json:"validto" bson:"validto"`
-	Key      string `json:"key" bson:"key"`
-	LastUsed string `json:"lastused" bson:"lastused"`
+	Rights   string `json:"rights" bson:"rights"`
+	UserID   int    `json:"userid" bson:"userid"`
+	NickName string `json:"nickname" bson:"nickname"`
 }
 
 // ClanPositionEvery this shows the clan possition in all type stats

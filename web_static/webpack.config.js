@@ -4,8 +4,11 @@ const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const LiveReloadPlugin = require('webpack-livereload-plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
+const fs = require('fs');
 
 const production = process.env.npm_lifecycle_event == 'build'
+
+const conf = fs.readFileSync('../config.json', 'utf8')
 
 module.exports = {
   entry: {
@@ -16,9 +19,9 @@ module.exports = {
     path: path.resolve(__dirname, './build/')
   },
   resolveLoader: {
-    extensions: [ 
-      '.js', 
-      '.json', 
+    extensions: [
+      '.js',
+      '.json',
       '.styl',
       '.svg'
     ]
@@ -35,17 +38,17 @@ module.exports = {
             shouldPrintComment: val => false
           }
         }
-      },{
+      }, {
         test: /\.styl$/,
-        loader: 'style-loader!css-loader!stylus-loader' 
-      },{
+        loader: 'style-loader!css-loader!stylus-loader'
+      }, {
         test: /\.svg$/,
         loader: 'svg-inline-loader'
       }
     ]
   },
   resolve: {
-    alias:  production 
+    alias: production
       ? {
         'react': 'preact-compat',
         'react-dom': 'preact-compat'
@@ -56,10 +59,13 @@ module.exports = {
     new FriendlyErrorsWebpackPlugin(),
     new LiveReloadPlugin({}),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': production 
-        ? '"production"' 
+      'process.env.NODE_ENV': production
+        ? '"production"'
         : '"development"',
-      WEBPACK_PRODUCTION: production
+      WEBPACK_PRODUCTION: production,
+      CONF_BOTTOM_TEXT: conf.bottomText,
+      CONF_SPONSOR: conf.sponsor,
+      CONF_COMMUNITY: conf.community,
     }),
     new HtmlWebpackPlugin({
       production: production,
@@ -67,11 +73,6 @@ module.exports = {
       inject: false
     })
   ],
-  // optimization: {
-  //   splitChunks: {
-  //     chunks: 'all'
-  //   }
-  // },
   stats: {
     colors: true
   },

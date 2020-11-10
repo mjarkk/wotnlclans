@@ -2,10 +2,8 @@ package other
 
 import (
 	"crypto/sha1"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"strings"
 )
 
@@ -97,30 +95,6 @@ type CommunityBlock struct {
 	// Supported:
 	// - "discord" (the discord token needs to be available)
 	Requirements []string `json:"requirements"`
-}
-
-var cachedCommunityData []CommunityBlock
-
-// GetCommunityData returns the CommunityBlocks
-func GetCommunityData() []CommunityBlock {
-	if cachedCommunityData != nil {
-		return cachedCommunityData
-	}
-
-	data, err := ioutil.ReadFile("./community.json")
-	if err != nil {
-		fmt.Println("ERROR: Can't read community.json,", err)
-		cachedCommunityData = []CommunityBlock{}
-		return cachedCommunityData
-	}
-
-	err = json.Unmarshal(data, &cachedCommunityData)
-	if err != nil {
-		cachedCommunityData = []CommunityBlock{}
-		return cachedCommunityData
-	}
-
-	return cachedCommunityData
 }
 
 // CheckCommunityBlock checks a communityblock and returns in a slice the errors if found

@@ -116,23 +116,6 @@ type ClanData struct {
 	} `json:"data"`
 }
 
-// LoginLink is a type for the loginLink route
-type LoginLink struct {
-	Status string `json:"status"`
-	Error  struct {
-		Code    int    `json:"code"`
-		Field   string `json:"field"`
-		Message string `json:"message"`
-		Value   string `json:"value"`
-	} `json:"error"`
-	Meta struct {
-		Count int `json:"count"`
-	} `json:"meta"`
-	Data struct {
-		Location string `json:"location"`
-	} `json:"data"`
-}
-
 // ClanRating is a type for the clanRating route
 type ClanRating struct {
 	Status string `json:"status"`
