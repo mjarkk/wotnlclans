@@ -87,7 +87,10 @@ export default class Header extends React.Component {
         <div className={cn('promo', { hidden: this.state.promoHidden })}>
           <div className="promoInner">
             <h1>{CONF_BOTTOM_TEXT}</h1>
-            <p>{CONF_SPONSOR.pre} <a href={CONF_SPONSOR.linkURL}>{CONF_SPONSOR.linkText}</a></p>
+            {CONF_SPONSOR
+              ? <p>{CONF_SPONSOR.pre} {CONF_SPONSOR.linkURL && CONF_SPONSOR.linkText ? <a href={CONF_SPONSOR.linkURL}>{CONF_SPONSOR.linkText}</a> : ''}</p>
+              : <p></p>
+            }
           </div>
         </div>
         { this.props.isMobile && this.props.currentPage == 'list'
