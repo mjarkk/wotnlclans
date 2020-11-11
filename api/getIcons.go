@@ -27,14 +27,15 @@ type imageAndIDType struct {
 // GetIcons fetches all clan icons and creates a grid
 func GetIcons() error {
 	fmt.Println("Getting clan icons...")
-	clans := db.GetCurrentClansData()
 
 	imgAndID := []imageAndIDType{}
 
-	var waitForImgs sync.WaitGroup
-	waitForImgs.Add(len(clans))
+	currentStats, unlock := db.GetCurrentStats()
 
-	for _, clan := range clans {
+	var waitForImgs sync.WaitGroup
+	waitForImgs.Add(len(currentStats))
+
+	for _, clan := range currentStats {
 		go func(clan db.ClanStats) {
 			defer waitForImgs.Done()
 
@@ -68,6 +69,7 @@ func GetIcons() error {
 			})
 		}(clan)
 	}
+	unlock()
 
 	waitForImgs.Wait()
 
@@ -125,7 +127,7 @@ func GetIcons() error {
 
 		webpbin.DetectUnsupportedPlatforms()
 		if doesNotSupportWebPBin {
-			webpbin.Dest("vendor/webp")
+			webpbin.Dest("webp")
 		}
 
 		err = webpbin.NewCWebP().

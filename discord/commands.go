@@ -49,11 +49,14 @@ var OptionsList = []Option{
 		ToMatch:     "top clans",
 		Discription: "List the current top clans",
 		Command: func(currentOptions []Option, prefix string, args ...string) (string, error) {
-			clanStats := db.GetCurrentClansData()
+			currentStats, currentStatsUnlock := db.GetCurrentStats()
+			defer currentStatsUnlock()
+			db.SortedRatingLock.Lock()
+			defer db.SortedRatingLock.Unlock()
+
 			top10 := make([]db.ClanStats, 10)
-			sortedRatings := db.GetSortedRating()
-			for _, clan := range clanStats {
-				clanPos, ok := sortedRatings[clan.ID]
+			for _, clan := range currentStats {
+				clanPos, ok := db.SortedRating[clan.ID]
 				if !ok {
 					continue
 				}
@@ -80,11 +83,15 @@ var OptionsList = []Option{
 			if args[0] == "" {
 				return ":confused: Heu?? No clans found", nil
 			}
-			clanStats := db.GetCurrentClansData()
-			sortedRatings := db.GetSortedRating()
-			for _, clan := range clanStats {
+
+			currentStats, currentStatsUnlock := db.GetCurrentStats()
+			defer currentStatsUnlock()
+			db.SortedRatingLock.Lock()
+			defer db.SortedRatingLock.Unlock()
+
+			for _, clan := range currentStats {
 				if strings.ToLower(clan.Tag) == strings.ToLower(strings.TrimSpace(args[0])) {
-					clanPos, ok := sortedRatings[clan.ID]
+					clanPos, ok := db.SortedRating[clan.ID]
 					realClanPos := 0
 					if ok {
 						realClanPos = clanPos.Efficiency + 1
@@ -92,6 +99,7 @@ var OptionsList = []Option{
 					return PrintClanLine(clan, realClanPos, true), nil
 				}
 			}
+
 			return ":eyes: We have looked everyware but cloud not found the clan you are looking for", nil
 		},
 	},

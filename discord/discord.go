@@ -18,14 +18,13 @@ var IsEnabled = false
 const AuthURL = "https://discordapp.com/oauth2/authorize?client_id=536542444154519552&permissions=522304&scope=bot"
 
 // Setup sets up the discord part
-func Setup() {
+func Setup(config other.FlagsAndConfig) {
 	fmt.Println("Settings up the discord api...")
-	key := other.GetConfig().DiscordAuthToken
-	if len(key) == 0 {
+	if len(config.DiscordAuthToken) == 0 {
 		fmt.Println("No key spesified, Skipping the discord bot")
 		return
 	}
-	discord, err := discordgo.New("Bot " + key)
+	discord, err := discordgo.New("Bot " + config.DiscordAuthToken)
 	if err != nil {
 		fmt.Println("Can't createa a discord bot, err:", err.Error())
 	}

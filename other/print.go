@@ -1,14 +1,10 @@
 package other
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // DevPrint only prints when there the -dev flag is given
-func DevPrint(inputs ...interface{}) {
-	flagsLock.Lock()
-	defer flagsLock.Unlock()
-	if flags.Dev {
+func (c *FlagsAndConfig) DevPrint(inputs ...interface{}) {
+	if c.Dev {
 		fmt.Println(inputs...)
 	}
 }

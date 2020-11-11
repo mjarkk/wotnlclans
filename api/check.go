@@ -8,8 +8,8 @@ import (
 )
 
 // CheckAPI checks if the key is valid and if there are no other errors
-func CheckAPI() error {
-	rawOut, err := CallRoute("nicknameAndClan", map[string]string{"playerID": "516673968"}, other.GetConfig().WargamingKey)
+func CheckAPI(config other.FlagsAndConfig) error {
+	rawOut, err := CallRoute("nicknameAndClan", map[string]string{"playerID": "516673968"}, config.WargamingKey)
 	if err != nil {
 		return err
 	}

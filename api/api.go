@@ -12,13 +12,11 @@ import (
 )
 
 // SetupAPI sets up the api for fetching data from the wargaming api
-func SetupAPI() error {
-	err := CheckAPI()
+func SetupAPI(config other.FlagsAndConfig) error {
+	err := CheckAPI(config)
 	if err != nil {
 		return err
 	}
-	flags := other.GetFlags()
-	config := other.GetConfig()
 
 	fmt.Println("setting up the api...")
 	if len(config.WargamingKey) == 0 {
@@ -27,8 +25,8 @@ func SetupAPI() error {
 	fmt.Println("Running api...")
 	GetIcons()
 	clanIds := db.GetClanIDs()
-	if len(clanIds) == 0 || flags.ForceStartupIndexing {
-		err := SearchForClanIds(flags, config, true)
+	if len(clanIds) == 0 || config.ForceStartupIndexing {
+		err := SearchForClanIds(config, true)
 		if err != nil {
 			fmt.Println("ERROR: [SearchForClanIds]:", err.Error())
 			return err
@@ -37,31 +35,30 @@ func SetupAPI() error {
 		GetClanData(config.WargamingKey, clanIds)
 	}
 	GetIcons()
-	RunSchedule()
+	RunSchedule(config)
 
 	return nil
 }
 
 // RunSchedule runs GetClanData every few hours
-func RunSchedule() {
+func RunSchedule(config other.FlagsAndConfig) {
 	go func() {
 		count := 0
 		for {
 			time.Sleep(time.Hour * 4)
 			count++
-			config := other.GetConfig()
 			if count == 12 {
 				count = 0
-				err := SearchForClanIds(other.GetFlags(), config, false)
+				err := SearchForClanIds(config, false)
 				if err != nil {
 					apiErr("RunSchedule", err, "error check SearchForClanIds")
-					other.DevPrint("ERROR: [SearchForClanIds]:", err.Error())
+					config.DevPrint("ERROR: [SearchForClanIds]:", err.Error())
 				}
 			} else {
 				err := GetClanData(config.WargamingKey)
 				if err != nil {
 					apiErr("RunSchedule", err, "error check GetClanData")
-					other.DevPrint("ERROR: [GetClanData]:", err.Error())
+					config.DevPrint("ERROR: [GetClanData]:", err.Error())
 				}
 			}
 			GetIcons()
@@ -81,22 +78,22 @@ func apiErr(functionName string, err error, meta ...string) {
 }
 
 // SearchForClanIds searches through all clans for dutch clans and after that saves them in the database
-func SearchForClanIds(flags other.FlagsType, config other.ConfigType, isInit bool) error {
-	if isInit && flags.SkipStartupIndexing {
+func SearchForClanIds(config other.FlagsAndConfig, isInit bool) error {
+	if isInit && config.SkipStartupIndexing {
 		return nil
 	}
 
-	clans, err := GetAllClanIds(flags, config)
+	clans, err := GetAllClanIds(config)
 	if err != nil {
 		return err
 	}
 
-	other.DevPrint("Fetched", len(clans), "clan ids")
+	config.DevPrint("Fetched", len(clans), "clan ids")
 	clans = FilterOutClans(clans, config)
-	other.DevPrint("Filtered out all dutch clans,", len(clans), "clans")
+	config.DevPrint("Filtered out all dutch clans,", len(clans), "clans")
 	// TODO: Removes blacklisted clans and add extra clans to the clans list
 	clans = RemovedDuplicates(clans)
-	other.DevPrint("Removed all duplicate clans")
+	config.DevPrint("Removed all duplicate clans")
 	db.SetClanIDs(clans)
 
 	// when this is ran for the first time make sure to get clan list
@@ -244,7 +241,7 @@ func GetClanData(key string, includedClans ...[]string) error {
 }
 
 // IsSpesifiedLang checks a setence for allowed and disallowed words
-func IsSpesifiedLang(input string, config other.ConfigType) bool {
+func IsSpesifiedLang(input string, config other.FlagsAndConfig) bool {
 	if len(input) == 0 {
 		return false
 	}
@@ -293,7 +290,7 @@ func SplitToChucks(list []string) [][]string {
 }
 
 // FilterOutClans filters out all not dutch clans out of a input list
-func FilterOutClans(clanList []string, config other.ConfigType) []string {
+func FilterOutClans(clanList []string, config other.FlagsAndConfig) []string {
 	tofetch := SplitToChucks(clanList)
 	toReturn := []string{}
 	for _, ids := range tofetch {
@@ -311,7 +308,7 @@ func FilterOutClans(clanList []string, config other.ConfigType) []string {
 		for clanID, clan := range out.Data {
 			if IsSpesifiedLang(clan.Description, config) {
 				toReturn = append(toReturn, clanID)
-				other.DevPrint("found clan:", clan.Tag)
+				config.DevPrint("found clan:", clan.Tag)
 			}
 		}
 	}
@@ -338,13 +335,13 @@ func RemovedDuplicates(input []string) (output []string) {
 }
 
 // GetAllClanIds returns all clan ids
-func GetAllClanIds(flags other.FlagsType, config other.ConfigType) ([]string, error) {
+func GetAllClanIds(config other.FlagsAndConfig) ([]string, error) {
 	ids := []string{}
 	page := 0
 
 	for {
 		page++
-		if page > flags.MaxIndexPages {
+		if page > config.MaxIndexPages {
 			break
 		}
 		var out TopClans
@@ -370,7 +367,7 @@ func GetAllClanIds(flags other.FlagsType, config other.ConfigType) ([]string, er
 		}
 
 		if page%10 == 1 {
-			other.DevPrint("Fetched", len(ids), "Clans")
+			config.DevPrint("Fetched", len(ids), "Clans")
 		}
 	}
 	return ids, nil

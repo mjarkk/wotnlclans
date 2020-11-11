@@ -15,28 +15,26 @@ var clanNameAndTags = map[string]ClanNameAndTag{}
 var currentStatsLock sync.Mutex
 var currentStats = map[string]ClanStats{}
 
+func GetCurrentStats() (map[string]ClanStats, func()) {
+	currentStatsLock.Lock()
+	return currentStats, currentStatsLock.Unlock
+}
+
 // refillClanNameAndTags places data in the clanNameAndTags var
 func refillClanNameAndTags() {
-	clans := GetCurrentClansData()
-
+	currentStats, unlock := GetCurrentStats()
 	clanNameAndTagsLock.Lock()
-	defer clanNameAndTagsLock.Unlock()
 
 	clanNameAndTags = map[string]ClanNameAndTag{}
-	for _, clan := range clans {
+	for _, clan := range currentStats {
 		clanNameAndTags[clan.ID] = ClanNameAndTag{
 			Name: clan.Name,
 			Tag:  clan.Tag,
 		}
 	}
-}
 
-// GetCurrentClansData returns all clan data
-func GetCurrentClansData() map[string]ClanStats {
-	currentStatsLock.Lock()
-	defer currentStatsLock.Unlock()
-
-	return currentStats
+	unlock()
+	clanNameAndTagsLock.Unlock()
 }
 
 // GetCurrentClansByID filter the list with spesific IDs
@@ -48,28 +46,31 @@ func GetCurrentClansByID(ids ...string) ([]ClanStats, error) {
 	if len(ids) == 0 {
 		return toReturn, nil
 	}
-	clans := GetCurrentClansData()
+
+	currentStats, unlock := GetCurrentStats()
 	for _, id := range ids {
-		clan, ok := clans[id]
+		clan, ok := currentStats[id]
 		if ok {
 			toReturn = append(toReturn, clan)
 		}
 	}
+	unlock()
 
 	return toReturn, nil
 }
 
 // GetCurrentClansTop returns the top of some amound of clans
 func GetCurrentClansTop(maxAmound int) ([]ClanStats, error) {
-	toReturn := make([]ClanStats, len(sortedRating))
+	toReturn := make([]ClanStats, len(SortedRating))
 	clansMapped := map[string]ClanStats{}
 
-	clans := GetCurrentClansData()
-	for _, clan := range clans {
+	currentStats, unlock := GetCurrentStats()
+	for _, clan := range currentStats {
 		clansMapped[clan.ID] = clan
 	}
+	unlock()
 
-	for clanID, positions := range sortedRating {
+	for clanID, positions := range SortedRating {
 		toReturn[positions.Efficiency] = clansMapped[clanID]
 	}
 
@@ -99,10 +100,9 @@ func SetCurrentClansData(stats []ClanStats) error {
 		return errors.New("SetCurrentClansData got a empty array")
 	}
 
-	currentStatsLock.Lock()
-	defer currentStatsLock.Unlock()
-
+	_, unlock := GetCurrentStats()
 	currentStats = filteredStats
+	unlock()
 
 	SortClanIds()
 	refillClanNameAndTags()

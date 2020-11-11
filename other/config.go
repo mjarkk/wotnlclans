@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"strings"
-	"sync"
 )
 
 type ConfigType struct {
@@ -28,37 +27,22 @@ type FlagsType struct {
 	ForceStartupIndexing bool
 }
 
-var flags FlagsType
-var flagsLock sync.Mutex
-
-func GetFlags() FlagsType {
-	flagsLock.Lock()
-	defer flagsLock.Unlock()
-	return flags
-}
-
-var config ConfigType
-var configLock sync.Mutex
-
-// GetConfig returns the config
-func GetConfig() ConfigType {
-	configLock.Lock()
-	defer configLock.Unlock()
-	return config
+type FlagsAndConfig struct {
+	ConfigType
+	FlagsType
 }
 
 // SetupFlagsAndConfig sets up the Flags and config var
-func SetupFlagsAndConfig() error {
-	config, err := ioutil.ReadFile("./config.json")
+func SetupFlagsAndConfig() (FlagsAndConfig, error) {
+	configBytes, err := ioutil.ReadFile("./config.json")
 	if err != nil {
-		return err
+		return FlagsAndConfig{}, err
 	}
 
-	configLock.Lock()
-	defer configLock.Unlock()
-	err = json.Unmarshal(config, &flags)
+	var config ConfigType
+	err = json.Unmarshal(configBytes, &config)
 	if err != nil {
-		return err
+		return FlagsAndConfig{}, err
 	}
 
 	debug := fBool("debug", "debug the program")
@@ -73,17 +57,16 @@ func SetupFlagsAndConfig() error {
 		*maxIndexPages = 30 // limit this to 30 to make it faster to debug
 	}
 
-	flagsLock.Lock()
-	defer flagsLock.Unlock()
-	flags = FlagsType{
-		Debug:                *debug,
-		Dev:                  *dev,
-		MaxIndexPages:        *maxIndexPages,
-		SkipStartupIndexing:  *skipStartupIndexing,
-		ForceStartupIndexing: *forceStartupIndexing,
-	}
-
-	return nil
+	return FlagsAndConfig{
+		ConfigType: config,
+		FlagsType: FlagsType{
+			Debug:                *debug,
+			Dev:                  *dev,
+			MaxIndexPages:        *maxIndexPages,
+			SkipStartupIndexing:  *skipStartupIndexing,
+			ForceStartupIndexing: *forceStartupIndexing,
+		},
+	}, nil
 }
 
 // Run runs a command
