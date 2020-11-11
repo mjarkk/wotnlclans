@@ -103,7 +103,7 @@ export default class ClanDetials extends React.Component {
             <div className="back" onClick={() => location.hash = '/'}>
               <Icon icon="close" />
             </div>
-            {d && CONF_SPONSOR && this.state.showClan.id == CONF_SPONSOR.clanID ?
+            {d && CONF_SPONSOR?.clanID && this.state.showClan.id == CONF_SPONSOR?.clanID ?
               <div className="isSponsor">Sponsor!</div>
               : ''}
           </div>

@@ -22,7 +22,7 @@ body
     padding 0px 0px 20px 0px
     .filterOnList
       margin-top 10px
-      button 
+      button
         margin-top 10px
   .actualData
     padding 0px 0px 80px 0px
@@ -114,7 +114,7 @@ body
         display flex
         justify-content center
         align-items center
-        span 
+        span
           transition 0.2s opacity
           opacity 0
           height 40px
@@ -183,6 +183,7 @@ body
       display flex
       flex-wrap nowrap
       margin 0px auto
+      justify-content center
     button
       padding 5px 5px 7px 5px
       width 150px
@@ -233,8 +234,21 @@ body
           font-size 31px
         p
           font-size 15px
+    .noSponsor
+      p, h1
+        top -10px
   .promo.hidden
     height 0px
+
+.showNoLinks
+  .top .fullscreenCenter
+    display none
+  .promo .promoInner
+    p, h1
+      top -30px
+  .promo.hidden .promoInner
+    p, h1
+      top -20px
 
 button
   cursor pointer
@@ -279,7 +293,7 @@ button
     width 100%
     max-width 400px
     text-align center
-    
+
 .clanStatsContainer
   position fixed
   bottom 0px
@@ -379,7 +393,7 @@ button
   .discription
     padding 20px
 
-.chartAndStats 
+.chartAndStats
   position fixed
   top 20px
   right 20px
@@ -414,7 +428,7 @@ button
     transition transform 0.3s
   .show
     transform translateX(-100%) translateY(-100%)
-    
+
 .inputWrapper
   color white
   background-color rgba(95,10,204,0)
@@ -538,7 +552,7 @@ button
         border-bottom 2px solid #ddd
       .input
         padding-top 10px
-        label 
+        label
           font-weight bold
           display block
         input, textarea
@@ -583,13 +597,13 @@ button
           transition background-color 0.2s
       .check.checked
         background-color black
-  .commingSoon 
+  .commingSoon
     margin 20px
     font-size 22px
     display inline-block
     padding 3px 15px 5px 15px
     border 2px solid #da5eed
-    background-color #5b1665 
+    background-color #5b1665
     color white
     border-radius 10px
     transform scale(1)
@@ -729,7 +743,7 @@ button
       cursor pointer
       color white
       padding 4px 25px 6px 25px
-      -webkit-user-select none       
+      -webkit-user-select none
       -moz-user-select none
       -ms-user-select none
       user-select none
@@ -772,7 +786,7 @@ button
       width 178px
       padding 5px 5px 5px 0px
       display flex
-      flex-wrap nowrap      
+      flex-wrap nowrap
       .icon
         padding-left 3px
         height 30px

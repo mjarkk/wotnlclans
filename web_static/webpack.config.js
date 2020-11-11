@@ -8,7 +8,8 @@ const fs = require('fs');
 
 const production = process.env.npm_lifecycle_event == 'build'
 
-const conf = fs.readFileSync('../config.json', 'utf8')
+const confString = fs.readFileSync('../config.json', 'utf8')
+const conf = JSON.parse(confString)
 
 module.exports = {
   entry: {
@@ -63,9 +64,9 @@ module.exports = {
         ? '"production"'
         : '"development"',
       WEBPACK_PRODUCTION: production,
-      CONF_TITLE: conf.title,
-      CONF_SPONSOR: conf.sponsor,
-      CONF_COMMUNITY: conf.community,
+      CONF_TITLE: JSON.stringify(conf.title),
+      CONF_SPONSOR: JSON.stringify(conf.sponsor),
+      CONF_COMMUNITY: JSON.stringify(conf.community),
     }),
     new HtmlWebpackPlugin({
       production: production,

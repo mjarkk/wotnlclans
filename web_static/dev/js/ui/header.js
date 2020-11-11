@@ -13,7 +13,7 @@ export default class Header extends React.Component {
           selectedWhen: 'list',
           name: 'List',
           color: 'blue',
-          onClick: () => this.clickedListLink()
+          onClick: () => this.goto('/')
         }
       ],
       promoHidden: false,
@@ -25,7 +25,7 @@ export default class Header extends React.Component {
         selectedWhen: 'community',
         name: 'Community',
         color: 'green',
-        onClick: () => this.clickedComunityLink()
+        onClick: () => this.goto('/community'),
       })
     }
 
@@ -38,11 +38,8 @@ export default class Header extends React.Component {
       })
     }
   }
-  clickedComunityLink() {
-    location.hash = '/community'
-  }
-  clickedListLink() {
-    location.hash = '/'
+  goto(url) {
+    location.hash = url
   }
   watchScroll() {
     window.addEventListener('scroll', () => {
@@ -56,13 +53,13 @@ export default class Header extends React.Component {
   }
   render() {
     return (
-      <div className="header">
+      <div className={cn('header', { 'showNoLinks': this.state.selector.length <= 1 })}>
         <div className="top">
           <div
             className="fullscreenCenter"
             style={{
-              minWidth: `${(this.state.selector.length + 1) * 160}px`,
-              maxWidth: `${(this.state.selector.length + 1) * 160}px`
+              minWidth: `${(this.state.selector.length) * 160}px`,
+              maxWidth: `${(this.state.selector.length) * 160}px`
             }}
           >
             {this.state.selector.map((select, id) =>
@@ -85,20 +82,22 @@ export default class Header extends React.Component {
           </div>
         </div>
         <div className={cn('promo', { hidden: this.state.promoHidden })}>
-          <div className="promoInner">
+          <div className={cn('promoInner', { 'noSponsor': !CONF_SPONSOR })}>
             <h1>{CONF_TITLE}</h1>
             {CONF_SPONSOR
               ? <p>{CONF_SPONSOR.pre} {CONF_SPONSOR.linkURL && CONF_SPONSOR.linkText ? <a href={CONF_SPONSOR.linkURL}>{CONF_SPONSOR.linkText}</a> : ''}</p>
-              : <p></p>
+              : ''
             }
           </div>
         </div>
-        { this.props.isMobile && this.props.currentPage == 'list'
-          ? <div className={cn('clanStatsContainer', { show: this.props.showClan })}>
-            <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
-          </div>
-          : ''}
-      </div>
+        {
+          this.props.isMobile && this.props.currentPage == 'list'
+            ? <div className={cn('clanStatsContainer', { show: this.props.showClan })}>
+              <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
+            </div>
+            : ''
+        }
+      </div >
     )
   }
 }
