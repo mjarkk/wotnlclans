@@ -10,6 +10,8 @@ import (
 )
 
 type ConfigType struct {
+	AllowedWords      []string `json:"allowedWords"`
+	DisallowedWords   []string `json:"disallowedWords"`
 	BlockedClans      []string `json:"blockedClans"`
 	ExtraClans        []string `json:"extraClans"`
 	WargamingKey      string   `json:"wargamingKey"`

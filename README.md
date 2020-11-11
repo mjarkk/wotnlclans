@@ -10,12 +10,14 @@ On this site you can see all Dutch & Belgium clans ranked.
 | Backend | Golang |
 | Frondend | Javascript (React/Preact) |
 
-## Run
-1. Make sure you have installed [docker](https://docs.docker.com/install/)
+## Setup
+1. Make sure you have installed [docker](https://docs.docker.com/install/) in production and in development make sure you have [golang](https://golang.org/doc/install) and [nodejs](https://nodejs.org/en/)
 2. `git clone git@github.com:mjarkk/wotnlclans.git && cd wotnlclans`
 3. Configure `config.json`
-4. `docker build -t wotclans:latest .`
-5. Run the command under here and edit what needs to change
+
+## Run docker
+1. `docker build -t wotclans:latest .`
+2. Run the command under here and edit what needs to change
 ```sh
 docker run \
   --restart always \
@@ -25,18 +27,15 @@ docker run \
   wotclans:latest
 ```
 
-**Discord:**
+**Get discord discordAuthToken:**
 1. Generate a new application here: https://discordapp.com/developers/applications/
 2. Set a icon and after that go to the **Bot** tab
 3. Click the copy button
-4. add this to the docker run command: `-e DISCORDAUTHTOKEN=DiscordBotTokenHere`
 *NOTE: The community tab has a static discord bot invite link that is from the production build*
 
-## Development setup
-1. Make sure you have installed [golang](https://golang.org/doc/install) and [nodejs](https://nodejs.org/en/) also Make sure that golang is setted up correctly with a working gopath
-2. `git clone git@github.com:mjarkk/wotnlclans.git && cd wotnlclans`
-3. `go get`
-4. Configure `config.json`
-5. Read [web_static/README.md](./web_static/README.md)
-5. `./buildAndRun.sh -wgkey "yourWargamingApiKey"`
+## Run development
+1. `go get`
+2. Configure `config.json`
+3. Read [web_static/README.md](./web_static/README.md)
+4. `./buildAndRun.sh`
 

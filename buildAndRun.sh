@@ -6,4 +6,4 @@ set -e
 go build
 
 # Run the program with the -dev flag for devlopment
-./wotnlclans -dev "$@"
+./wotclans -dev "$@"

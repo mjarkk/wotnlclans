@@ -63,14 +63,16 @@ module.exports = {
         ? '"production"'
         : '"development"',
       WEBPACK_PRODUCTION: production,
-      CONF_BOTTOM_TEXT: conf.bottomText,
+      CONF_TITLE: conf.title,
       CONF_SPONSOR: conf.sponsor,
       CONF_COMMUNITY: conf.community,
     }),
     new HtmlWebpackPlugin({
       production: production,
       template: 'dev/index.html',
-      inject: false
+      inject: false,
+      conf_title: conf.title,
+      webAnalytics: conf.webAnalytics,
     })
   ],
   stats: {

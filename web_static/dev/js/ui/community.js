@@ -5,7 +5,6 @@ import cn from 'classnames'
 import { CirclePicker } from 'react-color'
 
 const CommunityBlock = d(import('../els/communityBlock'))
-const SVG = d(import('../els/svg'))
 
 export default class Comunity extends React.Component {
   constructor(props) {

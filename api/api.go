@@ -22,7 +22,7 @@ func SetupAPI() error {
 
 	fmt.Println("setting up the api...")
 	if len(config.WargamingKey) == 0 {
-		return errors.New("No wargaming api key defined use `./wotnlclans -help` to get more info")
+		return errors.New("No wargaming api key defined")
 	}
 	fmt.Println("Running api...")
 	GetIcons()
@@ -243,36 +243,39 @@ func GetClanData(key string, includedClans ...[]string) error {
 	return nil
 }
 
-// DutchWords is a list of words and small setences that are usualy in dutch clan descriptions
-var DutchWords = []string{
-	"verplicht", "menselijkheid", "pannenkoeken", "leeftijd", "minimale", "opzoek", "beginnende", "nederlandse", "spelers", "voldoen", "wij zijn", "gezelligheid", "ons op", "Kom erbij", "minimaal", "gemiddelde", "plezier", "samenwerking", "samenwerken", "aangezien", "toegelaten", "goedkeuring", "gebruik", "tijdens",
-}
-
-// BannedWords is a list of words that do usualy not exsits in a dutch clan descriptions
-var BannedWords = []string{
-	"équipe", "jeux", "ambiance", "rigolade",
-}
-
-// IsDutch detecst dutch words in setence
-func IsDutch(input string) bool {
+// IsSpesifiedLang checks a setence for allowed and disallowed words
+func IsSpesifiedLang(input string, config other.ConfigType) bool {
 	if len(input) == 0 {
 		return false
 	}
 	input = strings.ToLower(input)
-	returnStatus := false
-	for _, word := range DutchWords {
-		if strings.Contains(input, word) {
-			returnStatus = true
-			break
+	input = strings.ReplaceAll(input, "\n", " ")
+	input = strings.ReplaceAll(input, "\t", " ")
+	input = strings.ReplaceAll(input, "\r", " ")
+	input = strings.ReplaceAll(input, "  ", " ")
+	inputParts := strings.Split(input, " ")
+
+	res := false
+	for _, word := range inputParts {
+		word = strings.TrimSpace(word)
+		if word == "" {
+			continue
+		}
+
+		for _, disallowedWord := range config.DisallowedWords {
+			if strings.Contains(word, strings.TrimSpace(disallowedWord)) {
+				return false
+			}
+		}
+		for _, allowedWord := range config.AllowedWords {
+			if strings.Contains(word, strings.TrimSpace(allowedWord)) {
+				res = true
+				break
+			}
 		}
 	}
-	for _, word := range BannedWords {
-		if strings.Contains(input, word) {
-			returnStatus = false
-			break
-		}
-	}
-	return returnStatus
+
+	return res
 }
 
 // SplitToChucks splits up a input list in arrays of 100
@@ -290,11 +293,11 @@ func SplitToChucks(list []string) [][]string {
 }
 
 // FilterOutClans filters out all not dutch clans out of a input list
-func FilterOutClans(clanList []string, key string) []string {
+func FilterOutClans(clanList []string, config other.ConfigType) []string {
 	tofetch := SplitToChucks(clanList)
 	toReturn := []string{}
 	for _, ids := range tofetch {
-		rawOut, err := CallRoute("clanDiscription", map[string]string{"clanID": strings.Join(ids, "%2C")}, key) // %2C = ,
+		rawOut, err := CallRoute("clanDiscription", map[string]string{"clanID": strings.Join(ids, "%2C")}, config.WargamingKey) // %2C = ,
 		if err != nil {
 			apiErr("FilterOutClans", err, "error check CallRoute")
 			continue
@@ -306,7 +309,7 @@ func FilterOutClans(clanList []string, key string) []string {
 			continue
 		}
 		for clanID, clan := range out.Data {
-			if IsDutch(clan.Description) {
+			if IsSpesifiedLang(clan.Description, config) {
 				toReturn = append(toReturn, clanID)
 				other.DevPrint("found clan:", clan.Tag)
 			}
