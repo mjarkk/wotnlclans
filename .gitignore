@@ -21,3 +21,5 @@ test/
 # added extra for this project
 icons/*
 wotclans*
+webp
+vendor
