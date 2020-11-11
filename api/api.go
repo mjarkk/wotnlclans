@@ -92,7 +92,7 @@ func SearchForClanIds(flags other.FlagsType, config other.ConfigType, isInit boo
 	}
 
 	other.DevPrint("Fetched", len(clans), "clan ids")
-	clans = FilterOutClans(clans, config.WargamingKey)
+	clans = FilterOutClans(clans, config)
 	other.DevPrint("Filtered out all dutch clans,", len(clans), "clans")
 	// TODO: Removes blacklisted clans and add extra clans to the clans list
 	clans = RemovedDuplicates(clans)
