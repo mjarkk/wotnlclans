@@ -1,7 +1,27 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize, Clone)]
+pub trait DataHelper {
+  type Data;
+
+  fn get_status<'a>(&'a self) -> &'a str;
+  fn get_error(&self) -> Option<Error>;
+  fn get_data_option(&self) -> Option<Self::Data>;
+  fn get_data(&self) -> Result<Self::Data, String> {
+    let data = self.get_data_option();
+    if self.get_status() != "ok" || data.is_none() {
+      if let Some(err) = self.get_error() {
+        Err(format!("{:?}", err))
+      } else {
+        Err(String::from("Unknown error"))
+      }
+    } else {
+      Ok(data.unwrap())
+    }
+  }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Error {
   pub code: isize,
   pub field: String,
@@ -24,6 +44,19 @@ pub struct TopClans {
   pub data: Option<Vec<TopClansData>>,
 }
 
+impl DataHelper for TopClans {
+  type Data = Vec<TopClansData>;
+  fn get_status<'a>(&'a self) -> &'a str {
+    &self.status
+  }
+  fn get_error(&self) -> Option<Error> {
+    self.error
+  }
+  fn get_data_option(&self) -> Option<Self::Data> {
+    self.data
+  }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TopClansData {
   pub clan_id: usize,
@@ -38,9 +71,22 @@ pub struct NicknameAndClan {
   pub data: Option<HashMap<String, NicknameAndClanData>>,
 }
 
+impl DataHelper for NicknameAndClan {
+  type Data = HashMap<String, NicknameAndClanData>;
+  fn get_status<'a>(&'a self) -> &'a str {
+    &self.status
+  }
+  fn get_error(&self) -> Option<Error> {
+    self.error
+  }
+  fn get_data_option(&self) -> Option<Self::Data> {
+    self.data
+  }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct NicknameAndClanData {
-  pub clan_id: String,
+  pub clan_id: usize,
   pub nickname: String,
 }
 
@@ -51,6 +97,19 @@ pub struct ClanDiscription {
   pub error: Option<Error>,
   pub meta: Option<Meta>,
   pub data: Option<HashMap<String, ClanDiscriptionData>>,
+}
+
+impl DataHelper for ClanDiscription {
+  type Data = HashMap<String, ClanDiscriptionData>;
+  fn get_status<'a>(&'a self) -> &'a str {
+    &self.status
+  }
+  fn get_error(&self) -> Option<Error> {
+    self.error
+  }
+  fn get_data_option(&self) -> Option<Self::Data> {
+    self.data
+  }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -65,7 +124,20 @@ pub struct ClanData {
   pub status: String,
   pub error: Option<Error>,
   pub meta: Option<Meta>,
-  pub data: HashMap<String, ClanDataData>,
+  pub data: Option<HashMap<String, ClanDataData>>,
+}
+
+impl DataHelper for ClanData {
+  type Data = HashMap<String, ClanDataData>;
+  fn get_status<'a>(&'a self) -> &'a str {
+    &self.status
+  }
+  fn get_error(&self) -> Option<Error> {
+    self.error
+  }
+  fn get_data_option(&self) -> Option<Self::Data> {
+    self.data
+  }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -79,7 +151,7 @@ pub struct ClanDataData {
   accepts_join_requests: bool,
   leader_name: String,
   emblems: ClanDataEmblems,
-  clan_id: isize,
+  clan_id: usize,
   renamed_at: isize,
   old_tag: String,
   description: String,
@@ -91,7 +163,7 @@ pub struct ClanDataData {
   name: String,
   creator_name: String,
   created_at: isize,
-  creator_id: isize,
+  creator_id: usize,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -99,7 +171,7 @@ pub struct ClanDataMembers {
   role: String,
   role_i18n: String,
   joined_at: isize,
-  account_id: String,
+  account_id: usize,
   account_name: String,
 }
 
@@ -137,9 +209,22 @@ pub struct ClanRating {
   pub data: Option<HashMap<String, ClanRatingData>>,
 }
 
+impl DataHelper for ClanRating {
+  type Data = HashMap<String, ClanRatingData>;
+  fn get_status<'a>(&'a self) -> &'a str {
+    &self.status
+  }
+  fn get_error(&self) -> Option<Error> {
+    self.error
+  }
+  fn get_data_option(&self) -> Option<Self::Data> {
+    self.data
+  }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanRatingData {
-  clan_id: isize,
+  clan_id: usize,
   clan_name: String,
   clan_tag: String,
   battles_count_avg: ClanRatingGeneralRating,
@@ -177,6 +262,19 @@ pub struct PlayerInfoLogedIn {
   pub data: Option<HashMap<String, PlayerInfoLogedInData>>,
 }
 
+impl DataHelper for PlayerInfoLogedIn {
+  type Data = HashMap<String, PlayerInfoLogedInData>;
+  fn get_status<'a>(&'a self) -> &'a str {
+    &self.status
+  }
+  fn get_error(&self) -> Option<Error> {
+    self.error
+  }
+  fn get_data_option(&self) -> Option<Self::Data> {
+    self.data
+  }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct PlayerInfoLogedInDataPrivate {
   restrictions: PlayerInfoLogedInDataPrivateRestrictions,
@@ -201,11 +299,11 @@ pub struct PlayerInfoLogedInDataPrivateRestrictions {
 pub struct PlayerInfoLogedInData {
   client_language: String,
   last_battle_time: isize,
-  account_id: isize,
+  account_id: usize,
   created_at: isize,
   updated_at: isize,
   global_rating: isize,
-  clan_id: isize,
+  clan_id: usize,
   nickname: String,
   logout_at: isize,
   private: PlayerInfoLogedInDataPrivate,

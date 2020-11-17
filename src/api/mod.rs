@@ -1,39 +1,29 @@
 pub mod routes;
 pub mod types;
+pub mod api;
 
 use super::other::ConfAndFlags;
 use routes::{call_route, Routes};
 
 pub fn setup(config: ConfAndFlags) -> Result<(), String> {
-  check_api(config)?;
+  println!("setting up the api...");
+  if config.get_wg_key().len() == 0 {
+    return Err(String::from("No wargaming api key defined"));
+  }
 
-  // fmt.Println("setting up the api...")
-  // if len(config.WargamingKey) == 0 {
-  // 	return errors.New("No wargaming api key defined")
-  // }
-  // fmt.Println("Running api...")
-  // GetIcons()
-  // clanIds := db.GetClanIDs()
-  // if len(clanIds) == 0 || config.ForceStartupIndexing {
-  // 	err := SearchForClanIds(config, true)
-  // 	if err != nil {
-  // 		fmt.Println("ERROR: [SearchForClanIds]:", err.Error())
-  // 		return err
-  // 	}
-  // } else {
-  // 	GetClanData(config.WargamingKey, clanIds)
-  // }
+  check_api(&config)?;
+
+  println!("Running api...");
+  api::search_for_clan_ids(&config, true)?
   // GetIcons()
   // RunSchedule(config)
 
   Ok(())
 }
 
-fn check_api(config: ConfAndFlags) -> Result<types::NicknameAndClan, String> {
-  let res: types::NicknameAndClan = call_route(
-    Routes::NicknameAndClan("516673968".into()),
-    &config.conf().wargaming_key,
-  )?;
+fn check_api(config: &ConfAndFlags) -> Result<types::NicknameAndClan, String> {
+  let res: types::NicknameAndClan =
+    call_route(Routes::NicknameAndClan("516673968".into()), config)?;
 
   Ok(res)
 }

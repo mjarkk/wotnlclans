@@ -30,7 +30,7 @@ type NicknameAndClan struct {
 		Count int `json:"count"`
 	} `json:"meta"`
 	Data map[string]struct {
-		ClanID   string `json:"clan_id"`
+		ClanID   int `json:"clan_id"`
 		NickName string `json:"nickname"`
 	} `json:"data"`
 	Status string `json:"status"`

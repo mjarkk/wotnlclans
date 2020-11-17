@@ -1,5 +1,6 @@
+use crate::other::ConfAndFlags;
 use reqwest::blocking::get;
-use serde::Deserialize;
+use serde::de::DeserializeOwned;
 use serde_json::from_str;
 
 pub enum Routes {
@@ -57,12 +58,12 @@ impl Routes {
   }
 }
 
-pub fn call_route<'a, T: Deserialize<'a>>(route: Routes, key: &str) -> Result<T, String> {
-  let url = String::from("https://api.worldoftanks.eu") + &route.get_url_path(key);
+pub fn call_route<T: DeserializeOwned>(route: Routes, config: &ConfAndFlags) -> Result<T, String> {
+  let url = String::from("https://api.worldoftanks.eu") + &route.get_url_path(config.get_wg_key());
   let err = |e| Err(format!("Failed to get {} with error: {}", url, e));
 
   let response = match get(&url).or_else(err)?.text() {
-    Ok(v) => v.as_str(),
+    Ok(v) => v,
     Err(e) => {
       return Err(format!(
         "Failed to get {} with error {}",
@@ -72,7 +73,7 @@ pub fn call_route<'a, T: Deserialize<'a>>(route: Routes, key: &str) -> Result<T,
     } // Box<std::error::Error>
   };
 
-  let parsed_response: T = from_str::<'_, T>(response).or_else(|_| {
+  let parsed_response: T = from_str(&response).or_else(|_| {
     Err(format!(
       "Failed to get {} with error: failed to parse response",
       url

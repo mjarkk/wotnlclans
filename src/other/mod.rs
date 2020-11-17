@@ -23,6 +23,12 @@ impl ConfAndFlags {
   pub fn flags(&self) -> &Flags {
     &self.1
   }
+  pub fn get_wg_key(&self) -> &str {
+    &self.conf().wargaming_key
+  }
+  pub fn is_dev(&self) -> bool {
+    &self.flags().dev
+  }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -59,7 +65,7 @@ pub struct Flags {
 }
 
 impl Flags {
-  fn max_index_pages(&self) -> usize {
+  pub fn get_max_index_pages(&self) -> usize {
     if let Some(pages) = self.max_index_pages {
       pages
     } else if self.dev {
