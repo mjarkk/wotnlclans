@@ -1,7 +1,11 @@
+#[macro_use]
+extern crate lazy_static;
+
 use std::process::exit;
 use std::thread;
 
 pub mod api;
+pub mod db;
 pub mod other;
 
 fn main() {

@@ -9,10 +9,10 @@ pub enum Routes {
   PlayerInfoLogedIn(/*player_id*/ String, /*playerAccessToken*/ String),
   PlayerInfo(/*player_id*/ String),
   TopClans(/*page_num*/ usize),
-  ClanDiscription(/*clan_id*/ String),
+  ClanDiscription(/*clan_ids*/ Vec<String>),
   ClanTag(/*clan_id*/ String),
-  ClanData(/*clan_id*/ String),
-  ClanRating(/*clan_id*/ String),
+  ClanData(/*clan_ids*/ Vec<String>),
+  ClanRating(/*clan_ids*/ Vec<String>),
 }
 
 impl Routes {
@@ -38,21 +38,24 @@ impl Routes {
         "/wgn/clans/list/?application_id={}&limit=100&game=wot&fields=clan_id&page_no={}",
         key, page_num
       ),
-      Self::ClanDiscription(clan_id) => format!(
+      Self::ClanDiscription(clan_ids) => format!(
         "/wgn/clans/info/?application_id={}&clan_id={}&fields=description%2Ctag",
-        key, clan_id
+        key,
+        clan_ids.join("%2C")
       ),
       Self::ClanTag(clan_id) => format!(
         "/wgn/clans/info/?application_id={}&clan_id={}&fields=tag",
         key, clan_id
       ),
-      Self::ClanData(clan_id) => format!(
+      Self::ClanData(clan_ids) => format!(
         "/wgn/clans/info/?application_id={}&clan_id={}&game=wot",
-        key, clan_id
+        key,
+        clan_ids.join("%2C")
       ),
-      Self::ClanRating(clan_id) => format!(
+      Self::ClanRating(clan_ids) => format!(
         "/wot/clanratings/clans/?application_id={}&clan_id={}",
-        key, clan_id
+        key,
+        clan_ids.join("%2C")
       ),
     }
   }

@@ -1,6 +1,6 @@
+pub mod api;
 pub mod routes;
 pub mod types;
-pub mod api;
 
 use super::other::ConfAndFlags;
 use routes::{call_route, Routes};
@@ -14,9 +14,9 @@ pub fn setup(config: ConfAndFlags) -> Result<(), String> {
   check_api(&config)?;
 
   println!("Running api...");
-  api::search_for_clan_ids(&config, true)?
-  // GetIcons()
-  // RunSchedule(config)
+  api::search_for_clan_ids(&config, true)?;
+  // GetIcons();
+  // RunSchedule(config);
 
   Ok(())
 }

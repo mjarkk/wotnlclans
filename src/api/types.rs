@@ -142,62 +142,62 @@ impl DataHelper for ClanData {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanDataData {
-  leader_id: isize,
-  color: String,
-  updated_at: isize,
-  tag: String,
-  members_count: isize,
-  description_html: String,
-  accepts_join_requests: bool,
-  leader_name: String,
-  emblems: ClanDataEmblems,
-  clan_id: usize,
-  renamed_at: isize,
-  old_tag: String,
-  description: String,
-  game: String,
-  members: ClanDataMembers,
-  old_name: String,
-  is_clan_disbanded: bool,
-  motto: String,
-  name: String,
-  creator_name: String,
-  created_at: isize,
-  creator_id: usize,
+  pub clan_id: usize,
+  pub leader_id: usize,
+  pub creator_id: usize,
+  pub created_at: isize,
+  pub updated_at: isize,
+  pub renamed_at: isize,
+  pub members_count: usize,
+  pub accepts_join_requests: bool,
+  pub is_clan_disbanded: bool,
+  pub creator_name: String,
+  pub tag: String,
+  pub name: String,
+  pub game: String,
+  pub motto: String,
+  pub color: String,
+  pub old_tag: String,
+  pub old_name: String,
+  pub leader_name: String,
+  pub description: String,
+  pub description_html: String,
+  pub emblems: ClanDataEmblems,
+  pub members: ClanDataMembers,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanDataMembers {
-  role: String,
-  role_i18n: String,
-  joined_at: isize,
-  account_id: usize,
-  account_name: String,
+  pub role: String,
+  pub role_i18n: String,
+  pub joined_at: isize,
+  pub account_id: usize,
+  pub account_name: String,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanDataEmblems {
-  x32: ClanDataEmblemsOnlyPortal,
-  x24: ClanDataEmblemsOnlyPortal,
-  x256: ClanDataEmblemsX256,
-  x64: ClanDataEmblemsX64,
-  x195: ClanDataEmblemsOnlyPortal,
+  pub x32: ClanDataEmblemsOnlyPortal,
+  pub x24: ClanDataEmblemsOnlyPortal,
+  pub x256: ClanDataEmblemsX256,
+  pub x64: ClanDataEmblemsX64,
+  pub x195: ClanDataEmblemsOnlyPortal,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanDataEmblemsX64 {
-  wot: String,
-  portal: String,
+  pub wot: String,
+  pub portal: String,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanDataEmblemsX256 {
-  wowp: String,
+  pub wowp: String,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanDataEmblemsOnlyPortal {
-  portal: String,
+  pub portal: String,
 }
 
 // ClanRating is a type for the clanRating route
@@ -224,33 +224,33 @@ impl DataHelper for ClanRating {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanRatingData {
-  clan_id: usize,
-  clan_name: String,
-  clan_tag: String,
-  battles_count_avg: ClanRatingGeneralRating,
-  battles_count_avg_daily: ClanRatingGeneralRating,
-  efficiency: ClanRatingGeneralRating,
-  exclude_reasons: HashMap<String, String>,
-  fb_elo_rating: ClanRatingGeneralRating,
-  fb_elo_rating_10: ClanRatingGeneralRating,
-  fb_elo_rating_6: ClanRatingGeneralRating,
-  fb_elo_rating_8: ClanRatingGeneralRating,
-  global_rating_avg: ClanRatingGeneralRating,
-  global_rating_weighted_avg: ClanRatingGeneralRating,
-  gm_elo_rating: ClanRatingGeneralRating,
-  gm_elo_rating_10: ClanRatingGeneralRating,
-  gm_elo_rating_6: ClanRatingGeneralRating,
-  gm_elo_rating_8: ClanRatingGeneralRating,
-  rating_fort: ClanRatingGeneralRating,
-  v10l_avg: ClanRatingGeneralRating,
-  wins_ratio_avg: ClanRatingGeneralRating,
+  pub clan_id: usize,
+  pub clan_name: String,
+  pub clan_tag: String,
+  pub battles_count_avg: ClanRatingGeneralRating,
+  pub battles_count_avg_daily: ClanRatingGeneralRating,
+  pub efficiency: ClanRatingGeneralRating,
+  pub exclude_reasons: HashMap<String, String>,
+  pub fb_elo_rating: ClanRatingGeneralRating,
+  pub fb_elo_rating_10: ClanRatingGeneralRating,
+  pub fb_elo_rating_6: ClanRatingGeneralRating,
+  pub fb_elo_rating_8: ClanRatingGeneralRating,
+  pub global_rating_avg: ClanRatingGeneralRating,
+  pub global_rating_weighted_avg: ClanRatingGeneralRating,
+  pub gm_elo_rating: ClanRatingGeneralRating,
+  pub gm_elo_rating_10: ClanRatingGeneralRating,
+  pub gm_elo_rating_6: ClanRatingGeneralRating,
+  pub gm_elo_rating_8: ClanRatingGeneralRating,
+  pub rating_fort: ClanRatingGeneralRating,
+  pub v10l_avg: ClanRatingGeneralRating,
+  pub wins_ratio_avg: ClanRatingGeneralRating,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanRatingGeneralRating {
-  rank: f64,
-  rank_delta: f64,
-  value: f64,
+  pub rank: f64,
+  pub rank_delta: f64,
+  pub value: f64,
 }
 
 // PlayerInfoLogedIn is a type for the playerInfoLogedIn route

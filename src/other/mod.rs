@@ -27,7 +27,7 @@ impl ConfAndFlags {
     &self.conf().wargaming_key
   }
   pub fn is_dev(&self) -> bool {
-    &self.flags().dev
+    self.flags().dev
   }
 }
 
