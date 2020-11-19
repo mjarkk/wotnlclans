@@ -23,16 +23,10 @@ func SetupAPI(config other.FlagsAndConfig) error {
 		return errors.New("No wargaming api key defined")
 	}
 	fmt.Println("Running api...")
-	GetIcons()
-	clanIds := db.GetClanIDs()
-	if len(clanIds) == 0 || config.ForceStartupIndexing {
-		err := SearchForClanIds(config, true)
-		if err != nil {
-			fmt.Println("ERROR: [SearchForClanIds]:", err.Error())
-			return err
-		}
-	} else {
-		GetClanData(config.WargamingKey, clanIds)
+	err = SearchForClanIds(config)
+	if err != nil {
+		fmt.Println("ERROR: [SearchForClanIds]:", err.Error())
+		return err
 	}
 	GetIcons()
 	RunSchedule(config)
@@ -49,7 +43,7 @@ func RunSchedule(config other.FlagsAndConfig) {
 			count++
 			if count == 12 {
 				count = 0
-				err := SearchForClanIds(config, false)
+				err := SearchForClanIds(config)
 				if err != nil {
 					apiErr("RunSchedule", err, "error check SearchForClanIds")
 					config.DevPrint("ERROR: [SearchForClanIds]:", err.Error())
@@ -78,19 +72,17 @@ func apiErr(functionName string, err error, meta ...string) {
 }
 
 // SearchForClanIds searches through all clans for dutch clans and after that saves them in the database
-func SearchForClanIds(config other.FlagsAndConfig, isInit bool) error {
-	if isInit && config.SkipStartupIndexing {
-		return nil
-	}
+func SearchForClanIds(config other.FlagsAndConfig) error {
 
+	fmt.Println("Getting clan ids")
 	clans, err := GetAllClanIds(config)
 	if err != nil {
 		return err
 	}
 
-	config.DevPrint("Fetched", len(clans), "clan ids")
+	fmt.Println("Fetched", len(clans), "clan ids")
 	clans = FilterOutClans(clans, config)
-	config.DevPrint("Filtered out all dutch clans,", len(clans), "clans")
+	fmt.Println("Filtered out all not spesified language clans,", len(clans), "clans")
 	// TODO: Removes blacklisted clans and add extra clans to the clans list
 	clans = RemovedDuplicates(clans)
 	config.DevPrint("Removed all duplicate clans")
@@ -366,8 +358,14 @@ func GetAllClanIds(config other.FlagsAndConfig) ([]string, error) {
 			ids = append(ids, fmt.Sprintf("%v", clan.ClanID))
 		}
 
-		if page%10 == 1 {
-			config.DevPrint("Fetched", len(ids), "Clans")
+		if config.Dev {
+			if page%10 == 1 {
+				fmt.Println("Fetched", len(ids), "Clans")
+			}
+		} else {
+			if page%50 == 1 {
+				fmt.Println("Fetched", len(ids), "Clans")
+			}
 		}
 	}
 	return ids, nil
