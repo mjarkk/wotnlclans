@@ -2,8 +2,8 @@
 FROM golang:1.15-alpine as buildServer
 
 # Copy over the files
-RUN mkdir -p /go/src/github.com/mjarkk/wotclans
-WORKDIR /go/src/github.com/mjarkk/wotclans
+RUN mkdir -p /wotclans
+WORKDIR /wotclans
 COPY ./ ./
 
 # build the program
@@ -14,7 +14,7 @@ RUN GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -o wotclans -v -a -installsuff
 FROM node:15-alpine as buildWeb
 
 # Copy over the current state from
-COPY --from=buildServer /go/src/github.com/mjarkk/wotclans /wotclans
+COPY --from=buildServer /wotclans /wotclans
 WORKDIR /wotclans/web_static
 RUN npm i && npm run build
 
@@ -34,10 +34,9 @@ RUN apk add ca-certificates libwebp libwebp-tools \
 
 COPY --from=buildWeb /wotclans/wotclans /wotclans/wotclans
 COPY --from=buildWeb /wotclans/icons /wotclans/icons
-COPY --from=buildWeb /wotclans/community.json /wotclans/community.json
+COPY --from=buildWeb /wotclans/config.json /wotclans/config.json
 COPY --from=buildWeb /wotclans/web_static/build /wotclans/web_static/build
 COPY --from=buildWeb /wotclans/web_static/manifest.json /wotclans/web_static/manifest.json
-COPY ./config.json /wotclans/config.json
 
 WORKDIR /wotclans
 EXPOSE 8282

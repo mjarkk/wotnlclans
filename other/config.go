@@ -20,11 +20,9 @@ type ConfigType struct {
 
 // FlagsType is the interface for the program flags
 type FlagsType struct {
-	Debug                bool
-	Dev                  bool
-	MaxIndexPages        int
-	SkipStartupIndexing  bool
-	ForceStartupIndexing bool
+	Debug         bool
+	Dev           bool
+	MaxIndexPages int
 }
 
 type FlagsAndConfig struct {
@@ -48,8 +46,6 @@ func SetupFlagsAndConfig() (FlagsAndConfig, error) {
 	debug := fBool("debug", "debug the program")
 	dev := fBool("dev", "launch the project in dev mode")
 	maxIndexPages := fInt("maxindexpages", 4000, "the amound of pages of clans that will be searched through (every page contains 100 clans)") // currently there are around 700 pages
-	skipStartupIndexing := fBool("skipstartupindexing", "skip the indexing of clans on start (only for development)")
-	forceStartupIndexing := fBool("forcestartupindexing", "force indexing at startup")
 
 	flag.Parse()
 
@@ -60,11 +56,9 @@ func SetupFlagsAndConfig() (FlagsAndConfig, error) {
 	return FlagsAndConfig{
 		ConfigType: config,
 		FlagsType: FlagsType{
-			Debug:                *debug,
-			Dev:                  *dev,
-			MaxIndexPages:        *maxIndexPages,
-			SkipStartupIndexing:  *skipStartupIndexing,
-			ForceStartupIndexing: *forceStartupIndexing,
+			Debug:         *debug,
+			Dev:           *dev,
+			MaxIndexPages: *maxIndexPages,
 		},
 	}, nil
 }
