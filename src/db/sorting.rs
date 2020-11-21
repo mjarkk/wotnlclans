@@ -1,8 +1,8 @@
 use super::clan_data::get_current_stats;
 use super::types::{ClanPositionEvery, ClanStats, HistoryClanStats};
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::sync::{Mutex, MutexGuard};
-use std::cmp::Ordering;
 
 lazy_static! {
   static ref SORTED_RATINGS: Mutex<HashMap<String, ClanPositionEvery>> = Mutex::new(HashMap::new());
@@ -32,7 +32,7 @@ pub enum SortOn {
 }
 
 impl SortOn {
-  fn Sort(&self, a: HistoryClanStats, b: HistoryClanStats) -> Ordering {
+  fn sort(&self, a: &HistoryClanStats, b: &HistoryClanStats) -> Ordering {
     match self {
       Self::Members => a.members.partial_cmp(&b.members),
       Self::Battles => a.battles.partial_cmp(&b.battles),
@@ -50,162 +50,168 @@ impl SortOn {
       Self::GlobRatingweighted => a.glob_rating_weighted.partial_cmp(&b.glob_rating_weighted),
       Self::Winratio => a.win_ratio.partial_cmp(&b.win_ratio),
       Self::V10l => a.v10l.partial_cmp(&b.v10l),
-    }.unwrap()
+    }
+    .unwrap()
+  }
+  fn set_stat(&self, stats: &mut ClanPositionEvery, rank: u32) {
+    match self {
+      Self::Members => stats.members = rank,
+      Self::Battles => stats.battles = rank,
+      Self::Dailybattles => stats.daily_battles = rank,
+      Self::Efficiency => stats.efficiency = rank,
+      Self::Fbelo10 => stats.fb_elo10 = rank,
+      Self::Fbelo8 => stats.fb_elo8 = rank,
+      Self::Fbelo6 => stats.fb_elo6 = rank,
+      Self::Fbelo => stats.fb_elo = rank,
+      Self::Gmelo10 => stats.gm_elo10 = rank,
+      Self::Gmelo8 => stats.gm_elo8 = rank,
+      Self::Gmelo6 => stats.gm_elo6 = rank,
+      Self::Gmelo => stats.gm_elo = rank,
+      Self::Globrating => stats.global = rank,
+      Self::GlobRatingweighted => stats.global_weighted = rank,
+      Self::Winratio => stats.winratio = rank,
+      Self::V10l => stats.v10l = rank,
+    };
+  }
+  fn get_stat_value(&self, stats: &ClanPositionEvery) -> u32 {
+    match self {
+      Self::Members => stats.members,
+      Self::Battles => stats.battles,
+      Self::Dailybattles => stats.daily_battles,
+      Self::Efficiency => stats.efficiency,
+      Self::Fbelo10 => stats.fb_elo10,
+      Self::Fbelo8 => stats.fb_elo8,
+      Self::Fbelo6 => stats.fb_elo6,
+      Self::Fbelo => stats.fb_elo,
+      Self::Gmelo10 => stats.gm_elo10,
+      Self::Gmelo8 => stats.gm_elo8,
+      Self::Gmelo6 => stats.gm_elo6,
+      Self::Gmelo => stats.gm_elo,
+      Self::Globrating => stats.global,
+      Self::GlobRatingweighted => stats.global_weighted,
+      Self::Winratio => stats.winratio,
+      Self::V10l => stats.v10l,
+    }
+  }
+  fn all() -> Vec<Self> {
+    vec![
+      Self::Members,
+      Self::Battles,
+      Self::Dailybattles,
+      Self::Efficiency,
+      Self::Fbelo10,
+      Self::Fbelo8,
+      Self::Fbelo6,
+      Self::Fbelo,
+      Self::Gmelo10,
+      Self::Gmelo8,
+      Self::Gmelo6,
+      Self::Gmelo,
+      Self::Globrating,
+      Self::GlobRatingweighted,
+      Self::Winratio,
+      Self::V10l,
+    ]
   }
 }
 
 // SortClanIds makes a pre sorted list of all clans
-fn sort_clan_ids() {
+pub fn sort_clan_ids() {
   let mut clans: Vec<ClanStats> = Vec::new();
   let mut out: HashMap<String, ClanPositionEvery> = HashMap::new();
 
   let current_stats = get_current_stats();
-  for (clan_id, clan) in current_stats.iter() {
-    clans.push(*clan);
-    out.insert(clan_id.to_string(), ClanPositionEvery::empty()); // map ever clan id to the map
+  for (_, clan) in current_stats.iter() {
+    clans.push(clan.clone());
   }
   drop(current_stats);
 
-  for (id, filter_func) in items_to_sort {
-    filter_func(clans)
-    for i := 0; i < len(clans)/2; i++ {
-      j := len(clans) - i - 1
-      clans[i], clans[j] = clans[j], clans[i]
-    }
-    for rank, clan := range clans {
-      newData := out[clan.ID]
-      switch id {
-      case "members":
-        newData.Members = rank
-      case "battles":
-        newData.Battles = rank
-      case "dailybattles":
-        newData.Dailybattles = rank
-      case "efficiency":
-        newData.Efficiency = rank
-      case "fbelo10":
-        newData.Fbelo10 = rank
-      case "fbelo8":
-        newData.Fbelo8 = rank
-      case "fbelo6":
-        newData.Fbelo6 = rank
-      case "fbelo":
-        newData.Fbelo = rank
-      case "gmelo10":
-        newData.Gmelo10 = rank
-      case "gmelo8":
-        newData.Gmelo8 = rank
-      case "gmelo6":
-        newData.Gmelo6 = rank
-      case "gmelo":
-        newData.Gmelo = rank
-      case "globrating":
-        newData.Global = rank
-      case "globRatingweighted":
-        newData.GlobalWeighted = rank
-      case "winratio":
-        newData.Winratio = rank
-      case "v10l":
-        newData.V10l = rank
+  for sort_item in SortOn::all() {
+    clans.sort_by(|a, b| sort_item.sort(&a.stats, &b.stats));
+
+    for (rank_nmbr, clan) in clans.iter().enumerate() {
+      if let Some(data) = out.get_mut(&clan.id) {
+        sort_item.set_stat(data, rank_nmbr as u32);
+      } else {
+        let mut new_stats = ClanPositionEvery::empty();
+        sort_item.set_stat(&mut new_stats, rank_nmbr as u32);
+        out.insert(clan.id.clone(), new_stats);
       }
-      out[clan.ID] = newData
     }
   }
 
-  // 	SortedRatingLock.Lock()
-  // 	defer SortedRatingLock.Unlock()
-  // 	SortedRating = out
-  // }
+  let mut sorted_ratings = get_sorted_ratings();
+  *sorted_ratings = out;
+}
 
-  // // LightClanPositions does mostly the same as sortClanIds
-  // // this one tells per clan the posstion instaid of per cataory every clan's possition
-  // func LightClanPositions(item_to_get string) (map[string]interface{}, error) {
-  // 	SortedRatingLock.Lock()
-  // 	defer SortedRatingLock.Unlock()
+// LightClanPositions does mostly the same as sortClanIds
+// this one tells per clan the posstion instaid of per cataory every clan's possition
+pub fn light_clan_positions(item_to_get: SortOn) -> HashMap<String, u32> {
+  let sorted_ratings = get_sorted_ratings();
+  let mut res: HashMap<String, u32> = HashMap::new();
 
-  // 	toReturn := map[string]interface{}{}
+  for (clan_id, stats) in sorted_ratings.iter() {
+    let value = item_to_get.get_stat_value(stats);
+    res.insert(clan_id.clone(), value);
+  }
 
-  // 	if item_to_get == "all" {
-  // 		toReturn["actualData"] = map[string][]int{}
-  // 		for clanID, clan := range SortedRating {
-  // 			toReturn["actualData"].(map[string][]int)[clanID] = []int{
-  // 				clan.Members,
-  // 				clan.Battles,
-  // 				clan.Dailybattles,
-  // 				clan.Efficiency,
-  // 				clan.Fbelo10,
-  // 				clan.Fbelo8,
-  // 				clan.Fbelo6,
-  // 				clan.Fbelo,
-  // 				clan.Gmelo10,
-  // 				clan.Gmelo8,
-  // 				clan.Gmelo8,
-  // 				clan.Gmelo,
-  // 				clan.Global,
-  // 				clan.GlobalWeighted,
-  // 				clan.Winratio,
-  // 				clan.V10l,
-  // 			}
-  // 		}
-  // 		toReturn["dataMapping"] = []string{
-  // 			"members",
-  // 			"battles",
-  // 			"dailybattles",
-  // 			"efficiency",
-  // 			"fbelo10",
-  // 			"fbelo8",
-  // 			"fbelo6",
-  // 			"fbelo",
-  // 			"gmelo10",
-  // 			"gmelo8",
-  // 			"gmelo6",
-  // 			"gmelo",
-  // 			"globrating",
-  // 			"globRatingweighted",
-  // 			"winratio",
-  // 			"v10l",
-  // 		}
-  // 	} else {
-  // 		toReturn["actualData"] = map[string]int{}
-  // 		for clanID, clan := range SortedRating {
-  // 			switch item_to_get {
-  // 			case "members":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Members
-  // 			case "battles":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Battles
-  // 			case "dailybattles":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Dailybattles
-  // 			case "efficiency":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Efficiency
-  // 			case "fbelo10":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Fbelo10
-  // 			case "fbelo8":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Fbelo8
-  // 			case "fbelo6":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Fbelo6
-  // 			case "fbelo":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Fbelo
-  // 			case "gmelo10":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Gmelo10
-  // 			case "gmelo8":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Gmelo8
-  // 			case "gmelo6":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Gmelo6
-  // 			case "gmelo":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Gmelo
-  // 			case "globrating":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Global
-  // 			case "globRatingweighted":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.GlobalWeighted
-  // 			case "winratio":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.Winratio
-  // 			case "v10l":
-  // 				toReturn["actualData"].(map[string]int)[clanID] = clan.V10l
-  // 			default:
-  // 				return toReturn, errors.New("\"" + item_to_get + "\" can't be filterd on")
-  // 			}
-  // 		}
-  // 	}
-  // 	return toReturn, nil
-  // }
+  res
+}
+
+pub struct LightClanPositionsAll {
+  pub stats: HashMap<String, Vec<u32>>,
+  pub data_mapping: Vec<&'static str>,
+}
+
+pub fn light_clan_positions_all() -> LightClanPositionsAll {
+  let sorted_ratings = get_sorted_ratings();
+  let mut all_clan_stats: HashMap<String, Vec<u32>> = HashMap::new();
+
+  for (clan_id, stats) in sorted_ratings.iter() {
+    all_clan_stats.insert(
+      clan_id.clone(),
+      vec![
+        stats.members,
+        stats.battles,
+        stats.daily_battles,
+        stats.efficiency,
+        stats.fb_elo10,
+        stats.fb_elo8,
+        stats.fb_elo6,
+        stats.fb_elo,
+        stats.gm_elo10,
+        stats.gm_elo8,
+        stats.gm_elo8,
+        stats.gm_elo,
+        stats.global,
+        stats.global_weighted,
+        stats.winratio,
+        stats.v10l,
+      ],
+    );
+  }
+
+  let data_mapping: Vec<&'static str> = vec![
+    "members",
+    "battles",
+    "daily_battles",
+    "efficiency",
+    "fb_elo10",
+    "fb_elo8",
+    "fb_elo6",
+    "fb_elo",
+    "gm_elo10",
+    "gm_elo8",
+    "gm_elo8",
+    "gm_elo",
+    "global",
+    "global_weighted",
+    "winratio",
+    "v10l",
+  ];
+
+  LightClanPositionsAll {
+    stats: all_clan_stats,
+    data_mapping: data_mapping,
+  }
 }

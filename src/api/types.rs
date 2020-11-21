@@ -50,10 +50,10 @@ impl DataHelper for TopClans {
     &self.status
   }
   fn get_error(&self) -> Option<Error> {
-    self.error
+    self.error.clone()
   }
   fn get_data_option(&self) -> Option<Self::Data> {
-    self.data
+    self.data.clone()
   }
 }
 
@@ -77,10 +77,10 @@ impl DataHelper for NicknameAndClan {
     &self.status
   }
   fn get_error(&self) -> Option<Error> {
-    self.error
+    self.error.clone()
   }
   fn get_data_option(&self) -> Option<Self::Data> {
-    self.data
+    self.data.clone()
   }
 }
 
@@ -105,10 +105,10 @@ impl DataHelper for ClanDiscription {
     &self.status
   }
   fn get_error(&self) -> Option<Error> {
-    self.error
+    self.error.clone()
   }
   fn get_data_option(&self) -> Option<Self::Data> {
-    self.data
+    self.data.clone()
   }
 }
 
@@ -133,10 +133,10 @@ impl DataHelper for ClanData {
     &self.status
   }
   fn get_error(&self) -> Option<Error> {
-    self.error
+    self.error.clone()
   }
   fn get_data_option(&self) -> Option<Self::Data> {
-    self.data
+    self.data.clone()
   }
 }
 
@@ -215,10 +215,10 @@ impl DataHelper for ClanRating {
     &self.status
   }
   fn get_error(&self) -> Option<Error> {
-    self.error
+    self.error.clone()
   }
   fn get_data_option(&self) -> Option<Self::Data> {
-    self.data
+    self.data.clone()
   }
 }
 
@@ -268,10 +268,10 @@ impl DataHelper for PlayerInfoLogedIn {
     &self.status
   }
   fn get_error(&self) -> Option<Error> {
-    self.error
+    self.error.clone()
   }
   fn get_data_option(&self) -> Option<Self::Data> {
-    self.data
+    self.data.clone()
   }
 }
 

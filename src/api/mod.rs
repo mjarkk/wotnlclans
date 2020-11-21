@@ -5,8 +5,7 @@ mod types;
 
 use super::other::ConfAndFlags;
 use routes::{call_route, Routes};
-use std::thread;
-use std::time::Duration;
+use tokio::time::{sleep, Duration};
 
 pub async fn setup(config: ConfAndFlags) -> Result<(), String> {
   println!("setting up the api...");
@@ -18,7 +17,7 @@ pub async fn setup(config: ConfAndFlags) -> Result<(), String> {
 
   println!("Running api...");
   api::search_for_clan_ids(&config)?;
-  icons::get().await;
+  icons::get().await?;
   run_schedule(&config).await;
 
   Ok(())
@@ -36,7 +35,7 @@ async fn run_schedule(config: &ConfAndFlags) {
   let mut count: u8 = 0;
   loop {
     let timeout_4_hours = Duration::from_secs(60 * 60 * 4);
-    thread::sleep(timeout_4_hours);
+    sleep(timeout_4_hours).await;
 
     count += 1;
     if count == 12 {

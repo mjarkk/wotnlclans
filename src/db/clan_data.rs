@@ -1,4 +1,4 @@
-use super::sorting::get_sorted_ratings;
+use super::sorting::{light_clan_positions, sort_clan_ids, SortOn};
 use super::types::{ClanNameAndTag, ClanStats};
 use crate::other::format_search;
 use std::collections::HashMap;
@@ -20,23 +20,23 @@ pub fn get_clan_name_and_tags<'a>() -> MutexGuard<'a, HashMap<String, ClanNameAn
 
 // refillClanNameAndTags places data in the clanNameAndTags var
 pub fn refill_clan_name_and_tags() {
-  let mut current_stats = get_current_stats();
+  let current_stats = get_current_stats();
   let mut clan_name_and_tags = get_clan_name_and_tags();
 
   for (_, clan) in current_stats.iter() {
     clan_name_and_tags.insert(
-      clan.id,
+      clan.id.clone(),
       ClanNameAndTag {
-        name: clan.name,
-        tag: clan.tag,
+        name: clan.name.clone(),
+        tag: clan.tag.clone(),
       },
     );
   }
 }
 
 // GetCurrentClansByID filter the list with spesific IDs
-pub fn get_current_clans_by_id<'a>(ids: Vec<String>) -> Result<Vec<&'a ClanStats>, String> {
-  let res: Vec<&'a ClanStats> = Vec::new();
+pub fn get_current_clans_by_id<'a>(ids: Vec<String>) -> Result<Vec<ClanStats>, String> {
+  let mut res: Vec<ClanStats> = Vec::new();
   if ids.len() > 200 {
     return Err(String::from(
       "Too many IDs given to get_current_clans_by_id",
@@ -49,7 +49,7 @@ pub fn get_current_clans_by_id<'a>(ids: Vec<String>) -> Result<Vec<&'a ClanStats
   let current_stats = get_current_stats();
   for id in ids {
     if let Some(clan) = current_stats.get(&id) {
-      res.push(clan);
+      res.push(clan.clone());
     }
   }
 
@@ -57,36 +57,29 @@ pub fn get_current_clans_by_id<'a>(ids: Vec<String>) -> Result<Vec<&'a ClanStats
 }
 
 // GetCurrentClansTop returns the top of some amound of clans
-fn het_current_clans_top<'a>(max_amound: usize) -> Result<Vec<&'a ClanStats>, String> {
-  let sorted_rating = get_sorted_ratings();
-  let current_stats = get_current_stats();
+pub fn get_current_clans_top<'a>(max_amound: usize) -> Result<Vec<ClanStats>, String> {
+  let current_stats: MutexGuard<'a, HashMap<String, ClanStats>> = get_current_stats::<'a>();
 
-  let mut res: Vec<&'a ClanStats> = Vec::new();
+  let mut res: Vec<ClanStats> = Vec::new();
   for (_, clan) in current_stats.iter() {
-    res.push(clan);
+    res.push(clan.clone());
   }
 
   res.sort_by(|a, b| a.stats.efficiency.partial_cmp(&b.stats.efficiency).unwrap());
-
-  let mut res_with_max: Vec<&'a ClanStats> = Vec::new();
-
-  for (i, clan) in res.iter().enumerate() {
-    if i >= max_amound {
-      break;
-    }
-    res_with_max.push(*clan);
+  if res.len() > max_amound {
+    res.resize(max_amound, ClanStats::empty());
   }
 
-  Ok(res_with_max)
+  Ok(res)
 }
 
 // SetCurrentClansData saves the latest clan data in the database
-fn set_current_clans_data(stats: Vec<ClanStats>) -> Result<(), String> {
-  let filtered_stats: HashMap<String, ClanStats> = HashMap::new();
+pub fn set_current_clans_data(stats: Vec<ClanStats>) -> Result<(), String> {
+  let mut filtered_stats: HashMap<String, ClanStats> = HashMap::new();
 
   for stat in stats {
     if stat.id.len() > 1 && stat.tag.len() > 1 {
-      filtered_stats.insert(stat.id, stat);
+      filtered_stats.insert(stat.id.clone(), stat);
     }
   }
 
@@ -94,7 +87,7 @@ fn set_current_clans_data(stats: Vec<ClanStats>) -> Result<(), String> {
     return Err(String::from("set_current_clans_data got a empty array"));
   }
 
-  let stats = get_current_stats();
+  let mut stats = get_current_stats();
   *stats = filtered_stats;
   drop(stats);
 
@@ -105,17 +98,12 @@ fn set_current_clans_data(stats: Vec<ClanStats>) -> Result<(), String> {
 }
 
 // SearchClans returns the top 20 found using a search query
-fn search_clans(query: String, sort_on: String) -> Result<Vec<String>, String> {
+pub fn search_clans(query: String, sort_on: SortOn) -> Result<Vec<String>, String> {
   let mut res: Vec<String> = Vec::new();
 
-  if sort_on == "all" {
-    return Err(String::from("Can't filter on \"all\""));
-  }
-
-  let sorted_ratings_by_tag_raw = light_clan_positions(sortOn)?;
-  let sortedRatings_by_tag: HashMap<String, usize> = sorted_ratings_by_tag_raw["actualData"];
-  let mut sorted: Vec<(usize, String)> = Vec::new();
-  for (clan_id, pos) in sortedRatings_by_tag {
+  let sorted_ratings_by_id = light_clan_positions(sort_on);
+  let mut sorted: Vec<(u32, String)> = Vec::new();
+  for (clan_id, pos) in sorted_ratings_by_id {
     sorted.push((pos, clan_id));
   }
   sorted.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());

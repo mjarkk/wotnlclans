@@ -12,6 +12,23 @@ pub struct ClanStats {
 	pub stats: HistoryClanStats,
 }
 
+impl ClanStats {
+	pub fn empty() -> Self {
+		Self {
+			tag: String::new(),
+			name: String::new(),
+			color: String::new(),
+			members: 0,
+			description: String::new(),
+			motto: String::new(),
+			id: String::new(),
+			emblems: ClanStatsEmblems::empty(),
+			blocked: true,
+			stats: HistoryClanStats::empty(),
+		}
+	}
+}
+
 #[derive(Clone)]
 pub struct ClanStatsEmblems {
 	pub x256_wowp: String,
@@ -20,6 +37,19 @@ pub struct ClanStatsEmblems {
 	pub x64_wot: String,
 	pub x32_portal: String,
 	pub x24_portal: String,
+}
+
+impl ClanStatsEmblems {
+	pub fn empty() -> Self {
+		Self {
+			x256_wowp: String::new(),
+			x195_portal: String::new(),
+			x64_portal: String::new(),
+			x64_wot: String::new(),
+			x32_portal: String::new(),
+			x24_portal: String::new(),
+		}
+	}
 }
 
 // HistoryClanStats this is what to be exepected to get back per clan from the database when requesting old clan data
@@ -44,6 +74,32 @@ pub struct HistoryClanStats {
 	pub glob_rating_weighted: f64,
 	pub win_ratio: f64,
 	pub v10l: f64,
+}
+
+impl HistoryClanStats {
+	pub fn empty() -> Self {
+		Self {
+			tag: String::new(),
+			name: String::new(),
+			id: String::new(),
+			members: 0,
+			battles: 0.0,
+			daily_battles: 0.0,
+			efficiency: 0.0,
+			fb_elo10: 0.0,
+			fb_elo8: 0.0,
+			fb_elo6: 0.0,
+			fb_elo: 0.0,
+			gm_elo10: 0.0,
+			gm_elo8: 0.0,
+			gm_elo6: 0.0,
+			gm_elo: 0.0,
+			glob_rating: 0.0,
+			glob_rating_weighted: 0.0,
+			win_ratio: 0.0,
+			v10l: 0.0,
+		}
+	}
 }
 
 // HistoryCollectionItem is what the contens is of 1 hisotry colleciton item

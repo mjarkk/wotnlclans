@@ -8,7 +8,7 @@ use std::fs::OpenOptions;
 use std::io::prelude::*;
 use webp;
 
-struct ImageAndIDType {
+pub struct ImageAndIDType {
 	id: String,
 	image: DynamicImage,
 }
@@ -73,7 +73,9 @@ pub async fn get() -> Result<(), String> {
 
 	let current_stats = db::get_current_stats();
 
-	let awaiting = current_stats.iter().map(|clan| get_icon(clan, img_size));
+	let awaiting = current_stats
+		.iter()
+		.map(|clan| get_icon(clan.clone().1.clone(), img_size));
 	let awaiting_res = join!(future::join_all(awaiting));
 
 	for res in awaiting_res.0 {
@@ -92,7 +94,7 @@ pub async fn get() -> Result<(), String> {
 
 	for img_obj in img_and_id {
 		let id = img_obj.id;
-		if ids[ids.len() - 1].len() == imgs_in_a_row {
+		if ids.last().unwrap().len() == imgs_in_a_row {
 			ids.push(Vec::new());
 
 			// increase the size of the output_img
@@ -102,7 +104,8 @@ pub async fn get() -> Result<(), String> {
 			output_img = new_output_img;
 		}
 
-		ids[ids.len() - 1].push(id);
+		let ids_last = ids.last_mut().unwrap();
+		ids_last.push(id);
 
 		let from_top = (ids.len() - 1) as u32 * img_size;
 		let from_left = (ids[ids.len() - 1].len() - 1) as u32 * img_size;
@@ -117,7 +120,7 @@ pub async fn get() -> Result<(), String> {
 				"Unable to to save image in png format, error: {}",
 				e,
 			))
-		});
+		})?;
 
 	let output_img_dynamic = DynamicImage::ImageRgba8(output_img);
 	let rgba_bytes = output_img_dynamic.to_rgba8();
