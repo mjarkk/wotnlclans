@@ -1,41 +1,36 @@
-// package db
+use super::types::{ClanNameAndTag, ClanStats};
+use std::collections::HashMap;
+use std::sync::{Mutex, MutexGuard};
 
-// import (
-// 	"errors"
-// 	"strings"
-// 	"sync"
+lazy_static! {
+  static ref CLAN_NAME_AND_TAGS: Mutex<HashMap<String, ClanNameAndTag>> =
+    Mutex::new(HashMap::new());
+  static ref CURRENT_STATS: Mutex<HashMap<String, ClanStats>> = Mutex::new(HashMap::new());
+}
 
-// 	"github.com/mjarkk/wotclans/other"
-// )
+pub fn get_current_stats<'a>() -> MutexGuard<'a, HashMap<String, ClanStats>> {
+  CURRENT_STATS.lock().unwrap()
+}
 
-// // clanNameAndTags is a list of all clan info this can be used for search
-// var clanNameAndTagsLock sync.Mutex
-// var clanNameAndTags = map[string]ClanNameAndTag{}
+pub fn get_clan_name_and_tags<'a>() -> MutexGuard<'a, HashMap<String, ClanNameAndTag>> {
+  CLAN_NAME_AND_TAGS.lock().unwrap()
+}
 
-// var currentStatsLock sync.Mutex
-// var currentStats = map[string]ClanStats{}
+// refillClanNameAndTags places data in the clanNameAndTags var
+pub fn refill_clan_name_and_tags() {
+  let mut current_stats = get_current_stats();
+  let mut clan_name_and_tags = get_clan_name_and_tags();
 
-// func GetCurrentStats() (map[string]ClanStats, func()) {
-// 	currentStatsLock.Lock()
-// 	return currentStats, currentStatsLock.Unlock
-// }
-
-// // refillClanNameAndTags places data in the clanNameAndTags var
-// func refillClanNameAndTags() {
-// 	currentStats, unlock := GetCurrentStats()
-// 	clanNameAndTagsLock.Lock()
-
-// 	clanNameAndTags = map[string]ClanNameAndTag{}
-// 	for _, clan := range currentStats {
-// 		clanNameAndTags[clan.ID] = ClanNameAndTag{
-// 			Name: clan.Name,
-// 			Tag:  clan.Tag,
-// 		}
-// 	}
-
-// 	unlock()
-// 	clanNameAndTagsLock.Unlock()
-// }
+  for (_, clan) in current_stats.iter() {
+    clan_name_and_tags.insert(
+      clan.id,
+      ClanNameAndTag {
+        name: clan.name,
+        tag: clan.tag,
+      },
+    );
+  }
+}
 
 // // GetCurrentClansByID filter the list with spesific IDs
 // func GetCurrentClansByID(ids ...string) ([]ClanStats, error) {

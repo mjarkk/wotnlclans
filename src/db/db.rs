@@ -31,25 +31,12 @@ pub fn remove_clan_ids(to_remove_ids: Vec<String>) {
 	}
 }
 
-// // GetClanIDs returns the clans ids that where found after searching for new clans
-// func GetClanIDs() []string {
-// 	clanIDsLock.Lock()
-// 	defer clanIDsLock.Unlock()
+pub fn set_clan_ids(ids: Vec<String>) {
+	let mut ids_map: HashMap<String, ()> = HashMap::new();
+	for id in ids {
+		ids_map.insert(id, ());
+	}
 
-// 	toReturn := []string{}
-// 	for id := range clanIDs {
-// 		toReturn = append(toReturn, other.RemoveQuotes(id))
-// 	}
-
-// 	return toReturn
-// }
-
-// // SetClanIDs saves a list of clan id's in the database
-// func SetClanIDs(ids []string) {
-// 	clanIDsLock.Lock()
-// 	defer clanIDsLock.Unlock()
-
-// 	for _, id := range ids {
-// 		clanIDs[id] = struct{}{}
-// 	}
-// }
+	let mut clan_ids = get_clan_ids();
+	*clan_ids = ids_map;
+}

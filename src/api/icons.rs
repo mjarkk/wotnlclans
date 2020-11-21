@@ -1,8 +1,8 @@
 use crate::db;
 use futures::future;
 use image;
-use image::imageops::{overlay, resize, FilterType};
-use image::{DynamicImage, GenericImage, ImageBuffer, ImageFormat, ImageOutputFormat, RgbaImage};
+use image::imageops::{overlay, FilterType};
+use image::{DynamicImage, ImageBuffer, ImageFormat, RgbaImage};
 use serde_json;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
@@ -14,10 +14,9 @@ struct ImageAndIDType {
 }
 
 async fn get_icon(clan: db::ClanStats, resize_to: u32) -> Result<ImageAndIDType, String> {
-	let empty_string = String::new();
-	let mut icon_to_get = clan.emblems.get("X195.Portal").unwrap_or(&empty_string);
+	let mut icon_to_get = clan.emblems.x195_portal.as_str();
 	if icon_to_get.len() == 0 {
-		icon_to_get = clan.emblems.get("X256.Wowp").unwrap_or(&empty_string);
+		icon_to_get = clan.emblems.x256_wowp.as_str();
 		if icon_to_get.len() == 0 {
 			return Err(format!("Clan {} has no usable icons to fetch", clan.tag));
 		}

@@ -1,10 +1,4 @@
-// package db
-
-// import (
-// 	"fmt"
-// )
-
-// // LogErr logs an error message
-// func LogErr(from, message, pkg string) {
-// 	fmt.Printf("From: %s, pkg: %s, error: %s", from, message, pkg)
-// }
+// LogErr logs an error message
+pub fn log_err(from: String, message: String, pkg: String) {
+  println!("From: {}, pkg: {}, error: {}", from, message, pkg);
+}

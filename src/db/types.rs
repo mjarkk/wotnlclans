@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 pub struct ClanStats {
 	pub tag: String,
 	pub name: String,
@@ -8,9 +6,18 @@ pub struct ClanStats {
 	pub description: String,
 	pub motto: String,
 	pub id: String,
-	pub emblems: HashMap<String, String>,
+	pub emblems: ClanStatsEmblems,
 	pub blocked: bool,
 	pub stats: HistoryClanStats,
+}
+
+pub struct ClanStatsEmblems {
+	pub x256_wowp: String,
+	pub x195_portal: String,
+	pub x64_portal: String,
+	pub x64_wot: String,
+	pub x32_portal: String,
+	pub x24_portal: String,
 }
 
 // HistoryClanStats this is what to be exepected to get back per clan from the database when requesting old clan data
@@ -20,19 +27,19 @@ pub struct HistoryClanStats {
 	pub id: String,
 	pub members: usize,
 	pub battles: f64,
-	pub dailybattles: f64,
+	pub daily_battles: f64,
 	pub efficiency: f64,
-	pub fbelo10: f64,
-	pub fbelo8: f64,
-	pub fbelo6: f64,
-	pub fbelo: f64,
-	pub gmelo10: f64,
-	pub gmelo8: f64,
-	pub gmelo6: f64,
-	pub gmelo: f64,
-	pub globrating: f64,
-	pub globRatingweighted: f64,
-	pub winratio: f64,
+	pub fb_elo10: f64,
+	pub fb_elo8: f64,
+	pub fb_elo6: f64,
+	pub fb_elo: f64,
+	pub gm_elo10: f64,
+	pub gm_elo8: f64,
+	pub gm_elo6: f64,
+	pub gm_elo: f64,
+	pub glob_rating: f64,
+	pub glob_rating_weighted: f64,
+	pub win_ratio: f64,
 	pub v10l: f64,
 }
 
@@ -53,18 +60,18 @@ pub struct User {
 pub struct ClanPositionEvery {
 	pub v10l: isize,
 	pub winratio: isize,
-	pub globalWeighted: isize,
+	pub global_weighted: isize,
 	pub global: isize,
-	pub gmelo: isize,
-	pub gmelo6: isize,
-	pub gmelo8: isize,
-	pub gmelo10: isize,
-	pub fbelo: isize,
-	pub fbelo6: isize,
-	pub fbelo8: isize,
-	pub fbelo10: isize,
+	pub gm_elo: isize,
+	pub gm_elo6: isize,
+	pub gm_elo8: isize,
+	pub gm_elo10: isize,
+	pub fb_elo: isize,
+	pub fb_elo6: isize,
+	pub fb_elo8: isize,
+	pub fb_elo10: isize,
 	pub efficiency: isize,
-	pub dailybattles: isize,
+	pub daily_battles: isize,
 	pub battles: isize,
 	pub members: isize,
 }

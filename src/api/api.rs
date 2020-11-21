@@ -32,25 +32,33 @@ pub fn search_for_clan_ids(config: &ConfAndFlags) -> Result<(), String> {
 // GetClanData returns all needed information about clans
 // includedClans is not required
 pub fn get_clan_data(config: &ConfAndFlags, included_clans: Option<Vec<String>>) -> Result<(), String> {
-    let mut clan_ids: Vec<String> = included_clans.unwrap_or(db::get_clan_ids());
+    let mut clan_ids: HashMap<String, ()> = if let Some(ids) = included_clans {
+        let mut res: HashMap<String, ()> = HashMap::new();
+        for id in ids {
+            res.insert(id, ());
+        }
+        res
+    } else {
+        db::get_clan_ids().clone()
+    };
 
-    let blocked_clans: HashMap<String, ()> = db::get_blocked_clans();
-    let extra_clans: HashMap<String, ()> = db::get_extra_clans();
+    let mut blocked_clans = db::get_blocked_clans_ids().clone();
+    let mut extra_clans = db::get_extra_clans_ids().clone();
 
     let mut extraAddClans: Vec<bool> = Vec::new();
     for (i, _) in extra_clans {
         extraAddClans.push(true);
     }
 
-    for clan_id in &clan_ids {
+    for (clan_id, _) in &clan_ids {
         extra_clans.remove(clan_id);
     }
     for (id, _) in extra_clans {
-        clan_ids.push(id);
+        clan_ids.insert(id, ());
     }
 
     let to_save: Vec<db::ClanStats> = Vec::new();
-    let to_fetch = split_to_chucks(clan_ids);
+    let to_fetch = split_map_to_chucks(clan_ids);
 
     for chunk in to_fetch {
         let (info, rating, clans_to_remove_from_ids) =
@@ -62,7 +70,7 @@ pub fn get_clan_data(config: &ConfAndFlags, included_clans: Option<Vec<String>>)
                 }
             };
 
-        db.remove_clan_ids(clans_to_remove_from_ids);
+        db::remove_clan_ids(clans_to_remove_from_ids);
 
         for (id, item) in info {
             let rating = if let Some(rating) = rating.get(&id) {
@@ -76,13 +84,14 @@ pub fn get_clan_data(config: &ConfAndFlags, included_clans: Option<Vec<String>>)
                 continue;
             }
 
-            let emblems: HashMap<String, String> = HashMap::new();
-            emblems.insert(String::from("X256.Wowp"), item.emblems.x256.wowp);
-            emblems.insert(String::from("X195.Portal"), item.emblems.x195.portal);
-            emblems.insert(String::from("X64.Portal"), item.emblems.x64.portal);
-            emblems.insert(String::from("X64.Wot"), item.emblems.x64.wot);
-            emblems.insert(String::from("X32.Portal"), item.emblems.x32.portal);
-            emblems.insert(String::from("X24.Portal"), item.emblems.x24.portal);
+            let emblems = db::ClanStatsEmblems{
+                x256_wowp: item.emblems.x256.wowp,
+                x195_portal: item.emblems.x195.portal,
+                x64_portal: item.emblems.x64.portal,
+                x64_wot: item.emblems.x64.wot,
+                x32_portal: item.emblems.x32.portal,
+                x24_portal: item.emblems.x24.portal,
+            };
 
             let stats = db::HistoryClanStats {
                 tag: item.tag.clone(),
@@ -223,6 +232,19 @@ fn filter_out_clans(config: &ConfAndFlags, clan_ids: Vec<String>) -> Vec<String>
 fn split_to_chucks(list: Vec<String>) -> Vec<Vec<String>> {
     let mut res: Vec<Vec<String>> = vec![];
     for item in list {
+        let mut out = res.last_mut().unwrap();
+        if out.len() == 100 {
+            res.push(vec![item]);
+        } else {
+            out.push(item);
+        }
+    }
+    res
+}
+
+fn split_map_to_chucks<T>(list: HashMap<String, T>) -> Vec<Vec<String>> {
+    let mut res: Vec<Vec<String>> = vec![];
+    for (item,_) in list {
         let mut out = res.last_mut().unwrap();
         if out.len() == 100 {
             res.push(vec![item]);

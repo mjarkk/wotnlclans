@@ -25,7 +25,6 @@ func refillClanNameAndTags() {
 	currentStats, unlock := GetCurrentStats()
 	clanNameAndTagsLock.Lock()
 
-	clanNameAndTags = map[string]ClanNameAndTag{}
 	for _, clan := range currentStats {
 		clanNameAndTags[clan.ID] = ClanNameAndTag{
 			Name: clan.Name,
