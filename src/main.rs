@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate futures;
 
 use std::process::exit;
 use std::thread;
@@ -8,7 +10,8 @@ pub mod api;
 pub mod db;
 pub mod other;
 
-fn main() {
+#[actix_web::main]
+async fn main() {
 	println!("------------------------");
 	println!(" press CTRL + C to exit ");
 	println!("------------------------");
@@ -22,8 +25,8 @@ fn main() {
 	});
 
 	let api_config_copy = config.clone();
-	thread::spawn(move || {
-		if let Err(err) = api::setup(api_config_copy) {
+	thread::spawn(move || async move {
+		if let Err(err) = api::setup(api_config_copy).await {
 			println!("Api error: {}", err);
 			exit(1);
 		}

@@ -4,11 +4,7 @@ use crate::other::{ConfAndFlags,remove_all_quotes};
 use crate::db;
 use std::collections::HashMap;
 
-pub fn search_for_clan_ids(config: &ConfAndFlags, is_init: bool) -> Result<(), String> {
-    if is_init && config.flags().skip_startup_indexing {
-        return Ok(());
-    }
-
+pub fn search_for_clan_ids(config: &ConfAndFlags) -> Result<(), String> {
     let mut clans = get_all_clan_ids(config)?;
     if config.is_dev() {
         println!("Fetched {} clan ids", clans.len())
@@ -35,7 +31,7 @@ pub fn search_for_clan_ids(config: &ConfAndFlags, is_init: bool) -> Result<(), S
 
 // GetClanData returns all needed information about clans
 // includedClans is not required
-fn get_clan_data(config: &ConfAndFlags, included_clans: Option<Vec<String>>) -> Result<(), String> {
+pub fn get_clan_data(config: &ConfAndFlags, included_clans: Option<Vec<String>>) -> Result<(), String> {
     let mut clan_ids: Vec<String> = included_clans.unwrap_or(db::get_clan_ids());
 
     let blocked_clans: HashMap<String, ()> = db::get_blocked_clans();
@@ -124,7 +120,7 @@ fn get_clan_data(config: &ConfAndFlags, included_clans: Option<Vec<String>>) -> 
             });
         }
     }
-    db.set_current_clans_data(to_save);
+    db::set_current_clans_data(to_save);
 
     Ok(())
 }

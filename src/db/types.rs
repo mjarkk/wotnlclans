@@ -1,76 +1,76 @@
 use std::collections::HashMap;
 
-struct ClanStats {
-	tag: String,
-	name: String,
-	color: String,
-	members: usize,
-	description: String,
-	motto: String,
-	id: String,
-	emblems: HashMap<String, String>,
-	blocked: bool,
-	stats: HistoryClanStats,
+pub struct ClanStats {
+	pub tag: String,
+	pub name: String,
+	pub color: String,
+	pub members: usize,
+	pub description: String,
+	pub motto: String,
+	pub id: String,
+	pub emblems: HashMap<String, String>,
+	pub blocked: bool,
+	pub stats: HistoryClanStats,
 }
 
 // HistoryClanStats this is what to be exepected to get back per clan from the database when requesting old clan data
-struct HistoryClanStats {
-	tag: String,
-	name: String,
-	id: String,
-	members: usize,
-	battles: f64,
-	dailybattles: f64,
-	efficiency: f64,
-	fbelo10: f64,
-	fbelo8: f64,
-	fbelo6: f64,
-	fbelo: f64,
-	gmelo10: f64,
-	gmelo8: f64,
-	gmelo6: f64,
-	gmelo: f64,
-	globrating: f64,
-	globRatingweighted: f64,
-	winratio: f64,
-	v10l: f64,
+pub struct HistoryClanStats {
+	pub tag: String,
+	pub name: String,
+	pub id: String,
+	pub members: usize,
+	pub battles: f64,
+	pub dailybattles: f64,
+	pub efficiency: f64,
+	pub fbelo10: f64,
+	pub fbelo8: f64,
+	pub fbelo6: f64,
+	pub fbelo: f64,
+	pub gmelo10: f64,
+	pub gmelo8: f64,
+	pub gmelo6: f64,
+	pub gmelo: f64,
+	pub globrating: f64,
+	pub globRatingweighted: f64,
+	pub winratio: f64,
+	pub v10l: f64,
 }
 
 // HistoryCollectionItem is what the contens is of 1 hisotry colleciton item
-struct HistoryCollectionItem {
-	date: String,
-	stats: Vec<HistoryClanStats>,
+pub struct HistoryCollectionItem {
+	pub date: String,
+	pub stats: Vec<HistoryClanStats>,
 }
 
 // User defines what a user is
-struct User {
-	rights: String,
-	userid: isize,
-	nickname: String,
+pub struct User {
+	pub rights: String,
+	pub userid: isize,
+	pub nickname: String,
 }
 
 // ClanPositionEvery this shows the clan possition in all type stats
-struct ClanPositionEvery {
-	v10l: isize,
-	winratio: isize,
-	globalWeighted: isize,
-	global: isize,
-	gmelo: isize,
-	gmelo6: isize,
-	gmelo8: isize,
-	gmelo10: isize,
-	fbelo: isize,
-	fbelo6: isize,
-	fbelo8: isize,
-	fbelo10: isize,
-	efficiency: isize,
-	dailybattles: isize,
-	battles: isize,
-	members: isize,
+pub struct ClanPositionEvery {
+	pub v10l: isize,
+	pub winratio: isize,
+	pub globalWeighted: isize,
+	pub global: isize,
+	pub gmelo: isize,
+	pub gmelo6: isize,
+	pub gmelo8: isize,
+	pub gmelo10: isize,
+	pub fbelo: isize,
+	pub fbelo6: isize,
+	pub fbelo8: isize,
+	pub fbelo10: isize,
+	pub efficiency: isize,
+	pub dailybattles: isize,
+	pub battles: isize,
+	pub members: isize,
 }
 
 // ClanNameAndTag is a type that has the tag, name and id of a clan
-struct ClanNameAndTag {
-	tag: String,
-	name: String,
+pub struct ClanNameAndTag {
+	pub tag: String,
+	pub name: String,
 }
