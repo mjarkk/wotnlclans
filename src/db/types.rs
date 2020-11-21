@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct ClanStats {
 	pub tag: String,
 	pub name: String,
@@ -11,6 +12,7 @@ pub struct ClanStats {
 	pub stats: HistoryClanStats,
 }
 
+#[derive(Clone)]
 pub struct ClanStatsEmblems {
 	pub x256_wowp: String,
 	pub x195_portal: String,
@@ -21,6 +23,7 @@ pub struct ClanStatsEmblems {
 }
 
 // HistoryClanStats this is what to be exepected to get back per clan from the database when requesting old clan data
+#[derive(Clone)]
 pub struct HistoryClanStats {
 	pub tag: String,
 	pub name: String,
@@ -58,22 +61,45 @@ pub struct User {
 
 // ClanPositionEvery this shows the clan possition in all type stats
 pub struct ClanPositionEvery {
-	pub v10l: isize,
-	pub winratio: isize,
-	pub global_weighted: isize,
-	pub global: isize,
-	pub gm_elo: isize,
-	pub gm_elo6: isize,
-	pub gm_elo8: isize,
-	pub gm_elo10: isize,
-	pub fb_elo: isize,
-	pub fb_elo6: isize,
-	pub fb_elo8: isize,
-	pub fb_elo10: isize,
-	pub efficiency: isize,
-	pub daily_battles: isize,
-	pub battles: isize,
-	pub members: isize,
+	pub v10l: u32,
+	pub winratio: u32,
+	pub global_weighted: u32,
+	pub global: u32,
+	pub gm_elo: u32,
+	pub gm_elo6: u32,
+	pub gm_elo8: u32,
+	pub gm_elo10: u32,
+	pub fb_elo: u32,
+	pub fb_elo6: u32,
+	pub fb_elo8: u32,
+	pub fb_elo10: u32,
+	pub efficiency: u32,
+	pub daily_battles: u32,
+	pub battles: u32,
+	pub members: u32,
+}
+
+impl ClanPositionEvery {
+	pub fn empty() -> Self {
+		Self {
+			v10l: 0,
+			winratio: 0,
+			global_weighted: 0,
+			global: 0,
+			gm_elo: 0,
+			gm_elo6: 0,
+			gm_elo8: 0,
+			gm_elo10: 0,
+			fb_elo: 0,
+			fb_elo6: 0,
+			fb_elo8: 0,
+			fb_elo10: 0,
+			efficiency: 0,
+			daily_battles: 0,
+			battles: 0,
+			members: 0,
+		}
+	}
 }
 
 // ClanNameAndTag is a type that has the tag, name and id of a clan

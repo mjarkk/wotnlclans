@@ -1,4 +1,6 @@
+use super::sorting::get_sorted_ratings;
 use super::types::{ClanNameAndTag, ClanStats};
+use crate::other::format_search;
 use std::collections::HashMap;
 use std::sync::{Mutex, MutexGuard};
 
@@ -32,116 +34,117 @@ pub fn refill_clan_name_and_tags() {
   }
 }
 
-// // GetCurrentClansByID filter the list with spesific IDs
-// func GetCurrentClansByID(ids ...string) ([]ClanStats, error) {
-// 	toReturn := []ClanStats{}
-// 	if len(ids) > 200 {
-// 		return toReturn, errors.New("Too many IDs")
-// 	}
-// 	if len(ids) == 0 {
-// 		return toReturn, nil
-// 	}
+// GetCurrentClansByID filter the list with spesific IDs
+pub fn get_current_clans_by_id<'a>(ids: Vec<String>) -> Result<Vec<&'a ClanStats>, String> {
+  let res: Vec<&'a ClanStats> = Vec::new();
+  if ids.len() > 200 {
+    return Err(String::from(
+      "Too many IDs given to get_current_clans_by_id",
+    ));
+  }
+  if ids.len() == 0 {
+    return Ok(res);
+  }
 
-// 	currentStats, unlock := GetCurrentStats()
-// 	for _, id := range ids {
-// 		clan, ok := currentStats[id]
-// 		if ok {
-// 			toReturn = append(toReturn, clan)
-// 		}
-// 	}
-// 	unlock()
+  let current_stats = get_current_stats();
+  for id in ids {
+    if let Some(clan) = current_stats.get(&id) {
+      res.push(clan);
+    }
+  }
 
-// 	return toReturn, nil
-// }
+  Ok(res)
+}
 
-// // GetCurrentClansTop returns the top of some amound of clans
-// func GetCurrentClansTop(maxAmound int) ([]ClanStats, error) {
-// 	toReturn := make([]ClanStats, len(SortedRating))
-// 	clansMapped := map[string]ClanStats{}
+// GetCurrentClansTop returns the top of some amound of clans
+fn het_current_clans_top<'a>(max_amound: usize) -> Result<Vec<&'a ClanStats>, String> {
+  let sorted_rating = get_sorted_ratings();
+  let current_stats = get_current_stats();
 
-// 	currentStats, unlock := GetCurrentStats()
-// 	for _, clan := range currentStats {
-// 		clansMapped[clan.ID] = clan
-// 	}
-// 	unlock()
+  let mut res: Vec<&'a ClanStats> = Vec::new();
+  for (_, clan) in current_stats.iter() {
+    res.push(clan);
+  }
 
-// 	for clanID, positions := range SortedRating {
-// 		toReturn[positions.Efficiency] = clansMapped[clanID]
-// 	}
+  res.sort_by(|a, b| a.stats.efficiency.partial_cmp(&b.stats.efficiency).unwrap());
 
-// 	toReturnWithMax := []ClanStats{}
+  let mut res_with_max: Vec<&'a ClanStats> = Vec::new();
 
-// 	for i, item := range toReturn {
-// 		if i >= maxAmound {
-// 			break
-// 		}
-// 		toReturnWithMax = append(toReturnWithMax, item)
-// 	}
+  for (i, clan) in res.iter().enumerate() {
+    if i >= max_amound {
+      break;
+    }
+    res_with_max.push(*clan);
+  }
 
-// 	return toReturnWithMax, nil
-// }
+  Ok(res_with_max)
+}
 
-// // SetCurrentClansData saves the latest clan data in the database
-// func SetCurrentClansData(stats []ClanStats) error {
-// 	filteredStats := map[string]ClanStats{}
+// SetCurrentClansData saves the latest clan data in the database
+fn set_current_clans_data(stats: Vec<ClanStats>) -> Result<(), String> {
+  let filtered_stats: HashMap<String, ClanStats> = HashMap::new();
 
-// 	for _, stat := range stats {
-// 		if len(stat.ID) > 1 && len(stat.Tag) > 1 {
-// 			filteredStats[stat.ID] = stat
-// 		}
-// 	}
+  for stat in stats {
+    if stat.id.len() > 1 && stat.tag.len() > 1 {
+      filtered_stats.insert(stat.id, stat);
+    }
+  }
 
-// 	if len(filteredStats) == 0 {
-// 		return errors.New("SetCurrentClansData got a empty array")
-// 	}
+  if filtered_stats.len() == 0 {
+    return Err(String::from("set_current_clans_data got a empty array"));
+  }
 
-// 	_, unlock := GetCurrentStats()
-// 	currentStats = filteredStats
-// 	unlock()
+  let stats = get_current_stats();
+  *stats = filtered_stats;
+  drop(stats);
 
-// 	SortClanIds()
-// 	refillClanNameAndTags()
+  sort_clan_ids();
+  refill_clan_name_and_tags();
 
-// 	return nil
-// }
+  Ok(())
+}
 
-// // SearchClans returns the top 20 found using a search query
-// func SearchClans(query, sortOn string) ([]string, error) {
-// 	toReturn := []string{}
+// SearchClans returns the top 20 found using a search query
+fn search_clans(query: String, sort_on: String) -> Result<Vec<String>, String> {
+  let mut res: Vec<String> = Vec::new();
 
-// 	if sortOn == "all" {
-// 		return toReturn, errors.New("Can't filter on \"all\"")
-// 	}
-// 	sortedRatingsByTagRaw, err := LightClanPositions(sortOn)
-// 	if err != nil {
-// 		return toReturn, err
-// 	}
-// 	sortedRatingsByTag := sortedRatingsByTagRaw["actualData"].(map[string]int)
-// 	sorted := make([]string, len(sortedRatingsByTag))
-// 	for clanID, pos := range sortedRatingsByTag {
-// 		sorted[pos] = clanID
-// 	}
+  if sort_on == "all" {
+    return Err(String::from("Can't filter on \"all\""));
+  }
 
-// 	clanNameAndTagsLock.Lock()
-// 	defer clanNameAndTagsLock.Unlock()
-// 	for _, clanID := range sorted {
-// 		clanNameAndTag, ok := clanNameAndTags[clanID]
-// 		if !ok {
-// 			continue
-// 		}
+  let sorted_ratings_by_tag_raw = light_clan_positions(sortOn)?;
+  let sortedRatings_by_tag: HashMap<String, usize> = sorted_ratings_by_tag_raw["actualData"];
+  let mut sorted: Vec<(usize, String)> = Vec::new();
+  for (clan_id, pos) in sortedRatings_by_tag {
+    sorted.push((pos, clan_id));
+  }
+  sorted.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
-// 		formattedQuery := other.FormatSearch(query)
-// 	checkList:
-// 		for _, check := range []string{clanNameAndTag.Name, clanNameAndTag.Tag} {
-// 			if strings.Contains(other.FormatSearch(check), formattedQuery) {
-// 				toReturn = append(toReturn, clanID)
-// 				break checkList
-// 			}
-// 		}
-// 		if len(toReturn) == 20 {
-// 			break
-// 		}
-// 	}
+  let clan_name_and_tags = get_clan_name_and_tags();
+  for sorted_item in sorted {
+    let clan_id = sorted_item.1;
 
-// 	return toReturn, nil
-// }
+    let clan_name_and_tag = match clan_name_and_tags.get(&clan_id) {
+      Some(v) => v,
+      None => continue,
+    };
+
+    let formatted_query = format_search(&query);
+    let to_check_for = vec![
+      clan_name_and_tag.name.clone(),
+      clan_name_and_tag.tag.clone(),
+    ];
+    for check in to_check_for.iter() {
+      let formatted_check = format_search(check);
+      if formatted_check.contains(&formatted_query) {
+        res.push(clan_id);
+        break;
+      }
+    }
+    if res.len() == 20 {
+      break;
+    }
+  }
+
+  Ok(res)
+}
