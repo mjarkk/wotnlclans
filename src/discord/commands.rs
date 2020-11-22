@@ -1,118 +1,119 @@
-// package discord
+use crate::db;
+use std::collections::HashMap;
 
-// import (
-// 	"errors"
-// 	"fmt"
-// 	"strings"
+// Option is a command for the list
+pub struct CommandOption {
+  pub to_match: &'static str,    // is the command
+  pub discription: &'static str, // the discription of the command
+  pub handler: Box<dyn Fn(HashMap<String, String>) -> String>, // is the command that will be executed when the command happends
+}
 
-// 	"github.com/mjarkk/wotclans/db"
-// )
+pub fn get_options() -> Vec<CommandOption> {
+  vec![
+    CommandOption {
+      to_match: "top clans",
+      discription: "List the current top clans",
+      handler: Box::new(|_: HashMap<String, String>| -> String {
+        let current_stats = db::get_current_stats();
+        let sorted_ratings = db::get_sorted_ratings();
 
-// // Option is a command for the list
-// type Option struct {
-// 	ToMatch     string                                            // is the command
-// 	Discription string                                            // the discription of the command
-// 	Command     func([]Option, string, ...string) (string, error) // is the command that will be executed when the command happends
-// }
+        let mut top10: Vec<db::ClanStats> = Vec::new();
 
-// // PrintClanLine returns a printable stats line for discord for a clan
-// func PrintClanLine(clan db.ClanStats, clanPosition int, withExtras bool) string {
-// 	realClanPos := "**"
-// 	if clanPosition != 0 {
-// 		realClanPos = strings.TrimSpace(fmt.Sprintf("%v", clanPosition)) + "**"
-// 		if withExtras {
-// 			if clanPosition == 1 {
-// 				realClanPos = realClanPos + " *Best clan*:100:"
-// 			} else if clanPosition <= 5 {
-// 				realClanPos = realClanPos + " *Top 5 clan*:star:"
-// 			}
-// 		}
-// 	}
-// 	toReturn := fmt.Sprintf(
-// 		"**[%v] #%v, ClanRating: **%v**, Winrate: **%v**, Strongholds: **%v**, Global Tier 10: **%v**",
-// 		clan.Tag,
-// 		realClanPos,
-// 		clan.Stats.Efficiency,
-// 		clan.Stats.WinRatio,
-// 		clan.Stats.FbElo,
-// 		clan.Stats.FbElo10,
-// 	)
-// 	if withExtras {
-// 		toReturn = toReturn + "\n" + "https://wotnlbeclans.eu/#/clan/" + clan.ID
-// 	}
-// 	return toReturn
-// }
+        for (_, clan) in current_stats.iter() {
+          if let Some(clan_pos) = sorted_ratings.get(&clan.id) {
+            let eff = clan_pos.efficiency;
+            if eff >= 10 {
+              continue;
+            }
+            top10.push(clan.clone());
+          }
+        }
 
-// // OptionsList is a list of available commands
-// var OptionsList = []Option{
-// 	{
-// 		ToMatch:     "top clans",
-// 		Discription: "List the current top clans",
-// 		Command: func(currentOptions []Option, prefix string, args ...string) (string, error) {
-// 			currentStats, currentStatsUnlock := db.GetCurrentStats()
-// 			defer currentStatsUnlock()
-// 			db.SortedRatingLock.Lock()
-// 			defer db.SortedRatingLock.Unlock()
+        let eff = db::SortOn::Efficiency;
+        top10.sort_by(|a, b| eff.sort(&a.stats, &b.stats));
 
-// 			top10 := make([]db.ClanStats, 10)
-// 			for _, clan := range currentStats {
-// 				clanPos, ok := db.SortedRating[clan.ID]
-// 				if !ok {
-// 					continue
-// 				}
-// 				eff := clanPos.Efficiency
-// 				if eff >= 10 {
-// 					continue
-// 				}
-// 				top10[eff] = clan
-// 			}
-// 			toReturn := "Top 10 clans:"
-// 			for pos, clan := range top10 {
-// 				toReturn = toReturn + "\n" + PrintClanLine(clan, pos+1, false)
-// 			}
-// 			return toReturn, nil
-// 		},
-// 	},
-// 	{
-// 		ToMatch:     "clan {{clanTag}} stats",
-// 		Discription: "Show the stats and position of a spesific clan",
-// 		Command: func(currentOptions []Option, prefix string, args ...string) (string, error) {
-// 			if len(args) == 0 {
-// 				return "", errors.New("Not enough arguments spesified")
-// 			}
-// 			if args[0] == "" {
-// 				return ":confused: Heu?? No clans found", nil
-// 			}
+        let mut res = String::from("Top 10 clans:");
+        for (pos, clan) in top10.iter().enumerate() {
+          res = format!("{}\n{}", res, print_clan_line(&clan, pos as u32 + 1, false))
+        }
 
-// 			currentStats, currentStatsUnlock := db.GetCurrentStats()
-// 			defer currentStatsUnlock()
-// 			db.SortedRatingLock.Lock()
-// 			defer db.SortedRatingLock.Unlock()
+        res
+      }),
+    },
+    CommandOption {
+      to_match: "clan {{clanTag}} stats",
+      discription: "Show the stats and position of a spesific clan",
+      handler: Box::new(|args: HashMap<String, String>| -> String {
+        let empty_string = String::new();
+        let tag = match args.get("clanTag") {
+          Some(v) => v,
+          None => &empty_string,
+        };
 
-// 			for _, clan := range currentStats {
-// 				if strings.ToLower(clan.Tag) == strings.ToLower(strings.TrimSpace(args[0])) {
-// 					clanPos, ok := db.SortedRating[clan.ID]
-// 					realClanPos := 0
-// 					if ok {
-// 						realClanPos = clanPos.Efficiency + 1
-// 					}
-// 					return PrintClanLine(clan, realClanPos, true), nil
-// 				}
-// 			}
+        if tag.len() == 0 {
+          return String::from("You must provide a clan tag to search for: clan {{clanTag}} stats");
+        }
 
-// 			return ":eyes: We have looked everyware but cloud not found the clan you are looking for", nil
-// 		},
-// 	},
-// 	{
-// 		ToMatch:     "help",
-// 		Discription: "Show the help menu",
-// 		Command: func(currentOptions []Option, prefix string, args ...string) (string, error) {
-// 			out := ""
-// 			for _, option := range currentOptions {
-// 				out = out + "\n" + prefix + " " + option.ToMatch + "\n   > " + option.Discription
-// 			}
+        let current_stats = db::get_current_stats();
+        let sorted_ratings = db::get_sorted_ratings();
 
-// 			return "Beep boop this is what i can do:\n```" + out + "\n```", nil
-// 		},
-// 	},
-// }
+        for (_, clan) in current_stats.iter() {
+          if clan.tag.to_lowercase() == tag.trim().to_string().to_lowercase() {
+            let mut real_clan_pos = 0;
+            if let Some(clan_pos) = sorted_ratings.get(&clan.id) {
+              real_clan_pos = clan_pos.efficiency + 1
+            };
+            return print_clan_line(clan, real_clan_pos, true);
+          }
+        }
+
+        String::from(
+          ":eyes: We have looked everyware but cloud not found the clan you are looking for",
+        )
+      }),
+    },
+  ]
+}
+
+// PrintClanLine returns a printable stats line for discord for a clan
+fn print_clan_line(clan: &db::ClanStats, clan_position: u32, with_extras: bool) -> String {
+  let mut real_clan_pos = String::new();
+
+  if clan_position != 0 {
+    real_clan_pos = String::from(format!("**{}**", clan_position.to_string().trim()).trim());
+    if with_extras {
+      if clan_position == 1 {
+        real_clan_pos += " *Best clan*:100:";
+      } else if clan_position <= 5 {
+        real_clan_pos += " *Top 5 clan*:star:";
+      }
+    }
+  }
+
+  let mut res = format!(
+    "**[{}] #{}, ClanRating: **{}**, Winrate: **{}**, Strongholds: **{}**, Global Tier 10: **{}**",
+    clan.tag,
+    real_clan_pos,
+    clan.stats.efficiency,
+    clan.stats.win_ratio,
+    clan.stats.fb_elo,
+    clan.stats.fb_elo10,
+  );
+  if with_extras {
+    res = format!("{}\nhttps://wotnlbeclans.eu/#/clan/{}", res, clan.id);
+  }
+
+  res
+}
+
+pub fn get_help(prefix: &str) -> String {
+  let mut out = String::new();
+  for option in get_options() {
+    out = format!(
+      "{}\n{} {}\n   > {}",
+      out, prefix, option.to_match, option.discription
+    );
+  }
+
+  format!("Beep boop this is what i can do:\n```{}```", out)
+}

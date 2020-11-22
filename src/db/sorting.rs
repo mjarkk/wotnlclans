@@ -32,7 +32,7 @@ pub enum SortOn {
 }
 
 impl SortOn {
-  fn sort(&self, a: &HistoryClanStats, b: &HistoryClanStats) -> Ordering {
+  pub fn sort(&self, a: &HistoryClanStats, b: &HistoryClanStats) -> Ordering {
     match self {
       Self::Members => a.members.partial_cmp(&b.members),
       Self::Battles => a.battles.partial_cmp(&b.battles),

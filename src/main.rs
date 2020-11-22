@@ -20,14 +20,18 @@ async fn main() {
 
 	let thread_config = config.clone();
 	spawn(async move {
-		discord::setup(thread_config).await;
+		let discord_setup_res = discord::setup(thread_config).await;
+		if let Err(e) = discord_setup_res {
+			println!("{}", e);
+			// No not exit here as this is more of a report than an error
+		}
 	});
 
 	let api_config_copy = config.clone();
 	let _ = spawn(async move {
 		let setup_res = api::setup(api_config_copy).await;
-		if let Err(err) = setup_res {
-			println!("Api error: {}", err);
+		if let Err(e) = setup_res {
+			println!("Api error: {}", e);
 			exit(1);
 		}
 	})

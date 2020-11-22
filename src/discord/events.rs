@@ -1,38 +1,34 @@
-// package discord
+use super::parser::parse;
+use serenity::async_trait;
+use serenity::client::{Context, EventHandler};
+use serenity::model::{channel::Message, gateway::Ready};
 
-// import (
-// 	"strings"
+pub struct Handler;
 
-// 	"github.com/bwmarrin/discordgo"
-// )
+#[async_trait]
+impl EventHandler for Handler {
+  async fn message(&self, ctx: Context, msg: Message) {
+    let mut parts: Vec<&str> = msg.content.split(' ').collect();
+    parts.reverse();
+    let prefix = match parts.pop() {
+      Some(v) => v,
+      None => return, // WUT?
+    };
+    match prefix {
+      "w" | "!" => (),
+      _ => return, // Not a message for this bot
+    }
 
-// // onMessage handles every incomming message
-// func onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
-// 	if m.Author.ID == s.State.User.ID {
-// 		return
-// 	}
+    let message = if parts.len() == 0 {
+      format!("Did you mean `{} help`", prefix)
+    } else {
+      parts.reverse();
+      parse(prefix, parts)
+    };
+    let _ = msg.channel_id.say(&ctx.http, message).await;
+  }
 
-// 	msg := strings.Split(m.Content, " ")
-
-// 	hasPrefix := false
-// 	prefixIs := ""
-// 	if len(msg) > 0 {
-// 		hasPrefix = msg[0] == "w" || msg[0] == "!" || msg[0] == "?"
-// 		prefixIs = msg[0]
-// 		if len(msg) > 1 {
-// 			msg = msg[1:]
-// 		} else {
-// 			msg = []string{}
-// 		}
-// 	}
-
-// 	if !hasPrefix {
-// 		return
-// 	}
-
-// 	if len(msg) == 0 {
-// 		s.ChannelMessageSend(m.ChannelID, "Did you mean `"+prefixIs+" help`")
-// 	} else {
-// 		s.ChannelMessageSend(m.ChannelID, parse(prefixIs, msg))
-// 	}
-// }
+  async fn ready(&self, _: Context, _: Ready) {
+    println!("Discord bot ready");
+  }
+}
