@@ -19,3 +19,4 @@ futures = "0.3.8"
 image = "0.23.12"
 webp = "0.1.0"
 actix-web = "3.2.0"
+serenity = { version = "0.9.1", features = ["default_native_tls"] }

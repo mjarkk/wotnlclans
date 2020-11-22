@@ -71,14 +71,14 @@ pub async fn get() -> Result<(), String> {
 
 	let mut img_and_id: Vec<ImageAndIDType> = Vec::new();
 
-	let current_stats = db::get_current_stats();
+	let current_stats = db::get_current_stats().clone();
 
 	let awaiting = current_stats
 		.iter()
 		.map(|clan| get_icon(clan.clone().1.clone(), img_size));
-	let awaiting_res = join!(future::join_all(awaiting));
+	let awaiting_res = future::join_all(awaiting).await;
 
-	for res in awaiting_res.0 {
+	for res in awaiting_res {
 		match res {
 			Ok(v) => img_and_id.push(v),
 			Err(e) => println!("{}", e),

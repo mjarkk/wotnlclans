@@ -7,6 +7,13 @@ pub use events::*;
 pub use parser::*;
 
 use crate::other::ConfAndFlags;
+use serenity::async_trait;
+use serenity::client::{Client, Context, EventHandler};
+use serenity::framework::standard::{
+    macros::{command, group},
+    CommandResult, StandardFramework,
+};
+use serenity::model::channel::Message;
 use std::sync::Mutex;
 
 // IsEnabled shows if the discord bot is enabled
@@ -17,36 +24,30 @@ lazy_static! {
 // AuthURL is a url to add a bot your discord
 const AUTH_URL: &'static str = "https://discordapp.com/oauth2/authorize?client_id=536542444154519552&permissions=522304&scope=bot";
 
+pub struct Handler;
+
+#[async_trait]
+impl EventHandler for Handler {}
+
 // Setup sets up the discord part
-pub fn setup(config: ConfAndFlags) {
-    // fmt.Println("Settings up the discord api...")
-    // if len(config.DiscordAuthToken) == 0 {
-    // 	fmt.Println("No key spesified, Skipping the discord bot")
-    // 	return
-    // }
-    // discord, err := discordgo.New("Bot " + config.DiscordAuthToken)
-    // if err != nil {
-    // 	fmt.Println("Can't createa a discord bot, err:", err.Error())
-    // }
+pub async fn setup(config: ConfAndFlags) -> Result<(), String> {
+    println!("Settings up the discord api...");
+    if config.conf().discord_auth_token.len() == 0 {
+        return Err(String::from("No key spesified, Skipping the discord bot"));
+    }
 
-    // discord.AddHandler(onMessage)
+    let framework = StandardFramework::new().configure(|c| c.prefix("w"));
 
-    // err = discord.Open()
-    // if err != nil {
-    // 	fmt.Println("Can't connect to discord, err:", err)
-    // 	return
-    // }
+    let mut client = Client::builder(&config.conf().discord_auth_token)
+        .event_handler(Handler)
+        .framework(framework)
+        .await
+        .or_else(|e| Err(format!("Unable to setup discod bot, error: {}", e)))?;
 
-    // IsEnabled = true
-    // fmt.Println("Discord bot is now setted up")
+    client
+        .start()
+        .await
+        .or_else(|e| Err(format!("Unable to run discord bot, error: {}", e)))?;
 
-    // sc := make(chan os.Signal, 1)
-    // signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-    // <-sc
-    // go func() {
-    // 	discord.Close()
-    // 	os.Exit(1)
-    // }()
-    // time.Sleep(time.Millisecond * 250)
-    // os.Exit(1)
+    Err(format!("Discord bot stopped unexpected"))
 }
