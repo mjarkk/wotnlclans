@@ -31,6 +31,53 @@ pub enum SortOn {
   V10l,
 }
 
+impl Into<String> for SortOn {
+  fn into(self) -> String {
+    String::from(match self {
+      Self::Members => "Members",
+      Self::Battles => "Battles",
+      Self::Dailybattles => "Dailybattles",
+      Self::Efficiency => "Efficiency",
+      Self::Fbelo10 => "Fbelo10",
+      Self::Fbelo8 => "Fbelo8",
+      Self::Fbelo6 => "Fbelo6",
+      Self::Fbelo => "Fbelo",
+      Self::Gmelo10 => "Gmelo10",
+      Self::Gmelo8 => "Gmelo8",
+      Self::Gmelo6 => "Gmelo6",
+      Self::Gmelo => "Gmelo",
+      Self::Globrating => "Globrating",
+      Self::GlobRatingweighted => "GlobRatingweighted",
+      Self::Winratio => "Winratio",
+      Self::V10l => "V10l",
+    })
+  }
+}
+
+impl From<String> for SortOn {
+  fn from(name: String) -> Self {
+    match name.as_str() {
+      "Members" => Self::Members,
+      "Battles" => Self::Battles,
+      "Dailybattles" => Self::Dailybattles,
+      "Efficiency" => Self::Efficiency,
+      "Fbelo10" => Self::Fbelo10,
+      "Fbelo8" => Self::Fbelo8,
+      "Fbelo6" => Self::Fbelo6,
+      "Fbelo" => Self::Fbelo,
+      "Gmelo10" => Self::Gmelo10,
+      "Gmelo8" => Self::Gmelo8,
+      "Gmelo6" => Self::Gmelo6,
+      "Gmelo" => Self::Gmelo,
+      "Globrating" => Self::Globrating,
+      "GlobRatingweighted" => Self::GlobRatingweighted,
+      "Winratio" => Self::Winratio,
+      "V10l" => Self::V10l,
+      _ => Self::Efficiency,
+    }
+  }
+}
+
 impl SortOn {
   pub fn sort(&self, a: &HistoryClanStats, b: &HistoryClanStats) -> Ordering {
     match self {
@@ -158,6 +205,7 @@ pub fn light_clan_positions(item_to_get: SortOn) -> HashMap<String, u32> {
   res
 }
 
+#[derive(Serialize)]
 pub struct LightClanPositionsAll {
   pub stats: HashMap<String, Vec<u32>>,
   pub data_mapping: Vec<&'static str>,

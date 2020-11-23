@@ -1,5 +1,10 @@
+use actix_web::dev::Payload;
+use actix_web::Error;
+use actix_web::FromRequest;
+use actix_web::HttpRequest;
 use crypto::digest::Digest;
 use crypto::sha1::Sha1;
+use futures::future::{ok, Ready};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs::read_to_string;
@@ -7,6 +12,19 @@ use structopt::StructOpt;
 
 #[derive(Clone)]
 pub struct ConfAndFlags(Conf, Flags);
+
+impl FromRequest for ConfAndFlags {
+  type Error = Error;
+  type Future = Ready<Result<Self, Error>>;
+  type Config = ();
+
+  #[inline]
+  fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
+    let mut extensions = req.extensions_mut();
+    let c = extensions.remove::<ConfAndFlags>().unwrap();
+    ok(c)
+  }
+}
 
 impl ConfAndFlags {
   pub fn setup() -> Self {
@@ -29,6 +47,9 @@ impl ConfAndFlags {
   pub fn is_dev(&self) -> bool {
     self.flags().dev
   }
+  pub fn webserver_location(&self) -> String {
+    self.conf().webserver_location.clone()
+  }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -40,6 +61,7 @@ pub struct Conf {
   pub extra_clans: Vec<String>,
   pub wargaming_key: String,
   pub discord_auth_token: String,
+  pub discord_auth_url: String,
   pub webserver_location: String,
 }
 

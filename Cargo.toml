@@ -19,4 +19,8 @@ futures = "0.3.8"
 image = "0.23.12"
 webp = "0.1.0"
 actix-web = "3.2.0"
+actix-cors = "0.5.3"
+actix-service = "1.0.6"
+actix-files = "0.4.0"
+actix = "0.10.0"
 serenity = { version = "0.9.1", features = ["default_native_tls"] }

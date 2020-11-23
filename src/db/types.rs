@@ -1,4 +1,4 @@
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ClanStats {
 	pub tag: String,
 	pub name: String,
@@ -29,7 +29,7 @@ impl ClanStats {
 	}
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct ClanStatsEmblems {
 	pub x256_wowp: String,
 	pub x195_portal: String,
@@ -53,7 +53,7 @@ impl ClanStatsEmblems {
 }
 
 // HistoryClanStats this is what to be exepected to get back per clan from the database when requesting old clan data
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct HistoryClanStats {
 	pub tag: String,
 	pub name: String,
@@ -103,12 +103,14 @@ impl HistoryClanStats {
 }
 
 // HistoryCollectionItem is what the contens is of 1 hisotry colleciton item
+#[derive(Clone, Serialize)]
 pub struct HistoryCollectionItem {
 	pub date: String,
 	pub stats: Vec<HistoryClanStats>,
 }
 
 // User defines what a user is
+#[derive(Clone, Serialize)]
 pub struct User {
 	pub rights: String,
 	pub userid: isize,
@@ -116,6 +118,7 @@ pub struct User {
 }
 
 // ClanPositionEvery this shows the clan possition in all type stats
+#[derive(Clone, Serialize)]
 pub struct ClanPositionEvery {
 	pub v10l: u32,
 	pub winratio: u32,
@@ -159,6 +162,7 @@ impl ClanPositionEvery {
 }
 
 // ClanNameAndTag is a type that has the tag, name and id of a clan
+#[derive(Clone, Serialize)]
 pub struct ClanNameAndTag {
 	pub tag: String,
 	pub name: String,
