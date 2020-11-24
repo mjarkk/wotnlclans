@@ -247,12 +247,13 @@ fn filter_out_clans(config: &ConfAndFlags, clan_ids: Vec<String>) -> Vec<String>
 fn split_to_chucks(list: Vec<String>) -> Vec<Vec<String>> {
     let mut res: Vec<Vec<String>> = vec![];
     for item in list {
-        let out = res.last_mut().unwrap();
-        if out.len() == 100 {
-            res.push(vec![item]);
-        } else {
-            out.push(item);
+        if let Some(out) = res.last_mut() {
+            if out.len() < 100 {
+                out.push(item);
+                continue;
+            }
         }
+        res.push(vec![item]);
     }
     res
 }
@@ -260,12 +261,13 @@ fn split_to_chucks(list: Vec<String>) -> Vec<Vec<String>> {
 fn split_map_to_chucks<T>(list: HashMap<String, T>) -> Vec<Vec<String>> {
     let mut res: Vec<Vec<String>> = vec![];
     for (item, _) in list {
-        let out = res.last_mut().unwrap();
-        if out.len() == 100 {
-            res.push(vec![item]);
-        } else {
-            out.push(item);
+        if let Some(out) = res.last_mut() {
+            if out.len() < 100 {
+                out.push(item);
+                continue;
+            }
         }
+        res.push(vec![item]);
     }
     res
 }

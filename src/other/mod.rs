@@ -10,7 +10,7 @@ use serde_json;
 use std::fs::read_to_string;
 use structopt::StructOpt;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ConfAndFlags(Conf, Flags);
 
 impl FromRequest for ConfAndFlags {
@@ -52,7 +52,7 @@ impl ConfAndFlags {
   }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Conf {
   pub allowed_words: Vec<String>,

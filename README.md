@@ -68,7 +68,7 @@ docker run \
 ## Run development
 1. Configure `config.json`
 2. Read [web_static/README.md](./web_static/README.md)
-3. Run `cargo run`
+3. Run `cargo run -- --dev` *(use `cargo run -- --help` for the argument options)*
 
 ## How to update the config:
 - For development just restart the webpack server and api

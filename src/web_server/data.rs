@@ -6,10 +6,10 @@ use actix_web::HttpResponse;
 
 pub fn routes(app: &mut ServiceConfig) {
 	app.service(
-		scope("/api")
+		scope("")
 			.service(clan_data)
-			.service(search_query_sorton)
 			.service(clan_data_ids)
+			.service(search_query_sorton)
 			.service(clan_ids_to_get)
 			.service(clan_description_clan_id)
 			.service(discord),
@@ -25,6 +25,20 @@ pub async fn clan_data() -> Res {
 	}
 
 	ok_res(data)
+}
+
+#[get("/clanData/{ids}")]
+pub async fn clan_data_ids(Path(ids): Path<String>) -> Res {
+	let parsed_ids: Vec<String> = ids.split("+").map(|d| d.to_string()).collect();
+
+	let mut stats = db::get_current_clans_by_id(parsed_ids)
+		.or_else(|e| HTTPError::new(format!("Failed to get clans by ID, error: {}", e)))?;
+
+	for item in stats.iter_mut() {
+		item.description = String::new();
+	}
+
+	ok_res(stats)
 }
 
 #[get("/search/{query}/{sort_on}")]
@@ -43,20 +57,6 @@ pub async fn search_query_sorton(Path((query, sort_on)): Path<(String, String)>)
 	})?;
 
 	ok_res(list)
-}
-
-#[get("/clanData/{ids}")]
-pub async fn clan_data_ids(Path(ids): Path<String>) -> Res {
-	let parsed_ids: Vec<String> = ids.split("+").map(|d| d.to_string()).collect();
-
-	let mut stats = db::get_current_clans_by_id(parsed_ids)
-		.or_else(|e| HTTPError::new(format!("Failed to get clans by ID, error: {}", e)))?;
-
-	for item in stats.iter_mut() {
-		item.description = String::new();
-	}
-
-	ok_res(stats)
 }
 
 #[derive(Serialize)]

@@ -8,9 +8,8 @@ use actix_cors::Cors;
 use actix_service::Service;
 use actix_web::dev::{HttpResponseBuilder, ServiceRequest};
 use actix_web::http::StatusCode;
-use actix_web::web::{scope, JsonConfig};
+use actix_web::web::{scope, JsonConfig, ServiceConfig};
 use actix_web::{App, HttpResponse, HttpServer, ResponseError};
-use futures::future::FutureExt;
 use serde::Serialize;
 use std::fmt;
 
@@ -31,19 +30,20 @@ pub async fn serve(config: ConfAndFlags) -> Result<(), String> {
 		App::new()
 			.wrap(cors)
 			.data(JsonConfig::default().limit(4096))
-			.configure(move |app| {
+			.configure(move |app: &mut ServiceConfig| {
 				app.service(
-					scope("")
+					scope("/api")
 						.wrap_fn(move |mut req: ServiceRequest, srv| {
 							let head = req.head_mut();
 							head.extensions_mut().insert(config_sync_cloned.clone());
-							srv.call(req).map(|res| res)
+							let res = srv.call(req);
+							res
 						})
-						.configure(statics::routes)
-						.configure(data::routes)
-						.configure(posts::routes),
+						.configure(posts::routes)
+						.configure(data::routes),
 				);
 			})
+			.configure(statics::routes)
 	})
 	.bind(webserver_location)
 	.or_else(|e| Err(format!("{}", e)))?

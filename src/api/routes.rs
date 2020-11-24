@@ -63,23 +63,16 @@ impl<'a> Routes<'a> {
 
 pub fn call_route<T: DeserializeOwned>(route: Routes, config: &ConfAndFlags) -> Result<T, String> {
   let url = String::from("https://api.worldoftanks.eu") + &route.get_url_path(config.get_wg_key());
-  let err = |e| Err(format!("Failed to get {} with error: {}", url, e));
 
-  let response = match get(&url).or_else(err)?.text() {
-    Ok(v) => v,
-    Err(e) => {
-      return Err(format!(
-        "Failed to get {} with error {}",
-        url,
-        e.to_string()
-      ))
-    } // Box<std::error::Error>
-  };
+  let response = get(&url)
+    .or_else(|e| Err(format!("Failed to get {} with error: {}", &url, e)))?
+    .text()
+    .or_else(|e| Err(format!("Failed to get {} with error: {}", &url, e)))?;
 
-  let parsed_response: T = from_str(&response).or_else(|_| {
+  let parsed_response: T = from_str(&response).or_else(|e| {
     Err(format!(
-      "Failed to get {} with error: failed to parse response",
-      url
+      "Failed to parse response from: {} with error: {}",
+      &url, e
     ))
   })?;
 

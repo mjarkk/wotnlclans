@@ -85,7 +85,7 @@ impl DataHelper for NicknameAndClan {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct NicknameAndClanData {
-  pub clan_id: usize,
+  pub clan_id: Option<usize>,
   pub nickname: String,
 }
 
@@ -162,7 +162,7 @@ pub struct ClanDataData {
   pub description: String,
   pub description_html: String,
   pub emblems: ClanDataEmblems,
-  pub members: ClanDataMembers,
+  pub members: Vec<ClanDataMembers>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
