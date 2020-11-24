@@ -7,11 +7,11 @@ On this site you can see all Dutch & Belgium clans ranked.
 
 | Item | Used |
 |---|---|
-| Backend | Golang |
-| Frondend | Javascript (React/Preact) |
+| Backend | [Rust](https://www.rust-lang.org/) |
+| Frondend | Javascript ([React](https://reactjs.org/)/[Preact](https://preactjs.com/)) |
 
 ## Setup
-1. Make sure you have installed [docker](https://docs.docker.com/install/) in production and in development make sure you have [golang](https://golang.org/doc/install) and [nodejs](https://nodejs.org/en/)
+1. Make sure you have installed [docker](https://docs.docker.com/install/) in production and in development make sure you have [rust](https://www.rust-lang.org/) and [nodejs](https://nodejs.org/en/)
 2. `git clone git@github.com:mjarkk/wotnlclans.git && cd wotnlclans`
 3. Configure `config.json`
 
@@ -24,6 +24,7 @@ On this site you can see all Dutch & Belgium clans ranked.
   "extraClans": [], // A list of extra clans that might not be autodetected
   "wargamingKey": "7e5ce7007256737daa79dbec35f4f072", // Your wargaming key
   "discordAuthToken": "", // Optional discord token for discord bot
+  "discordAuthUrl": "", // If discord auth token is provided this is the auth url used to authenticated
   "webserverLocation": "localhost:8282", // Where should the webserver be ran
   "webAnalytics": "", // Spyware scripts :)
   "title": "Wot NL/BE clans", // Site title
@@ -65,10 +66,9 @@ docker run \
 ```
 
 ## Run development
-1. `go get`
-2. Configure `config.json`
-3. Read [web_static/README.md](./web_static/README.md)
-4. `./buildAndRun.sh`
+1. Configure `config.json`
+2. Read [web_static/README.md](./web_static/README.md)
+3. Run `cargo run`
 
 ## How to update the config:
 - For development just restart the webpack server and api
