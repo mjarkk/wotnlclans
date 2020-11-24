@@ -247,9 +247,9 @@ pub struct ClanRatingData {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanRatingGeneralRating {
-  pub rank: f64,
-  pub rank_delta: f64,
-  pub value: f64,
+  pub rank_delta: Option<isize>,
+  pub rank: Option<usize>,
+  pub value: Option<f64>,
 }
 
 // PlayerInfoLogedIn is a type for the playerInfoLogedIn route

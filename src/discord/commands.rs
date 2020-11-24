@@ -90,14 +90,19 @@ fn print_clan_line(clan: &db::ClanStats, clan_position: u32, with_extras: bool) 
     }
   }
 
+  let check_f64 = |d: Option<f64>| match d {
+    Some(val) => val.to_string(),
+    None => String::from("??"),
+  };
+
   let mut res = format!(
     "**[{}] #{}, ClanRating: **{}**, Winrate: **{}**, Strongholds: **{}**, Global Tier 10: **{}**",
     clan.tag,
     real_clan_pos,
-    clan.stats.efficiency,
-    clan.stats.win_ratio,
-    clan.stats.fb_elo,
-    clan.stats.fb_elo10,
+    check_f64(clan.stats.efficiency),
+    check_f64(clan.stats.win_ratio),
+    check_f64(clan.stats.fb_elo),
+    check_f64(clan.stats.fb_elo10),
   );
   if with_extras {
     res = format!("{}\nhttps://wotnlbeclans.eu/#/clan/{}", res, clan.id);
