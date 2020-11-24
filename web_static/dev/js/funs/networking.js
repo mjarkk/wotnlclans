@@ -3,7 +3,7 @@ import f from './functions'
 let fetchEdUrls = {}
 
 // fetchWCache is short for "fetch with cache" this function makes sure to not fetch something 2 times
-const fetchWCache = (url, toBlob) => {
+const fetchWCache = (url, toBlob = false) => {
   const item = fetchEdUrls[url]
   return new Promise((resolve, reject) => {
     if (!item) {
@@ -13,9 +13,11 @@ const fetchWCache = (url, toBlob) => {
         status: true,
         isWaitingForData: []
       }
+
       const reqUrl = toBlob
         ? new Request(url)
         : url
+
       fetch(reqUrl).then(r => {
         if (toBlob) {
           return r.blob()
@@ -58,10 +60,10 @@ const fetchWCache = (url, toBlob) => {
   })
 }
 
-const getClanList = async () => (await fetchWCache('/clanData')).data
-const getIconsLocation = () => fetchWCache('/icons/json')
-const getIconsPicture = () => fetchWCache(f.supportsWebp() ? '/icons/webp' : '/icons/png', true)
-const getFilteredList = () => fetchWCache('/clanIDs/all')
+const getClanList = async () => (await fetchWCache('/api/clanData')).data
+const getIconsLocation = () => fetchWCache('/icons/allIcons.json')
+const getIconsPicture = () => fetchWCache(f.supportsWebp() ? '/icons/allIcons.webp' : '/icons/allIcons.png', true)
+const getFilteredList = () => fetchWCache('/api/clanIDs/all')
 
 const checkKey = async (userKey, userID) => {
   const res = await fetch('/checkUser', {
@@ -92,10 +94,10 @@ const updateClanIDsList = async (userKey, userID, route, clans) =>
   })).json()
 
 const getClansByID = async (ids) =>
-  await (await fetch(`/clanData/${ids.join('+')}`)).json()
+  await (await fetch(`/api/clanData/${ids.join('+')}`)).json()
 
 const search = async (filter, sorting) =>
-  fetchWCache(`/search/${encodeURIComponent(filter)}/${encodeURIComponent(sorting)}`)
+  fetchWCache(`/api/search/${encodeURIComponent(filter)}/${encodeURIComponent(sorting)}`)
 
 const getDescription = async (clanID) => {
   const out = await fetchWCache(`/clanDescription/${clanID}`)

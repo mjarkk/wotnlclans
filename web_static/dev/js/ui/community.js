@@ -85,7 +85,7 @@ export default class Comunity extends React.Component {
     }, 200)
   }
   async componentDidMount() {
-    n.fetchWCache('/discord', false)
+    n.fetchWCache('/api/discord', false)
       .then(out =>
         this.setState(out.status ? { inviteLink: out.inviteLink } : { hasError: true })
       )
