@@ -61,7 +61,10 @@ impl<'a> Routes<'a> {
   }
 }
 
-pub fn call_route<T: DeserializeOwned>(route: Routes, config: &ConfAndFlags) -> Result<T, String> {
+pub async fn call_route<T: DeserializeOwned>(
+  route: Routes,
+  config: &ConfAndFlags,
+) -> Result<T, String> {
   let url = String::from("https://api.worldoftanks.eu") + &route.get_url_path(config.get_wg_key());
 
   let response = get(&url)

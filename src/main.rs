@@ -4,6 +4,8 @@ extern crate lazy_static;
 extern crate actix_web;
 #[macro_use]
 extern crate serde;
+#[macro_use]
+extern crate tokio;
 
 use std::process::exit;
 use tokio::spawn;
@@ -19,7 +21,7 @@ async fn main() {
 	let config = other::ConfAndFlags::setup();
 
 	let thread_config = config.clone();
-	spawn(async move {
+	let discord_task = spawn(async move {
 		let discord_setup_res = discord::setup(thread_config).await;
 		if let Err(e) = discord_setup_res {
 			println!("{}", e);
@@ -28,7 +30,7 @@ async fn main() {
 	});
 
 	let api_config_copy = config.clone();
-	spawn(async move {
+	let api_task = spawn(async move {
 		let setup_res = api::setup(api_config_copy).await;
 		if let Err(e) = setup_res {
 			println!("Api error: {}", e);
@@ -36,12 +38,5 @@ async fn main() {
 		}
 	});
 
-	println!("Running server on {}", config.webserver_location());
-	let res = web_server::serve(config).await;
-	if let Err(e) = res {
-		println!("Web server error: {}", e);
-	} else {
-		println!("Webserver stopped unexpectedly without any errors");
-	}
-	exit(1);
+	let _ = join!(discord_task, api_task, web_server::serve_unwrap(config));
 }

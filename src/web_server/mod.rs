@@ -12,6 +12,19 @@ use actix_web::web::{scope, JsonConfig, ServiceConfig};
 use actix_web::{App, HttpResponse, HttpServer, ResponseError};
 use serde::Serialize;
 use std::fmt;
+use std::process::exit;
+
+pub async fn serve_unwrap(config: ConfAndFlags) {
+	println!("Running server on {}", config.webserver_location());
+
+	let res = serve(config).await;
+	if let Err(e) = res {
+		println!("Web server error: {}", e);
+	} else {
+		println!("Webserver stopped unexpectedly without any errors");
+	}
+	exit(1);
+}
 
 pub async fn serve(config: ConfAndFlags) -> Result<(), String> {
 	let _ = System::new("web_server");

@@ -5,7 +5,7 @@ use crate::other::{remove_all_quotes, ConfAndFlags};
 use std::collections::HashMap;
 
 pub fn search_for_clan_ids(config: &ConfAndFlags) -> Result<(), String> {
-    let mut clans = get_all_clan_ids(config)?;
+    let mut clans = get_all_clan_ids(config).await?;
     if config.is_dev() {
         println!("Fetched {} clan ids", clans.len())
     }
@@ -133,7 +133,7 @@ pub fn get_clan_data(
 }
 
 // GetClanDataTry is a helper function that retries when the api reports on invalid clan IDs
-fn get_clan_data_try(
+async fn get_clan_data_try(
     config: &ConfAndFlags,
     chunk_input: Vec<String>,
     removed_ids: Option<Vec<String>>,
@@ -147,7 +147,7 @@ fn get_clan_data_try(
 > {
     let chunk = remove_all_quotes(chunk_input);
 
-    let info: types::ClanData = call_route(Routes::ClanData(&chunk), config)?;
+    let info: types::ClanData = call_route(Routes::ClanData(&chunk), config).await?;
     let info_data = match info.get_data() {
         Ok(v) => v,
         Err(e) => {
@@ -182,7 +182,7 @@ fn get_clan_data_try(
         }
     };
 
-    let rating: types::ClanRating = call_route(Routes::ClanRating(&chunk), config)?;
+    let rating: types::ClanRating = call_route(Routes::ClanRating(&chunk), config).await?;
     let rating_data = rating.get_data()?;
 
     if info_data.len() != rating_data.len() {
@@ -211,17 +211,18 @@ fn remove_duplicates(input: Vec<String>) -> Vec<String> {
 }
 
 // FilterOutClans filters out all not dutch clans out of a input list
-fn filter_out_clans(config: &ConfAndFlags, clan_ids: Vec<String>) -> Vec<String> {
+async fn filter_out_clans(config: &ConfAndFlags, clan_ids: Vec<String>) -> Vec<String> {
     let tofetch = split_to_chucks(clan_ids);
     let mut to_return: Vec<String> = Vec::new();
     for ids in tofetch {
-        let out: types::ClanDiscription = match call_route(Routes::ClanDiscription(&ids), config) {
-            Ok(v) => v,
-            Err(e) => {
-                println!("filter_out_clans api call failed, error: {}", e);
-                continue;
-            }
-        };
+        let out: types::ClanDiscription =
+            match call_route(Routes::ClanDiscription(&ids), config).await {
+                Ok(v) => v,
+                Err(e) => {
+                    println!("filter_out_clans api call failed, error: {}", e);
+                    continue;
+                }
+            };
         let data = match out.get_data() {
             Ok(v) => v,
             Err(e) => {
@@ -273,7 +274,7 @@ fn split_map_to_chucks<T>(list: HashMap<String, T>) -> Vec<Vec<String>> {
 }
 
 // GetAllClanIds returns all clan ids
-fn get_all_clan_ids(config: &ConfAndFlags) -> Result<Vec<String>, String> {
+async fn get_all_clan_ids(config: &ConfAndFlags) -> Result<Vec<String>, String> {
     let mut ids: Vec<String> = Vec::new();
     let mut page = 0;
 
@@ -283,7 +284,7 @@ fn get_all_clan_ids(config: &ConfAndFlags) -> Result<Vec<String>, String> {
             break;
         }
 
-        let out: types::TopClans = call_route(Routes::TopClans(page), config)?;
+        let out: types::TopClans = call_route(Routes::TopClans(page), config).await?;
         let data = out.get_data()?;
 
         if data.len() == 0 {

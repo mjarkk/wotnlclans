@@ -13,7 +13,7 @@ pub async fn setup(config: ConfAndFlags) -> Result<(), String> {
     return Err(String::from("No wargaming api key defined"));
   }
 
-  check_api(&config)?;
+  check_api(&config).await?;
 
   println!("Running api...");
   api::search_for_clan_ids(&config)?;
@@ -23,9 +23,9 @@ pub async fn setup(config: ConfAndFlags) -> Result<(), String> {
   Ok(())
 }
 
-fn check_api(config: &ConfAndFlags) -> Result<types::NicknameAndClan, String> {
+async fn check_api(config: &ConfAndFlags) -> Result<types::NicknameAndClan, String> {
   let res: types::NicknameAndClan =
-    call_route(Routes::NicknameAndClan("516673968".into()), config)?;
+    call_route(Routes::NicknameAndClan("516673968".into()), config).await?;
 
   Ok(res)
 }
