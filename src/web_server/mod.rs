@@ -3,8 +3,8 @@ mod posts;
 mod statics;
 
 use crate::other::ConfAndFlags;
-use actix::System;
 use actix_cors::Cors;
+use actix_rt::System;
 use actix_service::Service;
 use actix_web::dev::{HttpResponseBuilder, ServiceRequest};
 use actix_web::http::StatusCode;
@@ -13,9 +13,13 @@ use actix_web::{App, HttpResponse, HttpServer, ResponseError};
 use serde::Serialize;
 use std::fmt;
 use std::process::exit;
+use tokio::task::LocalSet;
 
 pub async fn serve_unwrap(config: ConfAndFlags) {
 	println!("Running server on {}", config.webserver_location());
+
+	let local = LocalSet::new();
+	let _ = System::run_in_tokio("web_server", &local);
 
 	let res = serve(config).await;
 	if let Err(e) = res {
@@ -27,8 +31,6 @@ pub async fn serve_unwrap(config: ConfAndFlags) {
 }
 
 pub async fn serve(config: ConfAndFlags) -> Result<(), String> {
-	let _ = System::new("web_server");
-
 	let webserver_location = config.webserver_location();
 
 	let config_sync = config.clone();
