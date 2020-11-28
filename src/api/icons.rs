@@ -15,8 +15,6 @@ pub struct ImageAndIDType {
 }
 
 async fn get_icon(clan: db::ClanStats, resize_to: u32) -> Result<ImageAndIDType, String> {
-	println!("1");
-
 	let mut icon_to_get = clan.emblems.x195_portal.as_str();
 	if icon_to_get.len() == 0 {
 		icon_to_get = clan.emblems.x256_wowp.as_str();
@@ -25,16 +23,12 @@ async fn get_icon(clan: db::ClanStats, resize_to: u32) -> Result<ImageAndIDType,
 		}
 	}
 
-	println!("2");
-
 	if !icon_to_get.contains("http://") && !icon_to_get.contains("https://") {
 		return Err(format!(
 			"Clan {} icon has an invalid url: {} , make sure the url starts with http(s)://",
 			clan.tag, icon_to_get
 		));
 	}
-
-	println!("3");
 
 	let https = HttpsConnector::new();
 	let client = Client::builder().build::<_, hyper::Body>(https);
@@ -63,11 +57,7 @@ async fn get_icon(clan: db::ClanStats, resize_to: u32) -> Result<ImageAndIDType,
 		}
 	};
 
-	println!("4");
-
 	let body_bytes_ref = resp_bytes.as_ref();
-
-	println!("5");
 
 	let parsed_image = image::load_from_memory(body_bytes_ref).or_else(|e| {
 		Err(format!(
@@ -75,8 +65,6 @@ async fn get_icon(clan: db::ClanStats, resize_to: u32) -> Result<ImageAndIDType,
 			icon_to_get, e, clan.tag,
 		))
 	})?;
-
-	println!("6");
 
 	Ok(ImageAndIDType {
 		id: clan.id,
@@ -95,20 +83,10 @@ pub async fn get() -> Result<(), String> {
 
 	let current_stats = db::get_current_stats().clone();
 
-	// for clan in current_stats.iter() {
-	// 	match get_icon(clan.clone().1.clone(), img_size).await {
-	// 		Ok(v) => img_and_id.push(v),
-	// 		Err(e) => println!("{}", e),
-	// 	};
-	// }
-
-	println!("0.1");
 	let awaiting = current_stats
 		.iter()
 		.map(|clan| get_icon(clan.clone().1.clone(), img_size));
-	println!("0.2");
 	let awaiting_res = future::join_all(awaiting).await;
-	println!("0.3");
 
 	for res in awaiting_res {
 		match res {
