@@ -2,15 +2,17 @@ use super::routes::{call_route, Routes};
 use super::types::{self, DataHelper};
 use crate::db;
 use crate::other::{remove_all_quotes, ConfAndFlags};
+use futures::Future;
 use std::collections::HashMap;
+use std::pin::Pin;
 
-pub fn search_for_clan_ids(config: &ConfAndFlags) -> Result<(), String> {
+pub async fn search_for_clan_ids(config: &ConfAndFlags) -> Result<(), String> {
     let mut clans = get_all_clan_ids(config).await?;
     if config.is_dev() {
         println!("Fetched {} clan ids", clans.len())
     }
 
-    clans = filter_out_clans(config, clans);
+    clans = filter_out_clans(config, clans).await;
     if config.is_dev() {
         println!("Filtered clans, output = {} clans", clans.len())
     }
@@ -24,14 +26,14 @@ pub fn search_for_clan_ids(config: &ConfAndFlags) -> Result<(), String> {
     db::set_clan_ids(&clans);
 
     // when this is ran for the first time make sure to get clan list
-    get_clan_data(config, Some(clans))?;
+    get_clan_data(config, Some(clans)).await?;
 
     Ok(())
 }
 
 // GetClanData returns all needed information about clans
 // includedClans is not required
-pub fn get_clan_data(
+pub async fn get_clan_data(
     config: &ConfAndFlags,
     included_clans: Option<Vec<String>>,
 ) -> Result<(), String> {
@@ -59,8 +61,8 @@ pub fn get_clan_data(
     let to_fetch = split_map_to_chucks(clan_ids);
 
     for chunk in to_fetch {
-        let (info, rating, clans_to_remove_from_ids) = match get_clan_data_try(config, chunk, None)
-        {
+        let res = get_clan_data_try(config.clone(), chunk, None).await;
+        let (info, rating, clans_to_remove_from_ids) = match res {
             Ok(v) => v,
             Err(e) => {
                 println!("get_clan_data error check get_clan_data_try: error: {}", e);
@@ -132,9 +134,32 @@ pub fn get_clan_data(
     Ok(())
 }
 
+fn get_clan_data_try_re(
+    config: ConfAndFlags,
+    chunk_input: Vec<String>,
+    removed_ids: Option<Vec<String>>,
+) -> Pin<
+    Box<
+        dyn Future<
+                Output = Result<
+                    (
+                        HashMap<String, types::ClanDataData>,
+                        HashMap<String, types::ClanRatingData>,
+                        Vec<String>,
+                    ),
+                    String,
+                >,
+            > + Send,
+    >,
+> {
+    Box::pin(
+        async move { get_clan_data_try(config, chunk_input.clone(), removed_ids.clone()).await },
+    )
+}
+
 // GetClanDataTry is a helper function that retries when the api reports on invalid clan IDs
 async fn get_clan_data_try(
-    config: &ConfAndFlags,
+    config: ConfAndFlags,
     chunk_input: Vec<String>,
     removed_ids: Option<Vec<String>>,
 ) -> Result<
@@ -147,7 +172,8 @@ async fn get_clan_data_try(
 > {
     let chunk = remove_all_quotes(chunk_input);
 
-    let info: types::ClanData = call_route(Routes::ClanData(&chunk), config).await?;
+    let clan_data_route = Routes::ClanData(&chunk);
+    let info: types::ClanData = call_route(clan_data_route, &config).await?;
     let info_data = match info.get_data() {
         Ok(v) => v,
         Err(e) => {
@@ -174,7 +200,7 @@ async fn get_clan_data_try(
                     let mut new_removed_ids = removed_ids.unwrap_or(Vec::new());
                     new_removed_ids.append(&mut to_exclude);
 
-                    return get_clan_data_try(config, new_chunk, Some(new_removed_ids));
+                    return get_clan_data_try_re(config, new_chunk, Some(new_removed_ids)).await;
                 }
             }
 
@@ -182,7 +208,8 @@ async fn get_clan_data_try(
         }
     };
 
-    let rating: types::ClanRating = call_route(Routes::ClanRating(&chunk), config).await?;
+    let clan_rating_route = Routes::ClanRating(&chunk);
+    let rating: types::ClanRating = call_route(clan_rating_route, &config).await?;
     let rating_data = rating.get_data()?;
 
     if info_data.len() != rating_data.len() {
@@ -215,14 +242,14 @@ async fn filter_out_clans(config: &ConfAndFlags, clan_ids: Vec<String>) -> Vec<S
     let tofetch = split_to_chucks(clan_ids);
     let mut to_return: Vec<String> = Vec::new();
     for ids in tofetch {
-        let out: types::ClanDiscription =
-            match call_route(Routes::ClanDiscription(&ids), config).await {
-                Ok(v) => v,
-                Err(e) => {
-                    println!("filter_out_clans api call failed, error: {}", e);
-                    continue;
-                }
-            };
+        let route = Routes::ClanDiscription(&ids);
+        let out: types::ClanDiscription = match call_route(route, config).await {
+            Ok(v) => v,
+            Err(e) => {
+                println!("filter_out_clans api call failed, error: {}", e);
+                continue;
+            }
+        };
         let data = match out.get_data() {
             Ok(v) => v,
             Err(e) => {

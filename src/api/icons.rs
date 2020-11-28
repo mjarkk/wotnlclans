@@ -1,6 +1,7 @@
 use crate::db;
 use futures::future;
-use image;
+use hyper::{body, Client, Uri};
+use hyper_tls::HttpsConnector;
 use image::imageops::{overlay, FilterType};
 use image::{DynamicImage, ImageBuffer, ImageFormat, RgbaImage};
 use serde_json;
@@ -35,31 +36,40 @@ async fn get_icon(clan: db::ClanStats, resize_to: u32) -> Result<ImageAndIDType,
 
 	println!("3");
 
-	let body_bytes = reqwest::get(icon_to_get)
-		.await
-		.or_else(|e| {
-			Err(format!(
+	let https = HttpsConnector::new();
+	let client = Client::builder().build::<_, hyper::Body>(https);
+
+	let uri: Uri = match icon_to_get.parse() {
+		Ok(v) => v,
+		Err(e) => return Err(format!("Clan {} icon has an invalid url: {}", clan.tag, e)),
+	};
+	let resp = match client.get(uri).await {
+		Ok(v) => v,
+		Err(e) => {
+			return Err(format!(
 				"Can't fetch image {}, error: {}, for clan: {}",
 				icon_to_get, e, clan.tag
 			))
-		})?
-		.bytes()
-		.await
-		.or_else(|e| {
-			Err(format!(
-				"Can't fetch image {}, error: {}, for clan: {}",
+		}
+	};
+
+	let resp_bytes = match body::to_bytes(resp).await {
+		Ok(v) => v,
+		Err(e) => {
+			return Err(format!(
+				"Unable to fetch image {}, error: {}, for clan: {}",
 				icon_to_get, e, clan.tag
 			))
-		})?;
+		}
+	};
 
 	println!("4");
 
-	let body = body_bytes.as_ref();
+	let body_bytes_ref = resp_bytes.as_ref();
 
 	println!("5");
 
-	// let icon_file_extension = icon_to_get.split(".").last().unwrap_or("png");
-	let parsed_image = image::load_from_memory(body).or_else(|e| {
+	let parsed_image = image::load_from_memory(body_bytes_ref).or_else(|e| {
 		Err(format!(
 			"Unable to parse image {}, error: {}, for clan: {}",
 			icon_to_get, e, clan.tag,

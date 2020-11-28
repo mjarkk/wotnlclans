@@ -38,5 +38,7 @@ async fn main() {
 		}
 	});
 
-	let _ = join!(discord_task, api_task, web_server::serve_unwrap(config));
+	let webserver_task = web_server::serve_unwrap(config);
+
+	let _ = join!(discord_task, api_task, webserver_task);
 }

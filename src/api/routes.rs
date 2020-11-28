@@ -1,5 +1,6 @@
 use crate::other::ConfAndFlags;
-use reqwest::blocking::get;
+use hyper::{body, Client, Uri};
+use hyper_tls::HttpsConnector;
 use serde::de::DeserializeOwned;
 use serde_json::from_str;
 
@@ -61,18 +62,34 @@ impl<'a> Routes<'a> {
   }
 }
 
-pub async fn call_route<T: DeserializeOwned>(
-  route: Routes,
+pub async fn call_route<'a, T: DeserializeOwned>(
+  route: Routes<'a>,
   config: &ConfAndFlags,
 ) -> Result<T, String> {
   let url = String::from("https://api.worldoftanks.eu") + &route.get_url_path(config.get_wg_key());
 
-  let response = get(&url)
-    .or_else(|e| Err(format!("Failed to get {} with error: {}", &url, e)))?
-    .text()
-    .or_else(|e| Err(format!("Failed to get {} with error: {}", &url, e)))?;
+  let https = HttpsConnector::new();
+  let client = Client::builder().build::<_, hyper::Body>(https);
 
-  let parsed_response: T = from_str(&response).or_else(|e| {
+  let parsed_url: Uri = match url.parse() {
+    Ok(v) => v,
+    Err(e) => return Err(format!("Invalid url: {}, error: {}", url, e)),
+  };
+
+  let resp = match client.get(parsed_url).await {
+    Ok(v) => v,
+    Err(e) => return Err(format!("Unable to fetch url: {}, error: {}", url, e)),
+  };
+
+  let resp_bytes = match body::to_bytes(resp).await {
+    Ok(v) => v,
+    Err(e) => return Err(format!("Unable to fetch url: {}, error: {}", url, e)),
+  };
+
+  let resp_u8 = resp_bytes.as_ref();
+  let resp_string = String::from_utf8_lossy(resp_u8).to_string();
+
+  let parsed_response: T = from_str(&resp_string).or_else(|e| {
     Err(format!(
       "Failed to parse response from: {} with error: {}",
       &url, e
