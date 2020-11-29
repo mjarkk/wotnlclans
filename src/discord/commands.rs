@@ -31,6 +31,7 @@ pub fn get_options() -> Vec<CommandOption> {
 
         let eff = db::SortOn::Efficiency;
         top10.sort_by(|a, b| eff.sort(&a.stats, &b.stats));
+        top10.reverse();
 
         let mut res = String::from("Top 10 clans:");
         for (pos, clan) in top10.iter().enumerate() {

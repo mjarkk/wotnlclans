@@ -175,6 +175,7 @@ pub fn sort_clan_ids() {
 
   for sort_item in SortOn::all() {
     clans.sort_by(|a, b| sort_item.sort(&a.stats, &b.stats));
+    clans.reverse();
 
     for (rank_nmbr, clan) in clans.iter().enumerate() {
       if let Some(data) = out.get_mut(&clan.id) {
@@ -254,7 +255,7 @@ pub fn light_clan_positions_all() -> LightClanPositionsAll {
     "gm_elo",
     "global",
     "global_weighted",
-    "winratio",
+    "win_ratio",
     "v10l",
   ];
 

@@ -100,7 +100,7 @@ const search = async (filter, sorting) =>
   fetchWCache(`/api/search/${encodeURIComponent(filter)}/${encodeURIComponent(sorting)}`)
 
 const getDescription = async (clanID) => {
-  const out = await fetchWCache(`/clanDescription/${clanID}`)
+  const out = await fetchWCache(`/api/clanDescription/${clanID}`)
   return out.status ? out.data : ''
 }
 

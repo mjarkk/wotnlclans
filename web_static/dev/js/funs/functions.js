@@ -5,7 +5,7 @@ import bowser from 'bowser'
 
 let currentClans = {}
 
-const deskTopSize = 1200 
+const deskTopSize = 1200
 let screenPosition = document.body.offsetWidth < deskTopSize
 
 export default {
@@ -31,13 +31,13 @@ export default {
     let toReturn = {}
     input.map((yline, y) => {
       yline.map((clanId, x) => {
-        toReturn[clanId] = {y, x}
+        toReturn[clanId] = { y, x }
       })
     })
     return toReturn
   },
   sortList(what, list) {
-    return reverse(sortBy(list, [o => o.stats[what], o => o.stats.winratio]))
+    return reverse(sortBy(list, [o => o.stats[what], o => o.stats.win_ratio]))
   },
   watchScreenSize(cb) {
     cb(screenPosition)
@@ -54,13 +54,13 @@ export default {
   },
   isClanId(input) {
     return (
-      typeof input == 'string' 
-      && input.length == 9 
+      typeof input == 'string'
+      && input.length == 9
       && this.isNumbers(input)
     )
   },
   supportsWebp() {
-    const browser = bowser.getParser(window.navigator.userAgent) .parsedResult.browser
+    const browser = bowser.getParser(window.navigator.userAgent).parsedResult.browser
     const name = browser.name || ''
     const version = browser.version || ''
     return (
@@ -72,14 +72,14 @@ export default {
   },
   clanPos(data) {
     let toReturn = {}
-    let actualDataKeys = Object.keys(data.actualData)
-    let arrLen = actualDataKeys.length
-    data.dataMapping.map(item => {
+    let statsKeys = Object.keys(data.stats)
+    let arrLen = statsKeys.length
+    data.data_mapping.map(item => {
       toReturn[item] = Array.from(new Array(arrLen))
     })
-    actualDataKeys.map(clanID => {
-      data.actualData[clanID].map((pos, i) => {
-        toReturn[data.dataMapping[i]][pos] = clanID
+    statsKeys.map(clanID => {
+      data.stats[clanID].map((pos, i) => {
+        toReturn[data.data_mapping[i]][pos] = clanID
       })
     })
     return toReturn
@@ -89,5 +89,26 @@ export default {
       acc[curr] = id < 50
       return acc
     }, {})
+  },
+  map_sorting(name) {
+    return {
+      'Members': 'members',
+      'Battles': 'battles',
+      'Dailybattles': 'daily_battles',
+      'Efficiency': 'efficiency',
+      'Fbelo10': 'fb_elo10',
+      'Fbelo8': 'fb_elo8',
+      'Fbelo6': 'fb_elo6',
+      'Fbelo': 'fb_elo',
+      'Gmelo10': 'gm_elo10',
+      'Gmelo8': 'gm_elo8',
+      'Gmelo6': 'gm_elo6',
+      'Gmelo': 'gm_elo',
+      'Globrating': 'glob_rating',
+      'GlobRatingweighted': 'glob_rating_weighted',
+      'Winratio': 'win_ratio',
+      'V10l': 'v10l',
+    }[name] || name
   }
 }
+

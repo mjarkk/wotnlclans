@@ -29,7 +29,7 @@ export default class List extends React.Component {
       isFetchingData: false,
       haveAllClans: false
     }, props)
-    
+
     this.search = {
       buzzy: false,
       lastFilter: ''
@@ -69,7 +69,7 @@ export default class List extends React.Component {
               })
               this.setState({
                 fetchedClans: this.state.fetchedClans + 50,
-                list, 
+                list,
                 haveClanIds
               }, () => {
                 this.setState({
@@ -117,7 +117,7 @@ export default class List extends React.Component {
 
           this.state.haveClanIds = haveClanIds
 
-          const clans = toFetch.length == 0 ? {status: false} : await n.getClansByID(toFetch)
+          const clans = toFetch.length == 0 ? { status: false } : await n.getClansByID(toFetch)
           if (clans.status) {
             this.setState({
               list: f.sortList(this.state.sortOn, [...this.state.list, ...clans.data]),
@@ -154,9 +154,7 @@ export default class List extends React.Component {
     if (!this.canSetState) {
       return
     }
-    this.setState({
-      list
-    })
+    this.setState({ list })
     const iconsLocation = f.clanIconsToIndex(await n.getIconsLocation())
     const iconsPicture = await n.getIconsPicture()
     this.setState({
@@ -176,9 +174,9 @@ export default class List extends React.Component {
           acc.y = item.y
         }
         return acc
-      }, {x:0, y:0})
-      maxLocations.x ++
-      maxLocations.y ++
+      }, { x: 0, y: 0 })
+      maxLocations.x++
+      maxLocations.y++
       this.setState({
         imgSize: {
           height: imgHeight,
@@ -190,12 +188,12 @@ export default class List extends React.Component {
     img.src = iconsPicture
     const out = await n.getFilteredList()
     if (out.status) {
-      const sortOn =  out.default
+      const sortOn = f.map_sorting(out.default)
       const sortedList = f.clanPos(out.data)
       const haveClanIds = f.haveClanIds(sortedList, sortOn)
       this.setState({
         haveClanIds,
-        sortedList, 
+        sortedList,
         sortOn
       })
       this.watchScroll()
@@ -228,7 +226,7 @@ export default class List extends React.Component {
 
       const haveClanIds = this.state.haveClanIds
       let canSetState = false
-      toFetch.reduce((acc, curr) => {acc.push(...curr); return acc}, []).map(id => {
+      toFetch.reduce((acc, curr) => { acc.push(...curr); return acc }, []).map(id => {
         canSetState = true
         haveClanIds[id] = true
       })
@@ -259,7 +257,7 @@ export default class List extends React.Component {
   }
   render() {
     const stateFilter = this.transfromToMatch(this.state.filter)
-    return(
+    return (
       <div className="list">
         <div className="title">
           <h2>Topclans</h2>
@@ -267,41 +265,41 @@ export default class List extends React.Component {
         <div className="filters">
           <Search
             placeholder="Search for clans"
-            onChange={filter => this.setState({filter})}
+            onChange={filter => this.setState({ filter })}
           />
           <div className="filterOnList">
             {([
-              ['efficiency', 'Rating'], 
-              ['globrating', 'Global'], 
-              ['winratio', 'Winrate'], 
-              ['fbelo', 'Strongholds'], 
-              ['battles', 'Battles'], 
-              ['gmelo10', 'Global 10']
+              ['efficiency', 'Rating'],
+              ['glob_rating', 'Global'],
+              ['win_ratio', 'Winrate'],
+              ['fb_elo', 'Strongholds'],
+              ['battles', 'Battles'],
+              ['gm_elo10', 'Global 10']
             ]).map((filter, key) =>
-              <Button 
+              <Button
                 key={key}
-                style={this.state.sortOn == filter[0] || (this.state.sortOn == '' && key == 0) ? 'selected' : 'outline'} 
-                click={() => this.filterOn(filter[0])} 
+                style={this.state.sortOn == filter[0] || (this.state.sortOn == '' && key == 0) ? 'selected' : 'outline'}
+                click={() => this.filterOn(filter[0])}
                 title={filter[1]}
               />
             )}
           </div>
         </div>
         <div className="actualData">
-          { 
+          {
             this.state.list.length != 0
-            ? this.state.list.map((item, id) => {
+              ? this.state.list.map((item, id) => {
                 const loc = this.state.iconsLocation[item.id]
                 return (
                   <div
                     style={{
-                      display: 
-                        this.state.filter == '' 
-                        || this.transfromToMatch(item.tag).indexOf(stateFilter) != -1 
-                        || this.transfromToMatch(item.name).indexOf(stateFilter) != -1 
+                      display:
+                        this.state.filter == ''
+                          || this.transfromToMatch(item.tag).indexOf(stateFilter) != -1
+                          || this.transfromToMatch(item.name).indexOf(stateFilter) != -1
                           ? 'grid'
                           : 'none'
-                    }} 
+                    }}
                     key={id}
                     className="row"
                     onClick={() => {
@@ -327,19 +325,19 @@ export default class List extends React.Component {
                     </div>
                     <div className="rating clanRating">
                       <span>Global</span>
-                      <span>{item.stats.globrating}</span>
+                      <span>{item.stats.glob_rating}</span>
                     </div>
                     <div className="rating winrate">
                       <span>Winrate</span>
-                      <span>{item.stats.winratio}%</span>
+                      <span>{item.stats.win_ratio}%</span>
                     </div>
                     <div className="rating global">
                       <span>Global 10</span>
-                      <span>{item.stats.gmelo10}</span>
+                      <span>{item.stats.gm_elo10}</span>
                     </div>
                     <div className="rating stronghold">
                       <span>Stronghold</span>
-                      <span>{item.stats.fbelo}</span>
+                      <span>{item.stats.fb_elo}</span>
                     </div>
                     <div className="rating members">
                       <span>Members</span>
@@ -350,30 +348,30 @@ export default class List extends React.Component {
                       <span>{item.stats.battles}</span>
                     </div>
                     <div className="moreinfo">
-                      <SVG icon="arrow"/>
+                      <SVG icon="arrow" />
                     </div>
                   </div>
                 )
               })
-            : <div className="loading">
+              : <div className="loading">
                 loading...
               </div>
           }
-          { this.state.isFetchingData ?
+          {this.state.isFetchingData ?
             <div className="loading">loading...</div>
-          :''}
-          { this.state.haveAllClans ?
+            : ''}
+          {this.state.haveAllClans ?
             <div className="loading">End of the list :(</div>
-          : ''}
+            : ''}
         </div>
         { !this.props.isMobile
           ? <div className="chartAndStats">
-              <Chart
-                type="light"
-              />
-              <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
-            </div>
-        : ''}
+            <Chart
+              type="light"
+            />
+            <ClanDetials showClan={this.props.showClan} isMobile={this.props.isMobile} />
+          </div>
+          : ''}
       </div>
     )
   }

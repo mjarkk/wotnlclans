@@ -66,6 +66,7 @@ pub fn get_current_clans_top<'a>(max_amound: usize) -> Result<Vec<ClanStats>, St
   }
 
   res.sort_by(|a, b| a.stats.efficiency.partial_cmp(&b.stats.efficiency).unwrap());
+  res.reverse();
   if res.len() > max_amound {
     res.resize(max_amound, ClanStats::empty());
   }
@@ -107,6 +108,7 @@ pub fn search_clans(query: String, sort_on: SortOn) -> Result<Vec<String>, Strin
     sorted.push((pos, clan_id));
   }
   sorted.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+  sorted.reverse();
 
   let clan_name_and_tags = get_clan_name_and_tags();
   for sorted_item in sorted {

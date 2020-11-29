@@ -25,27 +25,27 @@ export default class ClanDetials extends React.Component {
   renderStats(clan) {
     const list = [
       { type: 'one', item: 'efficiency', name: 'Efficiency' },
-      { type: 'one', item: 'globrating', name: 'Global' },
-      { type: 'one', item: 'globRatingweighted', name: 'Global weighted' },
+      { type: 'one', item: 'glob_rating', name: 'Global' },
+      { type: 'one', item: 'glob_rating_weighted', name: 'Global weighted' },
       { type: 'one', item: 'members', name: 'Members' },
       { type: 'one', item: 'battles', name: 'Total battles' },
-      { type: 'one', item: 'dailybattles', name: 'Daily battles' },
-      { type: 'one', item: 'winratio', name: 'Win rate' },
+      { type: 'one', item: 'daily_battles', name: 'Daily battles' },
+      { type: 'one', item: 'win_ratio', name: 'Win rate' },
       { type: 'one', item: 'v10l', name: 'v10l' },
       {
         type: 'multiple', items: [
-          { item: 'fbelo10', name: '10' },
-          { item: 'fbelo8', name: '8' },
-          { item: 'fbelo6', name: '6' },
-          { item: 'fbelo', name: '±' }
+          { item: 'fb_elo10', name: '10' },
+          { item: 'fb_elo8', name: '8' },
+          { item: 'fb_elo6', name: '6' },
+          { item: 'fb_elo', name: '±' }
         ], name: 'fbelo'
       },
       {
         type: 'multiple', items: [
-          { item: 'gmelo10', name: '10' },
-          { item: 'gmelo8', name: '8' },
-          { item: 'gmelo6', name: '6' },
-          { item: 'gmelo', name: '±' }
+          { item: 'gm_elo10', name: '10' },
+          { item: 'gm_elo8', name: '8' },
+          { item: 'gm_elo6', name: '6' },
+          { item: 'gm_elo', name: '±' }
         ], name: 'global'
       },
     ]
@@ -92,7 +92,7 @@ export default class ClanDetials extends React.Component {
     }
   }
   getIcon(emblems) {
-    return (emblems['X195.Portal'] || emblems['X64.Portal'] || '').replace(/http(s)?/, 'https')
+    return (emblems.x195_portal || emblems.x64_portal || '').replace(/http(s)?/, 'https')
   }
   render() {
     const d = this.state.showClan && this.state.showClan.tag
