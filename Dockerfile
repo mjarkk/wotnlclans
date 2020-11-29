@@ -1,8 +1,8 @@
 # Build the server binary
-FROM rust:alpine as buildServer
+FROM rust:1.48-buster as buildServer
 
 # Add required build deps
-RUN apk add openssl openssl-dev build-base
+RUN apt install openssl libssl-dev -y
 
 # Copy over the files
 RUN mkdir -p /wotclans/src
@@ -27,9 +27,9 @@ COPY ./config.json /wotclans/config.json
 # Build the webserver data
 RUN npm i && npm run build
 
-FROM alpine
+FROM debian:buster-slim
 
-RUN apk add ca-certificates openssl && mkdir /wotclans
+RUN apt update -y && apt install ca-certificates -y && mkdir /wotclans
 WORKDIR /wotclans
 
 COPY --from=buildServer /wotclans/target/release/wotnlclans ./wotclans

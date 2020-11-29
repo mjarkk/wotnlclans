@@ -113,8 +113,8 @@ impl DataHelper for ClanDiscription {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanDiscriptionData {
-  pub description: String,
-  pub tag: String,
+  pub description: Option<String>,
+  pub tag: Option<String>,
 }
 
 // ClanData is a type for the clanData route

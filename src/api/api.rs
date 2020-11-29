@@ -259,11 +259,17 @@ async fn filter_out_clans(config: &ConfAndFlags, clan_ids: Vec<String>) -> Vec<S
         };
 
         for (clan_id, clan) in data {
-            if is_spesified_lang(config, clan.description) {
-                to_return.push(clan_id);
-                if config.is_dev() {
-                    println!("found clan: {}", clan.tag);
-                }
+            let (description, tag) = match (clan.description, clan.tag) {
+                (Some(des), Some(tag)) => (des, tag),
+                _ => continue,
+            };
+            if !is_spesified_lang(config, description) {
+                continue;
+            }
+
+            to_return.push(clan_id);
+            if config.is_dev() {
+                println!("found clan: {}", tag);
             }
         }
     }
