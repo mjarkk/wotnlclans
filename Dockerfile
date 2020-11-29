@@ -1,6 +1,9 @@
 # Build the server binary
 FROM rust:alpine as buildServer
 
+# Add required build deps
+RUN apk add openssl openssl-dev build-base
+
 # Copy over the files
 RUN mkdir -p /wotclans/src
 WORKDIR /wotclans
@@ -9,6 +12,7 @@ COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 
 # build the program
+# for debugging remove the --release
 RUN cargo build --release
 
 # Build the javascript files
@@ -25,10 +29,10 @@ RUN npm i && npm run build
 
 FROM alpine
 
-RUN apk add ca-certificates && mkdir /wotclans
+RUN apk add ca-certificates openssl && mkdir /wotclans
 WORKDIR /wotclans
 
-COPY --from=buildServer /wotclans/target/ ./wotclans
+COPY --from=buildServer /wotclans/target/release/wotnlclans ./wotclans
 COPY ./config.json ./config.json
 COPY ./icons ./icons
 COPY --from=buildWeb /wotclans/web_static/build ./web_static/build
