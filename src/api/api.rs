@@ -172,7 +172,7 @@ async fn get_clan_data_try(
 > {
     let chunk = remove_all_quotes(chunk_input);
 
-    let clan_data_route = Routes::ClanData(&chunk);
+    let clan_data_route = Routes::ClanData(chunk.clone());
     let info: types::ClanData = call_route(clan_data_route, &config).await?;
     let info_data = match info.get_data() {
         Ok(v) => v,
@@ -208,7 +208,7 @@ async fn get_clan_data_try(
         }
     };
 
-    let clan_rating_route = Routes::ClanRating(&chunk);
+    let clan_rating_route = Routes::ClanRating(chunk);
     let rating: types::ClanRating = call_route(clan_rating_route, &config).await?;
     let rating_data = rating.get_data()?;
 
@@ -242,7 +242,7 @@ async fn filter_out_clans(config: &ConfAndFlags, clan_ids: Vec<String>) -> Vec<S
     let tofetch = split_to_chucks(clan_ids);
     let mut to_return: Vec<String> = Vec::new();
     for ids in tofetch {
-        let route = Routes::ClanDiscription(&ids);
+        let route = Routes::ClanDiscription(ids);
         let out: types::ClanDiscription = match call_route(route, config).await {
             Ok(v) => v,
             Err(e) => {

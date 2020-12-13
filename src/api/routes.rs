@@ -1,22 +1,24 @@
 use crate::other::ConfAndFlags;
+use futures::Future;
 use hyper::{body, Client, Uri};
 use hyper_tls::HttpsConnector;
 use serde::de::DeserializeOwned;
 use serde_json::from_str;
+use std::pin::Pin;
 
-pub enum Routes<'a> {
+pub enum Routes {
   NicknameAndClan(/*player_id*/ String),
   TopClans(/*page_num*/ usize),
-  ClanDiscription(/*clan_ids*/ &'a Vec<String>),
-  ClanData(/*clan_ids*/ &'a Vec<String>),
-  ClanRating(/*clan_ids*/ &'a Vec<String>),
+  ClanDiscription(/*clan_ids*/ Vec<String>),
+  ClanData(/*clan_ids*/ Vec<String>),
+  ClanRating(/*clan_ids*/ Vec<String>),
   // ClanIcon(/*clan_id*/ String),
   // PlayerInfoLogedIn(/*player_id*/ String, /*playerAccessToken*/ String),
   // PlayerInfo(/*player_id*/ String),
   // ClanTag(/*clan_id*/ String),
 }
 
-impl<'a> Routes<'a> {
+impl Routes {
   pub fn get_url_path(&self, key: &str) -> String {
     match self {
       Self::NicknameAndClan(player_id) => format!(
@@ -62,9 +64,17 @@ impl<'a> Routes<'a> {
   }
 }
 
-pub async fn call_route<'a, T: DeserializeOwned>(
-  route: Routes<'a>,
+pub async fn call_route<T: DeserializeOwned>(
+  route: Routes,
   config: &ConfAndFlags,
+) -> Result<T, String> {
+  call_route_inner(route, config, false).await
+}
+
+pub async fn call_route_inner<T: DeserializeOwned>(
+  route: Routes,
+  config: &ConfAndFlags,
+  is_retry: bool,
 ) -> Result<T, String> {
   let url = String::from("https://api.worldoftanks.eu") + &route.get_url_path(config.get_wg_key());
 
@@ -89,12 +99,28 @@ pub async fn call_route<'a, T: DeserializeOwned>(
   let resp_u8 = resp_bytes.as_ref();
   let resp_string = String::from_utf8_lossy(resp_u8).to_string();
 
-  let parsed_response: T = from_str(&resp_string).or_else(|e| {
-    Err(format!(
+  let e = match from_str(&resp_string) {
+    Ok(parsed_response) => return Ok(parsed_response),
+    Err(e) => e,
+  };
+
+  if is_retry {
+    return Err(format!(
       "Failed to parse response from: {} with error: {}",
       &url, e
-    ))
-  })?;
+    ));
+  }
 
-  Ok(parsed_response)
+  println!(
+    "Failed to parse response from: {}, error: {}, response: {}",
+    &url, e, &resp_string
+  );
+  return call_route_inner_re(route, config.clone()).await;
+}
+
+fn call_route_inner_re<T: DeserializeOwned>(
+  route: Routes,
+  config: ConfAndFlags,
+) -> Pin<Box<dyn Future<Output = Result<T, String>> + Send>> {
+  Box::pin(async move { call_route_inner(route, &config, true).await })
 }
