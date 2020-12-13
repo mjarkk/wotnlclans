@@ -18,6 +18,7 @@ pub async fn setup(config: ConfAndFlags) -> Result<(), String> {
   println!("Running api...");
   api::search_for_clan_ids(&config).await?;
   icons::get().await?;
+  println!("Completed bootstrapping");
   run_schedule(&config).await;
 
   Ok(())
