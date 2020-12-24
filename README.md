@@ -8,7 +8,7 @@ On this site you can see all Dutch & Belgium clans ranked.
 | Item | Used |
 |---|---|
 | Backend | [Rust](https://www.rust-lang.org/) |
-| Frondend | Javascript ([React](https://reactjs.org/)/[Preact](https://preactjs.com/)) |
+| Frondend | [Preact](https://preactjs.com/) |
 
 ## Setup
 1. Make sure you have installed [docker](https://docs.docker.com/install/) in production and in development make sure you have [rust](https://www.rust-lang.org/) and [nodejs](https://nodejs.org/en/)

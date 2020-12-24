@@ -14,7 +14,7 @@ serde_json = "1.0"
 rust-crypto = "0.2.36"
 hyper = "0.13.9"
 hyper-tls = "0.4.3"
-tokio = { version = "0.2.23", features = ["full"] }
+tokio = { version = "0.2.23", features = ["rt-core", "rt-threaded", "net", "blocking"] }
 lazy_static = "1.4.0"
 futures = "0.3.8"
 image = "0.23.12"
