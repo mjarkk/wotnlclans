@@ -24,5 +24,7 @@ wotclans*
 wotnlclans*
 
 # Added by cargo
-
 /target
+
+# Added myself
+.DS_Store
