@@ -12,8 +12,8 @@ COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 
 # build the program
-# for debugging remove the --release
 RUN cargo build --release
+# RUN cargo build
 
 # Build the javascript files
 FROM node:15-alpine as buildWeb
@@ -33,6 +33,7 @@ RUN apt update -y && apt install ca-certificates -y && mkdir /wotclans
 WORKDIR /wotclans
 
 COPY --from=buildServer /wotclans/target/release/wotnlclans ./wotclans
+# COPY --from=buildServer /wotclans/target/debug/wotnlclans ./wotclans
 COPY ./config.json ./config.json
 COPY ./icons ./icons
 COPY --from=buildWeb /wotclans/web_static/build ./web_static/build
