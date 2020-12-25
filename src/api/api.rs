@@ -177,30 +177,30 @@ async fn get_clan_data_try(
     let info_data = match info.get_data() {
         Ok(v) => v,
         Err(e) => {
-            if let Some(error_meta) = info.error {
-                if error_meta.field == "clan_id"
-                    && error_meta.message == "INVALID_CLAN_ID"
-                    && error_meta.value != ""
-                {
-                    let mut new_chunk: Vec<String> = Vec::new();
-                    let mut to_exclude: Vec<String> = error_meta
-                        .value
-                        .split(",")
-                        .map(|id_str| id_str.to_string())
-                        .collect();
+            if let Some(meta) = info.error {
+                match (meta.field, meta.value) {
+                    (Some(field), Some(value)) => {
+                        if field == "clan_id" && meta.message == "INVALID_CLAN_ID" && value != "" {
+                            let mut new_chunk: Vec<String> = Vec::new();
+                            let mut to_exclude: Vec<String> =
+                                value.split(",").map(|id_str| id_str.to_string()).collect();
 
-                    'outer: for clan_id in chunk {
-                        for item in &to_exclude {
-                            if item == &clan_id {
-                                continue 'outer;
+                            'outer: for clan_id in chunk {
+                                for item in &to_exclude {
+                                    if item == &clan_id {
+                                        continue 'outer;
+                                    }
+                                }
+                                new_chunk.push(clan_id);
                             }
-                        }
-                        new_chunk.push(clan_id);
-                    }
-                    let mut new_removed_ids = removed_ids.unwrap_or(Vec::new());
-                    new_removed_ids.append(&mut to_exclude);
+                            let mut new_removed_ids = removed_ids.unwrap_or(Vec::new());
+                            new_removed_ids.append(&mut to_exclude);
 
-                    return get_clan_data_try_re(config, new_chunk, Some(new_removed_ids)).await;
+                            return get_clan_data_try_re(config, new_chunk, Some(new_removed_ids))
+                                .await;
+                        }
+                    }
+                    _ => {}
                 }
             }
 

@@ -23,9 +23,9 @@ pub trait DataHelper {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Error {
   pub code: isize,
-  pub field: String,
   pub message: String,
-  pub value: String,
+  pub field: Option<String>,
+  pub value: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
