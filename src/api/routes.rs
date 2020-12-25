@@ -1,3 +1,4 @@
+use super::types::Response;
 use crate::other::ConfAndFlags;
 use futures::Future;
 use hyper::{body, Client, Uri};
@@ -67,7 +68,7 @@ impl Routes {
 pub async fn call_route<T: DeserializeOwned>(
   route: Routes,
   config: &ConfAndFlags,
-) -> Result<T, String> {
+) -> Result<Response<T>, String> {
   call_route_inner(route, config, false).await
 }
 
@@ -75,7 +76,7 @@ pub async fn call_route_inner<T: DeserializeOwned>(
   route: Routes,
   config: &ConfAndFlags,
   is_retry: bool,
-) -> Result<T, String> {
+) -> Result<Response<T>, String> {
   let url = String::from("https://api.worldoftanks.eu") + &route.get_url_path(config.get_wg_key());
 
   let https = HttpsConnector::new();
@@ -99,7 +100,7 @@ pub async fn call_route_inner<T: DeserializeOwned>(
   let resp_u8 = resp_bytes.as_ref();
   let resp_string = String::from_utf8_lossy(resp_u8).to_string();
 
-  let e = match from_str(&resp_string) {
+  let e = match from_str::<'_, Response<T>>(&resp_string) {
     Ok(parsed_response) => return Ok(parsed_response),
     Err(e) => e,
   };
@@ -112,7 +113,7 @@ pub async fn call_route_inner<T: DeserializeOwned>(
   }
 
   println!(
-    "Failed to parse response from: {}, error: {}, response: {}",
+    "Failed to parse response from: {}, error: {}, response: {}, Retrying..",
     &url, e, &resp_string
   );
   return call_route_inner_re(route, config.clone()).await;
@@ -121,6 +122,6 @@ pub async fn call_route_inner<T: DeserializeOwned>(
 fn call_route_inner_re<T: DeserializeOwned>(
   route: Routes,
   config: ConfAndFlags,
-) -> Pin<Box<dyn Future<Output = Result<T, String>> + Send>> {
+) -> Pin<Box<dyn Future<Output = Result<Response<T>, String>> + Send>> {
   Box::pin(async move { call_route_inner(route, &config, true).await })
 }

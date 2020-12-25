@@ -54,7 +54,7 @@ On this site you can see all Dutch & Belgium clans ranked.
 *NOTE: The community tab has a static discord bot invite link that is from the production build*
 
 ## Run docker
-If the rust binary fails to build on the last step you might need more ram, a easy fix is to add some extra swap if your server doesn't have any: https://www.cyberciti.biz/faq/linux-add-a-swap-file-howto/
+If the rust binary fails to build on the last step you might need more ram, a easy fix for this is to add some extra swap if your server doesn't have any: https://www.cyberciti.biz/faq/linux-add-a-swap-file-howto/
 In my case my serer has 2GB of ram and i added 2GB of swap.
 
 1. `docker build -t wotclans:latest .`

@@ -1,25 +1,5 @@
 use std::collections::HashMap;
 
-pub trait DataHelper {
-  type Data;
-
-  fn get_status<'a>(&'a self) -> &'a str;
-  fn get_error(&self) -> Option<Error>;
-  fn get_data_option(&self) -> Option<Self::Data>;
-  fn get_data(&self) -> Result<Self::Data, String> {
-    let data = self.get_data_option();
-    if self.get_status() != "ok" || data.is_none() {
-      if let Some(err) = self.get_error() {
-        Err(format!("{:?}", err))
-      } else {
-        Err(String::from("Unknown error"))
-      }
-    } else {
-      Ok(data.unwrap())
-    }
-  }
-}
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Error {
   pub code: isize,
@@ -34,54 +14,39 @@ pub struct Meta {
   pub total: Option<i64>,
 }
 
-// TopClans is a structure for the tops clans route
+/// The default data returned by the api
 #[derive(Serialize, Deserialize, Clone)]
-pub struct TopClans {
+pub struct Response<T> {
   pub status: String,
   pub error: Option<Error>,
   pub meta: Option<Meta>,
-  pub data: Option<Vec<TopClansData>>,
+  pub data: Option<T>,
 }
 
-impl DataHelper for TopClans {
-  type Data = Vec<TopClansData>;
-  fn get_status<'a>(&'a self) -> &'a str {
-    &self.status
-  }
-  fn get_error(&self) -> Option<Error> {
-    self.error.clone()
-  }
-  fn get_data_option(&self) -> Option<Self::Data> {
-    self.data.clone()
+impl<T: Clone> Response<T> {
+  pub fn get_data(&self) -> Result<T, String> {
+    if self.status != "ok" || self.data.is_none() {
+      if let Some(err) = self.error.clone() {
+        Err(format!("{:?}", err))
+      } else {
+        Err(String::from("Unknown error"))
+      }
+    } else {
+      Ok(self.data.clone().unwrap())
+    }
   }
 }
+
+/// TopClans is a structure for the tops clans route
+pub type TopClans = Vec<TopClansData>;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TopClansData {
   pub clan_id: usize,
 }
 
-// NicknameAndClan is a type for the nicknameAndClan route
-#[derive(Serialize, Deserialize, Clone)]
-pub struct NicknameAndClan {
-  pub status: String,
-  pub error: Option<Error>,
-  pub meta: Option<Meta>,
-  pub data: Option<HashMap<String, NicknameAndClanData>>,
-}
-
-impl DataHelper for NicknameAndClan {
-  type Data = HashMap<String, NicknameAndClanData>;
-  fn get_status<'a>(&'a self) -> &'a str {
-    &self.status
-  }
-  fn get_error(&self) -> Option<Error> {
-    self.error.clone()
-  }
-  fn get_data_option(&self) -> Option<Self::Data> {
-    self.data.clone()
-  }
-}
+/// NicknameAndClan is a type for the nicknameAndClan route
+pub type NicknameAndClan = HashMap<String, NicknameAndClanData>;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct NicknameAndClanData {
@@ -89,27 +54,8 @@ pub struct NicknameAndClanData {
   pub nickname: String,
 }
 
-// ClanDiscription is a type for the clanDiscription route
-#[derive(Serialize, Deserialize, Clone)]
-pub struct ClanDiscription {
-  pub status: String,
-  pub error: Option<Error>,
-  pub meta: Option<Meta>,
-  pub data: Option<HashMap<String, ClanDiscriptionData>>,
-}
-
-impl DataHelper for ClanDiscription {
-  type Data = HashMap<String, ClanDiscriptionData>;
-  fn get_status<'a>(&'a self) -> &'a str {
-    &self.status
-  }
-  fn get_error(&self) -> Option<Error> {
-    self.error.clone()
-  }
-  fn get_data_option(&self) -> Option<Self::Data> {
-    self.data.clone()
-  }
-}
+/// ClanDiscription is a type for the clanDiscription route
+pub type ClanDiscription = HashMap<String, ClanDiscriptionData>;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanDiscriptionData {
@@ -117,27 +63,8 @@ pub struct ClanDiscriptionData {
   pub tag: Option<String>,
 }
 
-// ClanData is a type for the clanData route
-#[derive(Serialize, Deserialize, Clone)]
-pub struct ClanData {
-  pub status: String,
-  pub error: Option<Error>,
-  pub meta: Option<Meta>,
-  pub data: Option<HashMap<String, ClanDataData>>,
-}
-
-impl DataHelper for ClanData {
-  type Data = HashMap<String, ClanDataData>;
-  fn get_status<'a>(&'a self) -> &'a str {
-    &self.status
-  }
-  fn get_error(&self) -> Option<Error> {
-    self.error.clone()
-  }
-  fn get_data_option(&self) -> Option<Self::Data> {
-    self.data.clone()
-  }
-}
+/// ClanData is a type for the clanData route
+pub type ClanData = HashMap<String, ClanDataData>;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanDataData {
@@ -199,27 +126,8 @@ pub struct ClanDataEmblemsOnlyPortal {
   pub portal: String,
 }
 
-// ClanRating is a type for the clanRating route
-#[derive(Serialize, Deserialize, Clone)]
-pub struct ClanRating {
-  pub status: String,
-  pub error: Option<Error>,
-  pub meta: Option<Meta>,
-  pub data: Option<HashMap<String, ClanRatingData>>,
-}
-
-impl DataHelper for ClanRating {
-  type Data = HashMap<String, ClanRatingData>;
-  fn get_status<'a>(&'a self) -> &'a str {
-    &self.status
-  }
-  fn get_error(&self) -> Option<Error> {
-    self.error.clone()
-  }
-  fn get_data_option(&self) -> Option<Self::Data> {
-    self.data.clone()
-  }
-}
+/// ClanRating is a type for the clanRating route
+pub type ClanRating = HashMap<String, ClanRatingData>;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ClanRatingData {
@@ -250,28 +158,6 @@ pub struct ClanRatingGeneralRating {
   pub rank_delta: Option<isize>,
   pub rank: Option<usize>,
   pub value: Option<f64>,
-}
-
-// PlayerInfoLogedIn is a type for the playerInfoLogedIn route
-#[derive(Serialize, Deserialize, Clone)]
-pub struct PlayerInfoLogedIn {
-  pub status: String,
-  pub error: Option<Error>,
-  pub meta: Option<Meta>,
-  pub data: Option<HashMap<String, PlayerInfoLogedInData>>,
-}
-
-impl DataHelper for PlayerInfoLogedIn {
-  type Data = HashMap<String, PlayerInfoLogedInData>;
-  fn get_status<'a>(&'a self) -> &'a str {
-    &self.status
-  }
-  fn get_error(&self) -> Option<Error> {
-    self.error.clone()
-  }
-  fn get_data_option(&self) -> Option<Self::Data> {
-    self.data.clone()
-  }
 }
 
 #[derive(Serialize, Deserialize, Clone)]

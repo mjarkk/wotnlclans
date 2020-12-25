@@ -6,6 +6,7 @@ mod types;
 use super::other::ConfAndFlags;
 use routes::{call_route, Routes};
 use tokio::time::{delay_for, Duration};
+use types::{NicknameAndClan, Response};
 
 pub async fn setup(config: ConfAndFlags) -> Result<(), String> {
   println!("setting up the api...");
@@ -24,8 +25,8 @@ pub async fn setup(config: ConfAndFlags) -> Result<(), String> {
   Ok(())
 }
 
-async fn check_api(config: &ConfAndFlags) -> Result<types::NicknameAndClan, String> {
-  let res: types::NicknameAndClan =
+async fn check_api(config: &ConfAndFlags) -> Result<Response<NicknameAndClan>, String> {
+  let res: Response<NicknameAndClan> =
     call_route(Routes::NicknameAndClan("516673968".into()), config).await?;
 
   Ok(res)

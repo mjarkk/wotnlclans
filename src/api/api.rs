@@ -1,5 +1,7 @@
 use super::routes::{call_route, Routes};
-use super::types::{self, DataHelper};
+use super::types::{
+    ClanData, ClanDataData, ClanDiscription, ClanRating, ClanRatingData, Response, TopClans,
+};
 use crate::db;
 use crate::other::{remove_all_quotes, ConfAndFlags};
 use futures::Future;
@@ -143,8 +145,8 @@ fn get_clan_data_try_re(
         dyn Future<
                 Output = Result<
                     (
-                        HashMap<String, types::ClanDataData>,
-                        HashMap<String, types::ClanRatingData>,
+                        HashMap<String, ClanDataData>,
+                        HashMap<String, ClanRatingData>,
                         Vec<String>,
                     ),
                     String,
@@ -164,8 +166,8 @@ async fn get_clan_data_try(
     removed_ids: Option<Vec<String>>,
 ) -> Result<
     (
-        HashMap<String, types::ClanDataData>,
-        HashMap<String, types::ClanRatingData>,
+        HashMap<String, ClanDataData>,
+        HashMap<String, ClanRatingData>,
         Vec<String>,
     ),
     String,
@@ -173,7 +175,7 @@ async fn get_clan_data_try(
     let chunk = remove_all_quotes(chunk_input);
 
     let clan_data_route = Routes::ClanData(chunk.clone());
-    let info: types::ClanData = call_route(clan_data_route, &config).await?;
+    let info: Response<ClanData> = call_route(clan_data_route, &config).await?;
     let info_data = match info.get_data() {
         Ok(v) => v,
         Err(e) => {
@@ -209,7 +211,7 @@ async fn get_clan_data_try(
     };
 
     let clan_rating_route = Routes::ClanRating(chunk);
-    let rating: types::ClanRating = call_route(clan_rating_route, &config).await?;
+    let rating: Response<ClanRating> = call_route(clan_rating_route, &config).await?;
     let rating_data = rating.get_data()?;
 
     if info_data.len() != rating_data.len() {
@@ -243,7 +245,7 @@ async fn filter_out_clans(config: &ConfAndFlags, clan_ids: Vec<String>) -> Vec<S
     let mut to_return: Vec<String> = Vec::new();
     for ids in tofetch {
         let route = Routes::ClanDiscription(ids);
-        let out: types::ClanDiscription = match call_route(route, config).await {
+        let out: Response<ClanDiscription> = match call_route(route, config).await {
             Ok(v) => v,
             Err(e) => {
                 println!("filter_out_clans api call failed, error: {}", e);
@@ -317,7 +319,7 @@ async fn get_all_clan_ids(config: &ConfAndFlags) -> Result<Vec<String>, String> 
             break;
         }
 
-        let out: types::TopClans = call_route(Routes::TopClans(page), config).await?;
+        let out: Response<TopClans> = call_route(Routes::TopClans(page), config).await?;
         let data = out.get_data()?;
 
         if data.len() == 0 {
