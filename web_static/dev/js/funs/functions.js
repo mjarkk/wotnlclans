@@ -1,7 +1,6 @@
 import sortBy from 'lodash.sortby'
 import reverse from 'lodash.reverse'
 import n from './networking'
-import bowser from 'bowser'
 
 let currentClans = {}
 

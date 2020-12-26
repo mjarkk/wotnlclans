@@ -1,8 +1,8 @@
-import React from 'react'
-import d from '../funs/dynamic'
+import React, { useState, Fragment } from 'react'
+import d from '@loadable/component'
 import snarkdown from 'snarkdown'
 
-const SVG = d(import('./svg'))
+const SVG = d(() => import('./svg'))
 
 /*
 <CommunityBlock data={{...}}/>
@@ -25,66 +25,62 @@ data = {
 }
 */
 
-export default class CommunityBlock extends React.Component {
-  constructor(props) {
-    super()
-    this.state = {
-      showInfo: false
-    }
-  }
-  render() {
-    const block = this.props.data
-    return (
-      <React.Fragment>
+export default function CommunityBlock({ data }) {
+  const [showInfo, setShowInfo] = useState(false)
 
-        {/* The block */}
-        <div className="floating" style={!block.background.image ? { backgroundColor: block.background.color } : { backgroundImage: `url(${block.background.image})` }}>
-          <div className="back">
-            {!block.background.text || block.background.image ? '' : block.background.text.split('\n').length <= 1
-              ? <h1>{block.background.text.split('\n').map((item, key) => <React.Fragment key={key}>{item}<br /></React.Fragment>)}</h1>
-              : <h2>{block.background.text.split('\n').map((item, key) => <React.Fragment key={key}>{item}<br /></React.Fragment>)}</h2>
-            }
-          </div>
-          <div className="frond">
-            <p>{block.text.split('\n').map((item, key) => <React.Fragment key={key}>{item}<br /></React.Fragment>)}</p>
-            <div className="btns">
-              <a
-                href={block.link.url}
-                rel="noopener noreferrer"
-                target="_blank"
-              >{block.link.text || 'Link'}</a>
-              {block.info.length > 0 ?
-                <div className="infoBtn" onClick={() => this.setState({ showInfo: true })}>
-                  <SVG icon="filledInfo" />
-                </div>
-                : ''}
-            </div>
+  if (!data) {
+    return (<></>);
+  }
+
+  return (
+    <>
+      {/* The block */}
+      <div className="floating" style={!data.background.image ? { backgroundColor: data.background.color } : { backgroundImage: `url(${data.background.image})` }}>
+        <div className="back">
+          {!data.background.text || data.background.image ? '' : data.background.text.split('\n').length <= 1
+            ? <h1>{data.background.text.split('\n').map((item, key) => <Fragment key={key}>{item}<br /></Fragment>)}</h1>
+            : <h2>{data.background.text.split('\n').map((item, key) => <Fragment key={key}>{item}<br /></Fragment>)}</h2>
+          }
+        </div>
+        <div className="frond">
+          <p>{data.text.split('\n').map((item, key) => <Fragment key={key}>{item}<br /></Fragment>)}</p>
+          <div className="btns">
+            <a
+              href={data.link.url}
+              rel="noopener noreferrer"
+              target="_blank"
+            >{data.link.text || 'Link'}</a>
+            {data.info.length > 0 ?
+              <div className="infoBtn" onClick={() => setShowInfo(true)}>
+                <SVG icon="filledInfo" />
+              </div>
+              : ''}
           </div>
         </div>
+      </div>
 
-        {/* The info popup */}
-        {this.state.showInfo ?
-          <div
-            className="fullscreen"
-            onClick={e => {
-              if (e.currentTarget == e.target) {
-                this.setState({ showInfo: false })
-              }
-            }}
-          >
-            <div className="center">
-              <div
-                className="titlebar"
-                onClick={() => this.setState({ showInfo: false })}
-              >
-                <SVG icon="close" />
-                <p>Back</p>
-              </div>
-              <div className="markdownPart" dangerouslySetInnerHTML={{ __html: snarkdown(block.info) }}></div>
+      {/* The info popup */}
+      {showInfo ?
+        <div
+          className="fullscreen"
+          onClick={e => {
+            if (e.currentTarget == e.target) {
+              setShowInfo(false)
+            }
+          }}
+        >
+          <div className="center">
+            <div
+              className="titlebar"
+              onClick={() => setShowInfo(false)}
+            >
+              <SVG icon="close" />
+              <p>Back</p>
             </div>
+            <div className="markdownPart" dangerouslySetInnerHTML={{ __html: snarkdown(data.info) }}></div>
           </div>
-          : ''}
-      </React.Fragment>
-    )
-  }
+        </div>
+        : ''}
+    </>
+  )
 }

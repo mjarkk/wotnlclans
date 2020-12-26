@@ -1,10 +1,12 @@
 const path = require('path')
 const webpack = require('webpack')
-const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const LiveReloadPlugin = require('webpack-livereload-plugin')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
-const fs = require('fs');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const fs = require('fs')
+
+// Using a fork of webpack-livereload-plugin because it doesn't support webpack v5
+// const LiveReloadPlugin = require('webpack-livereload-plugin')
+const LiveReloadPlugin = require('@kooneko/livereload-webpack-plugin')
 
 const production = process.env.npm_lifecycle_event == 'build'
 
@@ -16,7 +18,7 @@ module.exports = {
     bundel: './dev/js/index.js'
   },
   output: {
-    filename: 'js/[name].[hash].js',
+    filename: 'js/[name].[chunkhash].js',
     path: path.resolve(__dirname, './build/')
   },
   resolveLoader: {
@@ -39,26 +41,19 @@ module.exports = {
             shouldPrintComment: val => false
           }
         }
-      }, {
+      },
+      {
         test: /\.styl$/,
-        loader: 'style-loader!css-loader!stylus-loader'
-      }, {
+        use: ['style-loader', 'css-loader', 'stylus-loader'],
+      },
+      {
         test: /\.svg$/,
         loader: 'svg-inline-loader'
       }
     ]
   },
-  resolve: {
-    alias: production
-      ? {
-        'react': 'preact-compat',
-        'react-dom': 'preact-compat'
-      } : {}
-  },
   plugins: [
-    new CleanWebpackPlugin(['build']),
-    new FriendlyErrorsWebpackPlugin(),
-    new LiveReloadPlugin({}),
+    ...(production ? [new CleanWebpackPlugin()] : [new LiveReloadPlugin()]),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': production
         ? '"production"'
@@ -79,6 +74,6 @@ module.exports = {
   stats: {
     colors: true
   },
-  devtool: (production) ? 'none' : 'source-map',
-  mode: (production) ? 'production' : 'development'
+  mode: production ? 'production' : 'development',
+  devtool: production ? 'hidden-nosources-source-map' : 'eval-source-map',
 }
