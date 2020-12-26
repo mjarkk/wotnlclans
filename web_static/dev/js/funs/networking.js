@@ -96,8 +96,8 @@ const updateClanIDsList = async (userKey, userID, route, clans) =>
 const getClansByID = async (ids) =>
   await (await fetch(`/api/clanData/${ids.join('+')}`)).json()
 
-const search = async (filter, sorting) =>
-  fetchWCache(`/api/search/${encodeURIComponent(filter)}/${encodeURIComponent(sorting)}`)
+const search = async (search_filter, sorting) =>
+  fetchWCache(`/api/search/${encodeURIComponent(search_filter)}/${encodeURIComponent(sorting)}`)
 
 const getDescription = async (clanID) => {
   const out = await fetchWCache(`/api/clanDescription/${clanID}`)

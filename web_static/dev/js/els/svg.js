@@ -8,7 +8,7 @@ import plusBlock from '../../icons/plusBlock.svg'
 import filledInfo from '../../icons/filledInfo.svg'
 import removeBlock from '../../icons/removeBlock.svg'
 
-const returnIcon = icon => {
+const getIcon = icon => {
   const options = [
     ['arrow', arrow],
     ['close', close],
@@ -28,4 +28,6 @@ const returnIcon = icon => {
   return toUse
 }
 
-export default props => <SVG src={`data:image/svg+xml,${returnIcon(props.icon)}`} />
+export default function SVGElement({ icon }) {
+  return <SVG src={`data:image/svg+xml,${getIcon(icon)}`} />
+}

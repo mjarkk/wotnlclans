@@ -37,7 +37,16 @@ export default {
     return toReturn
   },
   sortList(what, list) {
-    return reverse(sortBy(list, [o => o.stats[what], o => o.stats.win_ratio]))
+    if (what == 'global') {
+      what = 'glob_rating'
+    }
+
+    let foundItems = {}
+    return reverse(sortBy(list, [o => o.stats[what], o => o.stats.win_ratio])).filter(item => {
+      if (foundItems[item.id]) return false
+      foundItems[item.id] = true
+      return true
+    })
   },
   watchScreenSize(cb) {
     cb(screenPosition)

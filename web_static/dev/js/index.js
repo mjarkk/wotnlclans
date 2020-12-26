@@ -1,14 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import d from './funs/dynamic'
-import List from './ui/list'
+import d from '@loadable/component'
+import List from './ui/list/list'
 import f from './funs/functions'
 import r from './funs/routes'
 import '../style/index.styl'
 
-const Header = d(import('./ui/header'))
-const Chart = d(import('./ui/chart'))
-const Community = d(import('./ui/community'))
+const Header = d(() => import('./ui/header'))
+const Chart = d(() => import('./ui/chart'))
+const Community = d(() => import('./ui/community'))
 
 class Site extends React.Component {
   constructor() {
