@@ -4,15 +4,14 @@ import d from '@loadable/component'
 
 const SVG = d(() => import('../../els/svg'))
 
-const transfromToMatch = input => {
-  return input
+const transfromToMatch = input =>
+  !input ? '' : input
     .replace(/0/g, 'o')
     .replace(/3/g, 'e')
     .replace(/1/g, 'i')
     .toUpperCase()
-}
 
-export default function ActualList({ sortOn, list, searchQuery, setLastListItem }) {
+export default function ActualList({ sortOn, list, searchQuery, setLastListItem, state }) {
   const [sortedList, setSortedList] = useState([])
 
   useEffect(() => {
@@ -41,7 +40,7 @@ export default function ActualList({ sortOn, list, searchQuery, setLastListItem 
           ref={htmlEl => {
             if (id == (sortedList.length - 1)) {
               setLastListItem(lastListItem => {
-                lastListItem = htmlEl
+                lastListItem.current = htmlEl
                 return lastListItem
               })
             }

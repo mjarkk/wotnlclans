@@ -34,6 +34,8 @@ export default function List(props) {
           sortOn={sortOn}
           setSortOn={setSortOn}
           searchQuery={searchQuery}
+          state={state}
+          setState={setState}
         />
         {state.isFetchingData ?
           <div className="loading">loading...</div>
@@ -47,7 +49,10 @@ export default function List(props) {
           <Chart
             type="light"
           />
-          <ClanDetials showClan={props.showClan} isMobile={props.isMobile} />
+          <ClanDetials
+            showClan={props.showClan}
+            isMobile={props.isMobile}
+          />
         </div>
         : ''}
     </div>

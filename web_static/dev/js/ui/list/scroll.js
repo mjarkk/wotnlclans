@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, createRef } from 'react'
 import n from '../../funs/networking'
 import f from '../../funs/functions'
 
@@ -14,20 +14,23 @@ export default function ScrollWatch({
   sortOn,
   sortedLists,
   setSortedLists,
+  lastListItem,
 }) {
-  const [lastListItem, setLastListItem] = useState(createRef())
+  const [scrollFromTop, setScrollFromTop] = useState(0)
+
+  const scrollEvHandeler = () => {
+    setScrollFromTop(document.documentElement.scrollTop)
+  }
 
   useEffect(() => {
     if (!lastListItem.current) {
       return
     }
 
-    const fromTop = document.documentElement.scrollTop
-    if (fromTop + window.innerHeight + 600 <= lastListItem.current.offsetTop || state.isFetchingData || state.haveAllClans) {
+    if (scrollFromTop + window.innerHeight + 600 <= lastListItem.current.offsetTop || state.isFetchingData || state.haveAllClans) {
       return
     }
 
-    state.isFetchingData = true
     setState(s => ({
       ...s,
       isFetchingData: true
@@ -73,14 +76,7 @@ export default function ScrollWatch({
         // show there are not more clans to fetch
       }
     }
-
-  }, [lastListItem])
-
-  const scrollEvHandeler = async () => {
-    setLastListItem(lastListItem => {
-      return lastListItem
-    })
-  }
+  }, [scrollFromTop])
 
   const getNeededInfo = async () => {
     const list = await n.getClanList()
@@ -122,11 +118,8 @@ export default function ScrollWatch({
     if (out.status) {
       const sortOn = f.map_sorting(out.default)
       const sortedLists = f.clanPos(out.data)
-      const haveClanIds = f.haveClanIds(sortedList, sortOn)
-      setState(s => ({
-        ...s,
-        haveClanIds,
-      }))
+      const haveClanIds = f.haveClanIds(sortedLists, sortOn)
+      setHaveClanIds(haveClanIds)
       setSortOn(sortOn)
       setSortedLists(sortedLists)
 

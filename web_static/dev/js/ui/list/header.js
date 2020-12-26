@@ -7,7 +7,7 @@ const Button = d(() => import('../../els/button'))
 export default function ListHeader({ setSortOn, sortOn, setSearchQuery }) {
   const options = [
     ['efficiency', 'Rating'],
-    ['glob_rating', 'Global'],
+    ['global', 'Global'],
     ['win_ratio', 'Winrate'],
     ['fb_elo', 'Strongholds'],
     ['battles', 'Battles'],

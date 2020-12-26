@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, createRef } from 'react'
 import n from '../../funs/networking'
 import ActualList from './actualList'
 import ScrollWatch from './scroll'
 
-export default function GetData({ sortOn, setSortOn, searchQuery, state, setState, setLastListItem }) {
+export default function GetData({ sortOn, setSortOn, searchQuery, state, setState }) {
   const [list, setList] = useState([])
   let [haveClanIds, setHaveClanIds] = useState({})
   const [fetchedClans, setFetchedClans] = useState(50)
   const [search, setSearch] = useState({ buzzy: false, lastSearchQuery: '' })
   const [sortedLists, setSortedLists] = useState(undefined)
+  const [lastListItem, setLastListItem] = useState(createRef())
 
   useEffect(() => {
     if (!sortedLists) {
@@ -50,7 +51,7 @@ export default function GetData({ sortOn, setSortOn, searchQuery, state, setStat
   }, [sortOn])
 
   useEffect(() => {
-    if ((search.buzzy && !force) || !searchQuery) {
+    if (search.buzzy || !searchQuery) {
       return
     }
 
@@ -92,27 +93,30 @@ export default function GetData({ sortOn, setSortOn, searchQuery, state, setStat
 
   return (
     <>
-      <ActualList
+      <ScrollWatch
+        state={state}
+        setState={setState}
+        setFetchedClans={setFetchedClans}
+        haveClanIds={haveClanIds}
+        setHaveClanIds={setHaveClanIds}
         list={list}
+        setList={setList}
+        setSortOn={setSortOn}
         sortOn={sortOn}
-        setLastListItem={setLastListItem}
-        searchQuery={searchQuery}
+        sortedLists={sortedLists}
+        setSortedLists={setSortedLists}
+        lastListItem={lastListItem}
       />
+
       {list.length == 0 ?
         <div className="loading">loading...</div>
         :
-        <ScrollWatch
-          state={state}
-          setState={setState}
-          setFetchedClans={setFetchedClans}
-          haveClanIds={haveClanIds}
-          setHaveClanIds={setHaveClanIds}
+        <ActualList
           list={list}
-          setList={setList}
-          setSortOn={setSortOn}
           sortOn={sortOn}
-          sortedLists={sortedLists}
-          setSortedLists={setSortedLists}
+          setLastListItem={setLastListItem}
+          searchQuery={searchQuery}
+          state={state}
         />
       }
     </>
