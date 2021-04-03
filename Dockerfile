@@ -1,5 +1,5 @@
 # Build the server binary
-FROM rust:1.51-buster as buildServer
+FROM rust:1.50-buster as buildServer
 
 # Add required build deps
 RUN apt install openssl libssl-dev -y
