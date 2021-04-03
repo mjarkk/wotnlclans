@@ -10,20 +10,14 @@ use std::pin::Pin;
 
 pub async fn search_for_clan_ids(config: &ConfAndFlags) -> Result<(), String> {
     let mut clans = get_all_clan_ids(config).await?;
-    if config.is_dev() {
-        println!("Fetched {} clan ids", clans.len())
-    }
+    println!("Fetched {} clan ids", clans.len());
 
     clans = filter_out_clans(config, clans).await;
-    if config.is_dev() {
-        println!("Filtered clans, output = {} clans", clans.len())
-    }
+    println!("Filtered clans, output = {} clans", clans.len());
 
     // // TODO: Removes blacklisted clans and add extra clans to the clans list
     clans = remove_duplicates(clans);
-    if config.is_dev() {
-        println!("Removed duplicate clans, output = {} clans", clans.len())
-    }
+    println!("Removed duplicate clans, output = {} clans", clans.len());
 
     db::set_clan_ids(&clans);
 

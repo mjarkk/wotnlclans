@@ -40,10 +40,14 @@
     "mindestens",
     "Idade",
     "mínima",
-    "clã"
+    "clã",
+    "deutschsprachigen",
+    "Aktivität"
   ],
   "blockedClans": [],
-  "extraClans": [],
+  "extraClans": [
+    "500149237"
+  ],
   "wargamingKey": "7e5ce7007256737daa79dbec35f4f072",
   "discordAuthToken": "",
   "discordAuthUrl": "https://discordapp.com/oauth2/authorize?client_id=536542444154519552&permissions=522304&scope=bot",
