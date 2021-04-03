@@ -324,8 +324,12 @@ async fn get_all_clan_ids(config: &ConfAndFlags) -> Result<Vec<String>, String> 
             ids.push(clan.clan_id.to_string());
         }
 
-        if page % 10 == 1 {
-            if config.is_dev() {
+        if config.is_dev() {
+            if page % 10 == 1 {
+                println!("Fetched {} clans", ids.len());
+            }
+        } else {
+            if page % 50 == 1 {
                 println!("Fetched {} clans", ids.len());
             }
         }
