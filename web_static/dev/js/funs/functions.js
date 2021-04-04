@@ -10,10 +10,9 @@ let screenPosition = document.body.offsetWidth < deskTopSize
 
 export default {
   setCurrentClans(newList) {
-    currentClans = newList.reduce((acc, curr) => {
-      acc[curr.id] = curr
-      return acc
-    }, {})
+    newList.map(clan => {
+      currentClans[clan.id] = clan
+    })
   },
   async getSpesificClan(id) {
     if (currentClans[id]) {

@@ -92,10 +92,10 @@ impl Flags {
       pages
     } else if self.dev {
       // In dev mode only index 30 pages so completing the statup progress is faster
-      30
+      100
     } else {
-      // In production index all pages, dunno why this is 4000 :)
-      4000
+      // In production index all pages
+      5000
     }
   }
 }

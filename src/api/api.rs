@@ -264,9 +264,7 @@ async fn filter_out_clans(config: &ConfAndFlags, clan_ids: Vec<String>) -> Vec<S
             }
 
             to_return.push(clan_id);
-            if config.is_dev() {
-                println!("found clan: {}", tag);
-            }
+            println!("found clan: {}", tag);
         }
     }
     to_return

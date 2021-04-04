@@ -48,6 +48,7 @@ export default function ScrollWatch({
           }
         }
       }
+
       if (toFetch.length != 0) {
         n.getClansByID(toFetch).then(out => {
           if (out.status) {
@@ -55,7 +56,7 @@ export default function ScrollWatch({
               haveClanIds[id] = true
             })
 
-            f.setCurrentClans(list)
+            f.setCurrentClans(out.data)
 
             setFetchedClans(n => n + 50)
             setHaveClanIds(haveClanIds)
@@ -63,8 +64,9 @@ export default function ScrollWatch({
               ...s,
               isFetchingData: false,
             }))
+            setList(l => [...l, ...out.data])
           } else {
-            // something whend wrong on the fetch side
+            // something went wrong on the server side
           }
         })
       } else {
